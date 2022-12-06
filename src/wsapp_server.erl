@@ -23,19 +23,20 @@
 
 -spec publish(Topic::string(),Message::any())->ok.
 publish(Topic,Message)->
-    gen_server:cast(?SERVER, {publish,{Topic,Message}}).
+    gen_server:cast(?MODULE, {publish,{Topic,Message}}).
+
 
 online(User,Socket)->
-    gen_server:call(?SERVER, {online,{User,Socket}}).
+    gen_server:call(?MODULE, {online,{User,Socket}}).
 
 offline(User,Socket)->
-    gen_server:call(?SERVER, {offline,{User,Socket}}).
+    gen_server:call(?MODULE, {offline,{User,Socket}}).
 
 subscribe(User,Topic)->
-    gen_server:call(?SERVER, {subscribe,{User,Topic}}).
+    gen_server:call(?MODULE, {subscribe,{User,Topic}}).
 
 unsubscribe(User,Topic)->
-    gen_server:call(?SERVER, {unsubscribe,{User, Topic}}).
+    gen_server:call(?MODULE, {unsubscribe,{User, Topic}}).
 
 
 start_link()->
@@ -46,31 +47,55 @@ start_link()->
 %-------------callbacks---------------------------------------%
 
 init(Args)->
+    process_flag(trap_exit,true),
     self() ! start,
     {ok,#state{}}.
 
+%% @doc 
+%% Handling call messages
+%% @end
 handle_call({subscribe,Topic,User},_,State)->
-    ets:insert(subsribers, {Topic,User}),
+    true=ets:insert(subsribers, {Topic,User}),
     {reply,ok,State};
 handle_call({unsubscribe,Topic,User},_,State)->
     case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
             ets:delete_object(subscribers,{Topic,User}),
             {reply,ok,State};
-        [] -> {reply,ok,State}
+        [] ->
+            logger:info("Nothing to unsubscribe user:~p topic:~p~n",[User,Topic]),
+            {reply,ok,State}
     end;
 handle_call({online,User,Socket},_,State)->
-    ets:insert(online,{User,Socket}),
+    true=ets:insert(online,{User,Socket}),
     {reply,ok,State};
 handle_call({offline,User,Socket},_,State)->
     ets:delete_object(online,{User,Socket}),
     {reply,ok,State}.
+
+
+
+%% @doc 
+%% Handling cast messages
+%% @end
 handle_cast({publish,Topic,Message},State)->
     Subscribers=ets:match(subscribers,{Topic,'$1'}),
-    [[send(S,Message)|| S<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
+    [[send(Socket,Message)|| [Socket]<-online_sockets(Subscriber)] || [Subscriber]<-Subscribers ],
     {noreply,State}.
 
 
+%% @doc 
+%% Handling info messages
+%% @end
+handle_info(start,State)->
+    ets:new(subscribers,[named_table,bag]),
+    ets:new(online,[named_table,bag]),
+    {noreply,State};
+
+handle_info(Message,State)->
+    {reply,Message,State}.
+
+terminate(_Reason,_State)->ok.
 send(Socket,Message)->
     Socket ! Message.
 online_sockets(User)->

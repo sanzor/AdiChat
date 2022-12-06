@@ -28,7 +28,21 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    {ok, { {one_for_all, 0, 1}, []} }.
+    ChildSpecs=[
+    #{
+        id => wsapp_server,
+        start=>{wsapp_server,start_link,[]},
+        restart=> permanent,
+        shutdown =>5000,
+        type=>worker,
+        modules=>[wsapp_server]
+     },
+     #{
+    
+    }
+    ],
+    Strategy={one_for_all,0,1},
+    {ok, { Strategy, ChildSpecs} }.
 
 %%====================================================================
 %% Internal functions

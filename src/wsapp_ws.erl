@@ -17,4 +17,12 @@ init(#{req :=Req})->
 
 websocket_init(State)->
     #{<<"user">> :=User}=State,
-    ok=wsapp_server:
+    ok=wsapp_server:online(User,self()),
+    {ok,State}.
+
+websocket_handle({text,Message},State)->
+    Decode=json:decode(Message,[maps]),
+    #{<<"user">> :=User}=State,
+    #{<<"topic">> :=Topic}=Decode,
+    Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
+    ok=wsapp_server:publish()
