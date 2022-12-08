@@ -8,9 +8,6 @@
 
 
 
-
-
-
 init(#{req :=Req})->
     #{bindings :=UserMap}=Req,
     {ok,UserMap}.
@@ -20,9 +17,18 @@ websocket_init(State)->
     ok=wsapp_server:online(User,self()),
     {ok,State}.
 
+websocket_info(Message,State)->
+    {reply,Message,State}.
+
 websocket_handle({text,Message},State)->
     Decode=json:decode(Message,[maps]),
     #{<<"user">> :=User}=State,
     #{<<"topic">> :=Topic}=Decode,
     Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
-    ok=wsapp_server:publish()
+    ok=wsapp_server:publish(Json,Message),
+    {ok,State}.
+
+terminate(_,_,State)->
+    #{<<"user">> := User}=State,
+    wsapp_server:offline(User,self()),
+    ok.
