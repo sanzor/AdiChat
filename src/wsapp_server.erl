@@ -26,15 +26,20 @@ publish(Topic,Message)->
     gen_server:cast(?MODULE, {publish,{Topic,Message}}).
 
 
+-spec online(User::string(),Socket::pid())->ok.
 online(User,Socket)->
     gen_server:call(?MODULE, {online,{User,Socket}}).
 
+-spec offline(User::string(),Socket::pid())->ok.
 offline(User,Socket)->
     gen_server:call(?MODULE, {offline,{User,Socket}}).
 
+-spec subscribe(User::string(),Topic::string())->ok.
 subscribe(User,Topic)->
     gen_server:call(?MODULE, {subscribe,{User,Topic}}).
 
+
+-spec unsubscribe(User::string(),Topic::string())->ok.
 unsubscribe(User,Topic)->
     gen_server:call(?MODULE, {unsubscribe,{User, Topic}}).
 
