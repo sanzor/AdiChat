@@ -11,7 +11,10 @@ routes(_Environment) ->
       security => false,
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
-                 {"/user/ws/:user",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
+                 {"/ws/:user",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
+                 {"/publish",{wsapp_main_controller,publish},#{ methods =>[post]}},
+                 {"/subscribe",{wsapp_main_controller,subscribe},#{ methods =>[post]}},
+                 {"/unsubscribe",{wsapp_main_controller,unsubscribe},#{ methods =>[post]}},
                  {"/assets/[...]", "assets"}
                 ]
       }].

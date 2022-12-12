@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>MySQL/OTP User's Guide</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<h1>MySQL/OTP User's Guide</h1>
+<p>
+MySQL/OTP is a driver for connecting Erlang/OTP applications to MySQL
+databases. It is a native implementation of the MySQL protocol in Erlang.</p>
+
+<p>This is the documentation generated from the Erlang source code using EDoc.
+The project page is on Github:
+<a href="https://github.com/mysql-otp/mysql-otp/" target="_top">https://github.com/mysql-otp/mysql-otp/</a>.</p>
+
+<p>For the reference manual see the <a href="mysql.html">mysql</a> module.</p>
+
+<h2 id="value-representation">Value representation</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>MySQL</th>
+      <th>Erlang</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>INT, TINYINT, etc.</td>
+      <td><code>integer()</code></td>
+      <td><code>42</code></td>
+    </tr>
+    <tr>
+      <td>VARCHAR, TEXT, etc.</td>
+      <td><code>unicode:chardata()</code> [<a href="#vn1">1</a>]</td>
+      <td><code>&lt;&lt;"foo"&gt;&gt;</code>, <code>"bar"</code></td>
+    </tr>
+    <tr>
+      <td>VARBINARY, BLOB, etc.</td>
+      <td><code>binary()</code></td>
+      <td><code>&lt;&lt;1, 2, 3, 4&gt;&gt;</code></td>
+    </tr>
+    <tr>
+      <td>BIT(N)</td>
+      <td><code>&lt;&lt;_:N/bitstring&gt;&gt;</code></td>
+      <td><code>&lt;&lt;255, 6:3&gt;&gt;</code></td>
+    </tr>
+    <tr>
+      <td>FLOAT, DOUBLE</td>
+      <td><code>float()</code></td>
+      <td><code>3.14</code></td>
+    </tr>
+    <tr>
+      <td>DECIMAL(P, S)</td>
+      <td><code>integer()</code> when S == 0<br>
+          <code>float()</code> when P =&lt; 15 and S &gt; 0<br>
+          <code>binary()</code> when P &gt;= 16 and S &gt; 0 [<a href="#vn2">2</a>]</td>
+      <td><code>42</code><br><code>3.14</code><br><code>&lt;&lt;"3.14159265358979323846"&gt;&gt;</code></td>
+    </tr>
+    <tr>
+      <td>DATETIME, TIMESTAMP</td>
+      <td><code>calendar:datetime()</code> [<a href="#vn3">3</a>]</td>
+      <td><code>{{2014, 11, 18}, {10, 22, 36}}</code></td>
+    </tr>
+    <tr>
+      <td>DATE</td>
+      <td><code>calendar:date()</code></td>
+      <td><code>{2014, 11, 18}</code></td>
+    </tr>
+    <tr>
+      <td>TIME</td>
+      <td><code>{Days, calendar:time()}</code> [<a href="#vn3">3</a>,
+          <a href="#vn4">4</a>]</td>
+      <td><code>{0, {10, 22, 36}}</code></td>
+    </tr>
+    <tr>
+      <td>NULL</td>
+      <td><code>null</code></td>
+      <td><code>null</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Notes:</p>
+
+<ol>
+  <li id="vn1">When fetching VARCHAR, TEXT etc. they are returned as <code>binary()</code>.
+    When sending (insert or update) any <code>unicode:chardata()</code> is accepted as
+    input. In a (possibly deep) list of integers and binaries, the integers are
+    treated as Unicode codepoints while binaries are treated as UTF-8 encoded
+    Unicode data. For lists, an error occurs if you try to send invalid Unicode
+    data, but if the input is a pure binary, no validation will be done. This is
+    to allow sending binary non-Unicode data for MySQL's binary strings (BLOB,
+    VARBINARY, etc.).</li>
+  <li id="vn2">DECIMALs are returned as <code>integer()</code> or <code>float()</code> when the value
+    can be represented without precision loss and as <code>binary()</code> for high
+    precision DECIMAL values. This is similar to how the <code>odbc</code> OTP application
+    treats DECIMALs.</li>
+  <li id="vn3">For <code>DATETIME</code>, <code>TIMESTAMP</code> and <code>TIME</code> values with fractions of
+    seconds, we use a float for the seconds part. (These are unusual and were
+    added to MySQL in version 5.6.4.)</li>
+  <li id="vn4">Since <code>TIME</code> can be outside the <code>calendar:time()</code> interval, we use
+    the format as returned by <code>calendar:seconds_to_daystime/1</code> for <code>TIME</code>
+    values.</li>
+</ol>
+
+<h2>Copying</h2>
+
+<p>Copyright 2014-2019 The authors of MySQL/OTP. See the project page at
+<a href="https://github.com/mysql-otp/mysql-otp" target="_top">https://github.com/mysql-otp/mysql-otp</a>.</p>
+
+This library is free software licensed under the GNU LGPL which allows you to
+use it in proprietary applications as well as free software applications with
+other licenses. This documentation is generated from the source code and thus
+goes under the same license as the library itself.
+
+<hr>
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

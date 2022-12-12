@@ -21,4 +21,9 @@ unsubscribe(_Req=#{parsed_qs := #{ <<"user">> :=User, <<"topic">> := Topic}})->
     ok=wsapp_server:unsubscribe(User,Topic),
     {status,200}.
 
+get_messages(Req=#{parsed_qs := #{ <<"topic">> := Topic}})->
+    Messages=wsapp_server:get_messages(Topic),
+    {json,200,#{ <<"Content-Type">> => <<"application/json">>},#{  <<"topic">> => Topic ,<<"messages">> =>Messages}}.
+
+
 

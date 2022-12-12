@@ -1,0 +1,13 @@
+{application,nova,
+             [{description,"Nova is a web application framework"},
+              {vsn,"0.9.2"},
+              {registered,[]},
+              {mod,{nova_app,[]}},
+              {included_applications,[]},
+              {applications,[kernel,stdlib,sasl,ranch,cowboy,compiler,erlydtl,
+                             jhn_stdlib,uuid,routing_tree,erldb,thoas]},
+              {env,[]},
+              {modules,[nova]},
+              {doc,"doc"},
+              {licenses,["Apache 2.0"]},
+              {links,[{"GitHub","https://github.com/novaframework/nova"}]}]}.

@@ -1,0 +1,12 @@
+{application,jhn_stdlib,
+             [{description,"Jan Henry Nystrom's standard library"},
+              {vsn,"3.6.2"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {env,[]},
+              {licenses,["Apache-2.0"]},
+              {links,[{"GitHub",
+                       "https://github.com/JanHenryNystrom/jhn_stdlib.git"}]},
+              {modules,[bencoding,blist,bloom,bstring,ip_addr,json,jstream,
+                        lazy,levenshtein,msgpack,mustache,p_tree,pb_tree,
+                        plist,r_tree,shttpc,syslog,t_tree,timestamp,uri]}]}.

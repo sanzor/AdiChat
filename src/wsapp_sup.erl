@@ -36,10 +36,7 @@ init([]) ->
         shutdown =>5000,
         type=>worker,
         modules=>[wsapp_server]
-     },
-     #{
-    
-    }
+     }
     ],
     Strategy={one_for_all,0,1},
     {ok, { Strategy, ChildSpecs} }.

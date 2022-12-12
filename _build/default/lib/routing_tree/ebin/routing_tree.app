@@ -1,0 +1,11 @@
+{application,routing_tree,
+             [{description,"An OTP application"},
+              {vsn,"1.0.4"},
+              {registered,[]},
+              {mod,{routing_tree_app,[]}},
+              {applications,[kernel,stdlib]},
+              {env,[]},
+              {modules,[routing_tree,routing_tree_app,routing_tree_binparser,
+                        routing_tree_sup]},
+              {licenses,["Apache 2.0"]},
+              {links,[]}]}.

@@ -12,7 +12,8 @@
          publish/2,
          online/2,
          offline/2,
-         subscribe/2]).
+         subscribe/2,
+         get_messages/1]).
 
 -define(SERVER,?MODULE).
 
@@ -20,7 +21,9 @@
 
 }).
 %----------------------------API ----------------------------------%
-
+-spec get_messages(Topic::string())->{ok,Messages::list()} | error .
+get_messages(Topic)->
+    gen_server:call(?MODULE,{get_messages,Topic}).
 -spec publish(Topic::string(),Message::any())->ok.
 publish(Topic,Message)->
     gen_server:cast(?MODULE, {publish,{Topic,Message}}).
@@ -29,6 +32,8 @@ publish(Topic,Message)->
 -spec online(User::string(),Socket::pid())->ok.
 online(User,Socket)->
     gen_server:call(?MODULE, {online,{User,Socket}}).
+
+
 
 -spec offline(User::string(),Socket::pid())->ok.
 offline(User,Socket)->
@@ -59,6 +64,10 @@ init(Args)->
 %% @doc 
 %% Handling call messages
 %% @end
+
+handle_call({get_messages,Topic},_,State)->
+    Messages=ets:match(messages, {Topic,'$1'}),
+    {reply,{ok,Messages},State};
 handle_call({subscribe,Topic,User},_,State)->
     true=ets:insert(subsribers, {Topic,User}),
     {reply,ok,State};
@@ -95,6 +104,7 @@ handle_cast({publish,Topic,Message},State)->
 handle_info(start,State)->
     ets:new(subscribers,[named_table,bag]),
     ets:new(online,[named_table,bag]),
+    ets:new(messages,[named_table,bag]),
     {noreply,State};
 
 handle_info(Message,State)->
