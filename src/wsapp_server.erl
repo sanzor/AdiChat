@@ -24,6 +24,7 @@
 -spec get_messages(Topic::string())->{ok,Messages::list()} | error .
 get_messages(Topic)->
     gen_server:call(?MODULE,{get_messages,Topic}).
+
 -spec publish(Topic::string(),Message::any())->ok.
 publish(Topic,Message)->
     gen_server:cast(?MODULE, {publish,{Topic,Message}}).
