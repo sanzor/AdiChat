@@ -38,7 +38,7 @@ init([]) ->
         modules=>[wsapp_server]
      }
     ],
-    Strategy={one_for_all,0,1},
+    Strategy={one_for_all,100,1},
     {ok, { Strategy, ChildSpecs} }.
 
 %%====================================================================

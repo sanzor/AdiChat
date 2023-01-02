@@ -69,10 +69,10 @@ init(Args)->
 handle_call({get_messages,Topic},_,State)->
     Messages=ets:match(messages, {Topic,'$1'}),
     {reply,{ok,Messages},State};
-handle_call({subscribe,Topic,User},_,State)->
+handle_call({subscribe,{Topic,User}},_,State)->
     true=ets:insert(subsribers, {Topic,User}),
     {reply,ok,State};
-handle_call({unsubscribe,Topic,User},_,State)->
+handle_call({unsubscribe,{Topic,User}},_,State)->
     case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
             ets:delete_object(subscribers,{Topic,User}),
@@ -81,10 +81,10 @@ handle_call({unsubscribe,Topic,User},_,State)->
             logger:info("Nothing to unsubscribe user:~p topic:~p~n",[User,Topic]),
             {reply,ok,State}
     end;
-handle_call({online,User,Socket},_,State)->
+handle_call({online,{User,Socket}},_,State)->
     true=ets:insert(online,{User,Socket}),
     {reply,ok,State};
-handle_call({offline,User,Socket},_,State)->
+handle_call({offline,{User,Socket}},_,State)->
     ets:delete_object(online,{User,Socket}),
     {reply,ok,State}.
 
@@ -93,7 +93,7 @@ handle_call({offline,User,Socket},_,State)->
 %% @doc 
 %% Handling cast messages
 %% @end
-handle_cast({publish,Topic,Message},State)->
+handle_cast({publish,{Topic,Message}},State)->
     Subscribers=ets:match(subscribers,{Topic,'$1'}),
     [[send(Socket,Message)|| [Socket]<-online_sockets(Subscriber)] || [Subscriber]<-Subscribers ],
     {noreply,State}.
