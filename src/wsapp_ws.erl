@@ -26,8 +26,12 @@ websocket_handle({text,Message},State)->
     #{<<"topic">> :=Topic}=Decode,
     %Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
     ok=wsapp_server:publish(Topic,Message),
-    {ok,State}.
+    {ok,State};
 
+websocket_handle(pong,State)->
+    {ok,State};
+websocket_handle(sugi,State)->
+    {ok,State}.
 terminate(_,_,State)->
     #{<<"user">> := User}=State,
     wsapp_server:offline(User,self()),
