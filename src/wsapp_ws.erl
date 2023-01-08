@@ -30,6 +30,9 @@ websocket_handle({text,Message},State)->
 
 websocket_handle(pong,State)->
     {ok,State};
+
+websocket_handle(ping,State)->
+    {ok,State};
 websocket_handle(sugi,State)->
     {ok,State}.
 terminate(_,_,State)->

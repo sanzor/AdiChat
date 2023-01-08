@@ -91,6 +91,7 @@ handle_call({offline,{User,Socket}},_,State)->
 
 
 %% @doc 
+%% 
 %% Handling cast messages
 %% @end
 handle_cast({publish,{Topic,Message}},State)->
