@@ -13,7 +13,8 @@ init(#{req :=Req})->
     {ok,UserMap}.
 
 websocket_init(State)->
-    #{<<"user">> :=User}=State,
+    #{<<"user">> :=User, <<"cookie">> :=Cookie}=State,
+    io:format("New User: ~p , Cookie:~p~n",[User,Cookie]),
     ok=wsapp_server:online(User,self()),
     {ok,State}.
 
@@ -21,6 +22,7 @@ websocket_info(Message,State)->
     {reply,Message,State}.
 
 websocket_handle({text,Message},State)->
+    io:format("Messager: ~p ~n", [Message]),
     Decode=json:decode(Message,[maps]),
     #{<<"user">> :=User}=State,
     #{<<"topic">> :=Topic}=Decode,
@@ -29,10 +31,12 @@ websocket_handle({text,Message},State)->
     {ok,State};
 
 websocket_handle(pong,State)->
-    {ok,State};
+    io:format("~npong~n"),
+    {reply,ping,State};
 
 websocket_handle(ping,State)->
-    {ok,State};
+    io:format("ping"),
+    {reply,pong,State};
 websocket_handle(sugi,State)->
     {ok,State}.
 terminate(_,_,State)->
