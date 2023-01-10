@@ -22,7 +22,7 @@ websocket_info(Message,State)->
     {reply,Message,State}.
 
 websocket_handle({text,Message},State)->
-    io:format("Messager: ~p ~n", [Message]),
+    io:format("Messagerz: ~p ~n", [Message]),
     Decode=json:decode(Message,[maps]),
     #{<<"user">> :=User}=State,
     #{<<"topic">> :=Topic}=Decode,
