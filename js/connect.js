@@ -1,9 +1,6 @@
-const { Console } = require("console");
-const { json } = require("stream/consumers");
-export {start}
+export {start};
 
-start=function (){
-    
+function start (){
     let socket=new WebSocket("ws://localhost:8080/ws/user/adi");
     socket.onopen=function (e){
         alert("Connection established");
