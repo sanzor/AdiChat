@@ -13,7 +13,8 @@
          online/2,
          offline/2,
          subscribe/2,
-         get_messages/1]).
+         get_messages/1,
+         get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
 
@@ -24,6 +25,10 @@
 -spec get_messages(Topic::string())->{ok,Messages::list()} | error .
 get_messages(Topic)->
     gen_server:call(?MODULE,{get_messages,Topic}).
+
+-spec get_subscriptions(User::string())->{ok,Channels::list()} | user_does_not_exist | {error,Reason::any()}.
+get_subscriptions(User)->
+    gen_server:call(?MODULE,{get_subscriptions,User}).
 
 -spec publish(Topic::string(),Message::any())->ok.
 publish(Topic,Message)->
@@ -69,6 +74,13 @@ init(Args)->
 handle_call({get_messages,Topic},_,State)->
     Messages=ets:match(messages, {Topic,'$1'}),
     {reply,{ok,Messages},State};
+
+handle_call({get_subscriptions,User},_,State)->
+    case ets:match(subscribers,{'$1',User}) of
+        []->{reply,user_does_not_exist,State};
+        Elements -> {reply,{ok,Elements},State}
+    end;
+
 handle_call({subscribe,{Topic,User}},_,State)->
     true=ets:insert(subsribers, {Topic,User}),
     {reply,ok,State};

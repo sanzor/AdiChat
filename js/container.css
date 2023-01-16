@@ -1,0 +1,13 @@
+.commandArea{
+    flex-flow: column; 
+    width: 300;
+    height: 20px;
+}
+  .grid-container > div {
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    padding: 20px 0;
+    font-size: 30px;
+  }
+
+/* "https://css-tricks.com/snippets/css/complete-guide-grid/" */

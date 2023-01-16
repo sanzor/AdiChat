@@ -1,36 +1,29 @@
 <html>
     <body>
-        <script  src="./connect.js"></script>
+        <script  src="./sock.js"></script>
         <script  src="./main.js"></script>
-        <div id="controlPanel">
-            <div>
-                <div id="connect-buttons">
+        <link rel="stylesheet" type="text/css" href="container.css">
+        <div>
+            <div >
+                <div id="connect-buttons" class="container">
                     <div>
-                        <textarea style="flex-flow: column; width: 500;height: 20px;" id="controlText">http://localhost:8080/user/adi/cookie/cook</textarea>
+                        <textarea class="commandArea"  id="controlText">http://localhost:8080/user/adi/cookie/cook</textarea>
                         <button  id="connectBtn" onclick="starts()">Connect</button>
                         <button id="disconnectBtn" onclick="disconnect()">Disconnect</button>
                     </div>
-                    <br>
-                    <br>
                 </div>
                 <div id="channel-buttons">
                     <button id="subscribeBtn" onclick="subscribe()">Subscribe</button>
-                    <button id="unsubscribeBtn" onclick="unsubscribe()">Unsubscribe</button>
+                    <textarea class="commandArea"  id="controlText">ChannelName</textarea>
                 </div>
-                <div><textarea id="channelBox"></textarea></div>
-               </div>
-               <div>
-                    <table id="channelsTable">
-                    </table>
-               </div>
+            </div>
+            <div id="channelist">
+                <table id="channelTable">
+                    <tr><td>Channels</td></tr>
+                    <tr>channel1</tr>
+                    <tr>channel2</tr>
+                </table>
+            </div>
         </div>
-        <div>
-            <table id="chatTable">
-                <tr>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-      
     </body>
 </html>

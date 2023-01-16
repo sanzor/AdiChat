@@ -25,5 +25,13 @@ get_messages(Req=#{parsed_qs := #{ <<"topic">> := Topic}})->
     Messages=wsapp_server:get_messages(Topic),
     {json,200,#{ <<"Content-Type">> => <<"application/json">>},#{  <<"topic">> => Topic ,<<"messages">> =>Messages}}.
 
+get_subscriptions(Req=#{bindings := #{<<"user">> := User}})->
+    try
+        Subs=wsapp_server:get_subscriptions(User),
+        {json,200,,#{},#{ <"user">> => User, <<"subscriptions">> =>Subs}}
+    catch
+        Error:Reason -> {status,500,#{},<<"error">>=>Error ,<<"reason">>=>Reason}
+    end.
+
 
 

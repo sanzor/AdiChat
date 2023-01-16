@@ -1,15 +1,4 @@
 
-function addListeners(){
-    document.addEventListener("onConnect",function(e){
-        console.log("Connect event fired");
-        onConnect()
-       
-    });
-    document.addEventListener("onDisconnect",function(e){
-        console.log("Disconnect event fired");
-        onDisconnect();
-    })
-}
 
 function onConnect(){
     var disconnectBtn=document.getElementById("disconnectBtn");
@@ -24,6 +13,9 @@ function onDisconnect(){
     connectBtn.disabled=false;
     disconnectBtn.disabled=true;
     
+}
+function getChannels(){
+    ws.send()
 }
 function starts(){
     connect();
