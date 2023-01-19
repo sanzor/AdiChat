@@ -30,6 +30,16 @@ websocket_handle({text,Message},State)->
     ok=wsapp_server:publish(Topic,Message),
     {ok,State};
 
+websocket_handle({text, Message=#{<<"command">> := Command}},State)->
+    io:format("Received :~p",[Message]),
+    try 
+        case handle_command(Command,Message,State) of
+            {ok,noreply} -> {ok,State};
+            {ok,reply,Reply} ->{reply,Reply,State}
+        end
+    catch
+        Error:Reason ->{reply,{error,Error,reason,Reason},State}
+    end;
 websocket_handle(pong,State)->
     io:format("~npong~n"),
     {reply,ping,State};
@@ -43,3 +53,13 @@ terminate(_,_,State)->
     #{<<"user">> := User}=State,
     wsapp_server:offline(User,self()),
     ok.
+
+
+  
+
+handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
+    {ok,Messages}=wsapp_server:get_messages(Topic),
+    {ok,reply,Messages};
+handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
+    {ok,Subscriptions}=wsapp_server:get_subscriptions(User),
+    {ok,reply,Subscriptions}.

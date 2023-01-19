@@ -41,11 +41,11 @@ online(User,Socket)->
 
 
 
--spec offline(User::string(),Socket::pid())->ok.
+-spec offline(User::string() |iodata(),Socket::pid())->ok.
 offline(User,Socket)->
     gen_server:call(?MODULE, {offline,{User,Socket}}).
 
--spec subscribe(User::string(),Topic::string())->ok.
+-spec subscribe(User::string() | iodata(),Topic::string() |iodata())->ok.
 subscribe(User,Topic)->
     gen_server:call(?MODULE, {subscribe,{User,Topic}}).
 
@@ -107,6 +107,7 @@ handle_call({offline,{User,Socket}},_,State)->
 %% Handling cast messages
 %% @end
 handle_cast({publish,{Topic,Message}},State)->
+    true=ets:insert(messages, {Topic,Message}),
     Subscribers=ets:match(subscribers,{Topic,'$1'}),
     [[send(Socket,Message)|| [Socket]<-online_sockets(Subscriber)] || [Subscriber]<-Subscribers ],
     {noreply,State}.

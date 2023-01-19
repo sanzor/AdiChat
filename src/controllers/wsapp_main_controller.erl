@@ -22,15 +22,15 @@ unsubscribe(_Req=#{parsed_qs := #{ <<"user">> :=User, <<"topic">> := Topic}})->
     {status,200}.
 
 get_messages(Req=#{parsed_qs := #{ <<"topic">> := Topic}})->
-    Messages=wsapp_server:get_messages(Topic),
+    {ok,Messages}=wsapp_server:get_messages(Topic),
     {json,200,#{ <<"Content-Type">> => <<"application/json">>},#{  <<"topic">> => Topic ,<<"messages">> =>Messages}}.
 
 get_subscriptions(Req=#{bindings := #{<<"user">> := User}})->
     try
-        Subs=wsapp_server:get_subscriptions(User),
-        {json,200,,#{},#{ <"user">> => User, <<"subscriptions">> =>Subs}}
+        {ok,Subscriptions}=wsapp_server:get_subscriptions(User),
+        {json,200,#{},#{ <<"user">> => User, <<"subscriptions">> =>Subscriptions}}
     catch
-        Error:Reason -> {status,500,#{},<<"error">>=>Error ,<<"reason">>=>Reason}
+        Error:Reason -> {status,500,#{},#{<<"error">> => Error ,<<"reason">> =>Reason}}
     end.
 
 
