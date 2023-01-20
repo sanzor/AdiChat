@@ -5,9 +5,6 @@
          websocket_info/2,
          terminate/3]).
 
-
-
-
 init(#{req :=Req})->
     #{bindings :=UserMap}=Req,
     {ok,UserMap}.
@@ -21,25 +18,16 @@ websocket_init(State)->
 websocket_info(Message,State)->
     {reply,Message,State}.
 
-websocket_handle({text,Message},State)->
-    io:format("Messagerz: ~p ~n", [Message]),
+websocket_handle({text, Message},State)->
     Decode=json:decode(Message,[maps]),
-    #{<<"user">> :=User}=State,
-    #{<<"topic">> :=Topic}=Decode,
-    %Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
-    ok=wsapp_server:publish(Topic,Message),
-    {ok,State};
-
-websocket_handle({text, Message=#{<<"command">> := Command}},State)->
-    io:format("Received :~p",[Message]),
-    try 
-        case handle_command(Command,Message,State) of
+    io:format("Received :~p",[Decode]),
+    #{<<"Command">>:= Command}=Decode,
+    case handle_command(Command,Decode,State) of
             {ok,noreply} -> {ok,State};
-            {ok,reply,Reply} ->{reply,Reply,State}
-        end
-    catch
-        Error:Reason ->{reply,{error,Error,reason,Reason},State}
+            {ok,reply,Reply} ->{reply,Reply,State};
+            {error,Error} ->{reply,{error,Error},State}
     end;
+
 websocket_handle(pong,State)->
     io:format("~npong~n"),
     {reply,ping,State};
@@ -56,10 +44,18 @@ terminate(_,_,State)->
 
 
   
+handle_command(<<"publish">>,Decode,_State)->
+    #{<<"topic">> := Topic}=Decode,
+    #{<<"user">>:= User}=_State,
+    Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
+    ok=wsapp_server:publish(Topic, Json),
+    {ok,noreply};
 
 handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
     {ok,Messages}=wsapp_server:get_messages(Topic),
     {ok,reply,Messages};
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
     {ok,Subscriptions}=wsapp_server:get_subscriptions(User),
-    {ok,reply,Subscriptions}.
+    {ok,reply,Subscriptions};
+handle_command(_,_,_State)->
+    {error,unknown_command}.

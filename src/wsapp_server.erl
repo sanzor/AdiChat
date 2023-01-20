@@ -22,7 +22,7 @@
 
 }).
 %----------------------------API ----------------------------------%
--spec get_messages(Topic::string())->{ok,Messages::list()} | error .
+-spec get_messages(Topic::binary())->{ok,Messages::list()} | error .
 get_messages(Topic)->
     gen_server:call(?MODULE,{get_messages,Topic}).
 
