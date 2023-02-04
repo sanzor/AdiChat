@@ -15,6 +15,7 @@ routes(_Environment) ->
                  {"/publish",{wsapp_main_controller,publish},#{ methods =>[post]}},
                  {"/subscribe",{wsapp_main_controller,subscribe},#{ methods =>[post]}},
                  {"/unsubscribe",{wsapp_main_controller,unsubscribe},#{ methods =>[post]}},
+                 {"/get_table/table/:table",{debug_controller,get_table},#{methods=>[get]}},
                  {"/assets/[...]", "assets"}
                 ]
       }].

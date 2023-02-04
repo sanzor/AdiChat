@@ -10,7 +10,7 @@ function init(){
     }});
 }
  function connect (url){
-    ws=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
+    var socket=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
     socket.onopen=function (e){
         alert("Connection established");
         let message=JSON.stringify({
