@@ -4,8 +4,8 @@
 ]).
 
 
-get_table(#{bindings := #{ table :=TableBin }})->
+get_table(#{bindings := #{ <<"table">> :=TableBin }})->
     Table=binary_to_atom(TableBin),
-    Result=wsapp_server:get_messages(Table),
+    {ok,Result}=wsapp_server:get_messages(Table),
     {json,200,#{},#{<<"table">> => Table, <<"messages">> =>Result }}.
     

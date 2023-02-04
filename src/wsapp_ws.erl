@@ -53,7 +53,7 @@ handle_command(<<"publish">>,Decode,_State)->
 
 handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
     {ok,Messages}=wsapp_server:get_messages(Topic),
-    {ok,reply,Messages};
+    {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages}};
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
     {ok,Subscriptions}=wsapp_server:get_subscriptions(User),
     {ok,reply,Subscriptions};
