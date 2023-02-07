@@ -5,6 +5,7 @@
          websocket_info/2,
          terminate/3]).
 
+-define(HEARTBEAT,1500).
 init(#{req :=Req})->
     #{bindings :=UserMap}=Req,
     {ok,UserMap}.
@@ -13,7 +14,11 @@ websocket_init(State)->
     #{<<"user">> :=User, <<"cookie">> :=Cookie}=State,
     io:format("New User: ~p , Cookie:~p~n",[User,Cookie]),
     ok=wsapp_server:online(User,self()),
-    {ok,State}.
+    {reply,ping,State}.
+
+websocket_info(send_ping,State)->
+    logger:info("Sending ping"),
+    {reply,ping,State};
 
 websocket_info(Message,State)->
     {reply,Message,State}.
@@ -28,14 +33,9 @@ websocket_handle({text, Message},State)->
             {error,Error} ->{reply,{error,Error},State}
     end;
 
-websocket_handle(pong,State)->
-    io:format("~npong~n"),
-    {reply,ping,State};
-
-websocket_handle(ping,State)->
-    io:format("ping"),
-    {reply,pong,State};
-websocket_handle(sugi,State)->
+websocket_handle(pong, State)->
+    logger:info("Received pong"),
+    erlang:send_after(?HEARTBEAT, self(), send_ping),
     {ok,State}.
 terminate(_,_,State)->
     #{<<"user">> := User}=State,
@@ -59,3 +59,11 @@ handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
     {ok,reply,Subscriptions};
 handle_command(_,_,_State)->
     {error,unknown_command}.
+
+ping_loop(Receiver)->
+    Receiver ! ping,
+    receive 
+        stop -> ok
+    after 5000 ->
+        ping_loop(Receiver)
+    end.

@@ -1,33 +1,29 @@
 
-var ws=null;
-function init(){
-    const terminationEvent = 'onpagehide' in self ? 'pagehide' : 'unload';
-    window.addEventListener(terminationEvent, (event) => {
-    if (event.persisted === false) {
-        // client is gone
-        ws.onclose = function () { };
-        ws.close();
-    }});
-}
+var socket=null;
+
  function connect (url){
-    var socket=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
+   socket=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
     socket.onopen=function (e){
         alert("Connection established");
-        let message=JSON.stringify({
-            topic:"adita",
-            message:"Hello from adita"
-        });
-        socket.send(message)
     }
-    socket.onmessage=function(message){
-        alert(`Message received: ${message.data}`);
+    socket.onmessage=function(ev){
+        alert(`Message received: ${ev.data}`);
+        if(ev.data=="ping"){
+            console.log("Received ping");
+            socket.send("pong");
+        }
+
     }
     socket.onclose=function(e){
-        alert(`Socket closed with code: ${e.code} , reason: ${e.reason}`);
-        alert(`Connection died`);
+        console.log(`Socket closed with code: ${e.code} , reason: ${e.reason}`);
+        console.log(`Connection died`);
     }
     
+    
 }
+
 function disconnect(url){
-    ws.close();
+    socket.close();
 }
+
+
