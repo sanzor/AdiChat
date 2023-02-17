@@ -26,10 +26,10 @@ websocket_info(Message,State)->
 websocket_handle({text, Message},State)->
     Decode=json:decode(Message,[maps]),
     io:format("Received :~p",[Decode]),
-    #{<<"Command">>:= Command}=Decode,
+    #{<<"command">>:= Command}=Decode,
     case handle_command(Command,Decode,State) of
             {ok,noreply} -> {ok,State};
-            {ok,reply,Reply} ->{reply,Reply,State};
+            {ok,reply,Reply} ->{reply,{text,thoas:encode(Reply)},State};
             {error,Error} ->{reply,{error,Error},State}
     end;
 
@@ -43,6 +43,9 @@ terminate(_,_,State)->
     ok.
 
 
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
+    ok=wsapp_server:subscribe(User, Topic),
+    {ok,reply,{subscribed,Topic}};
   
 handle_command(<<"publish">>,Decode,_State)->
     #{<<"topic">> := Topic}=Decode,
@@ -59,11 +62,3 @@ handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
     {ok,reply,Subscriptions};
 handle_command(_,_,_State)->
     {error,unknown_command}.
-
-ping_loop(Receiver)->
-    Receiver ! ping,
-    receive 
-        stop -> ok
-    after 5000 ->
-        ping_loop(Receiver)
-    end.

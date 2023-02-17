@@ -16,3 +16,7 @@ function onDisconnect(){
     disconnectBtn.disabled=true;
     
 }
+function subscribe(){
+    var topic=document.getElementById("topicBox").innerText;
+    socket_subscribe(topic);
+}

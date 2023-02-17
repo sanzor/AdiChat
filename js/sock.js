@@ -12,6 +12,7 @@ var socket=null;
             console.log("Received ping");
             socket.send("pong");
         }
+        handle_message(ev);
 
     }
     socket.onclose=function(e){
@@ -24,6 +25,33 @@ var socket=null;
 
 function disconnect(url){
     socket.close();
+}
+
+function socket_publish(message,topic){
+    var message={
+        "command":"publish",
+        "topic":topic,
+        "message":message
+    }
+    socket.send(message)
+}
+function handle_message(ev){
+    console.log("Received:"+ev.data);
+}
+
+function socket_subscribe(topic){
+    var message={
+        "command":"subscribe",
+        "topic":topic
+    }
+    socket.send(message);
+}
+ function socket_unsubscribe(topic){
+    var message={
+        "command":"unsubscribe",
+        "topic":topic
+    }
+     socket.send(message)
 }
 
 
