@@ -29,8 +29,7 @@ websocket_handle({text, Message},State)->
     #{<<"command">>:= Command}=Decode,
     case handle_command(Command,Decode,State) of
             {ok,noreply} -> {ok,State};
-            {ok,reply,Reply} ->{reply,{text,thoas:encode(Reply)},State};
-            {error,Error} ->{reply,{error,Error},State}
+            {ok,reply,Reply} ->{reply,{text,thoas:encode(Reply)},State}
     end;
 
 websocket_handle(pong, State)->
@@ -62,10 +61,12 @@ handle_command(<<"publish">>,Decode,_State)->
 handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
     {ok,Messages}=wsapp_server:get_messages(Topic),
     {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages}};
+
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
+    Reply=#{command=> <<"get_subscriptions">>},
     case wsapp_server:get_subscriptions(User) of
-        {ok,Result}-> {ok,reply,Result};
-        user_does_not_exists->{ok,reply,user_does_not_exist};
+        {ok,Result}->{ok,reply,Reply#{result =>Result}};  
+        user_does_not_exist->{ok,reply,Reply#{result=> atom_to_binary(user_does_not_exist)}};
         {error,Reason}->{error,Reason}
 end;
    

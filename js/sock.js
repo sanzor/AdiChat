@@ -4,15 +4,16 @@ var socket=null;
  function connect (url){
    socket=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
     socket.onopen=function (e){
-        alert("Connection established");
+        console.log("Connection established");
         command_get_subscriptions();
     }
     socket.onmessage=function(ev){
-        alert(`Message received: ${ev.data}`);
+        console.log("Received socket message:"+ev.data);
         if(ev.data=="ping"){
             console.log("Received ping");
             socket.send("pong");
         }
+    
         handle_callback_message(ev);
 
     }
@@ -42,7 +43,7 @@ function command_get_subscriptions(){
     var message={
         "command":"get_subscriptions"
     }
-    console.log("sending command:" + message);
+    console.log("sending command:" + JSON.stringify(message));
     socket.send(JSON.stringify(message));
     
 }
@@ -59,7 +60,7 @@ function command_publish(message,topic){
     socket.send(message)
 }
 function handle_callback_message(ev){
-    console.log("Received:"+ev.data);
+  
     if(ev.data.command=="subscribe"){
         callback_subscribe(ev.data);
     }
