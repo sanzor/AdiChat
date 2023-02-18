@@ -45,7 +45,12 @@ terminate(_,_,State)->
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
     ok=wsapp_server:subscribe(User, Topic),
-    {ok,reply,{subscribed,Topic}};
+    Reply=#{command=> <<"subscribe">>,result=> <<"ok">> , topic=> Topic},
+    {ok,reply,Reply};
+handle_command(<<"unsubscribe">>,_=#{<<topic>> :=Topic},_State=#{<<"user">>:=User})->
+    ok=wsapp_server:unsubscribe(Topic,User),
+    Reply=#{command=> <<"unsubscribe">>, result=> <<"ok">>, topic=>Topic},
+    {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->
     #{<<"topic">> := Topic}=Decode,
@@ -58,7 +63,11 @@ handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
     {ok,Messages}=wsapp_server:get_messages(Topic),
     {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages}};
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
-    {ok,Subscriptions}=wsapp_server:get_subscriptions(User),
-    {ok,reply,Subscriptions};
+    case wsapp_server:get_subscriptions(User) of
+        {ok,Result}-> {ok,reply,Result};
+        user_does_not_exists->{ok,reply,user_does_not_exist};
+        {error,Reason}->{error,Reason}
+end;
+   
 handle_command(_,_,_State)->
     {error,unknown_command}.

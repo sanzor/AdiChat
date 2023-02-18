@@ -13,6 +13,7 @@
          online/2,
          offline/2,
          subscribe/2,
+         unsubscribe/2,
          get_messages/1,
          get_subscriptions/1]).
 

@@ -6,10 +6,9 @@ function onConnect(){
     var connectBtn=document.getElementById("connectBtn");
     disconnectBtn.disabled=false;
     connectBtn.disabled=true;
-    
 }
 function onDisconnect(){
-    disconnect();
+    command_disconnect();
     var connectBtn=document.getElementById("connectBtn");
     var disconnectBtn=document.getElementById("disconnectBtn");
     connectBtn.disabled=false;
@@ -18,5 +17,11 @@ function onDisconnect(){
 }
 function subscribe(){
     var topic=document.getElementById("topicBox").innerText;
-    socket_subscribe(topic);
+    command_subscribe(topic);
+}
+
+function clickHandler(element){
+    element.addEventListener("click",function(){
+        
+    })
 }

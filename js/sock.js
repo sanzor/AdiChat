@@ -5,6 +5,7 @@ var socket=null;
    socket=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
     socket.onopen=function (e){
         alert("Connection established");
+        command_get_subscriptions();
     }
     socket.onmessage=function(ev){
         alert(`Message received: ${ev.data}`);
@@ -12,22 +13,44 @@ var socket=null;
             console.log("Received ping");
             socket.send("pong");
         }
-        handle_message(ev);
+        handle_callback_message(ev);
 
     }
     socket.onclose=function(e){
         console.log(`Socket closed with code: ${e.code} , reason: ${e.reason}`);
         console.log(`Connection died`);
     }
-    
-    
 }
 
-function disconnect(url){
+function command_subscribe(topic){
+    var message={
+        "command":"subscribe",
+        "topic":topic
+    }
+    socket.send(message);
+}
+ function command_unsubscribe(topic){
+    var message={
+        "command":"unsubscribe",
+        "topic":topic
+    }
+     socket.send(message)
+}
+
+function command_get_subscriptions(){
+   
+    var message={
+        "command":"get_subscriptions"
+    }
+    console.log("sending command:" + message);
+    socket.send(JSON.stringify(message));
+    
+}
+function command_disconnect(url){
     socket.close();
 }
 
-function socket_publish(message,topic){
+function command_publish(message,topic){
     var message={
         "command":"publish",
         "topic":topic,
@@ -35,23 +58,67 @@ function socket_publish(message,topic){
     }
     socket.send(message)
 }
-function handle_message(ev){
+function handle_callback_message(ev){
     console.log("Received:"+ev.data);
+    if(ev.data.command=="subscribe"){
+        callback_subscribe(ev.data);
+    }
+    if(ev.data.command=="unsubscribe"){
+        callback_unsubscribe(ev.data);
+    }
+    if(ev.data.command=="get_subscriptions"){
+        callback_get_subscriptions(ev.data);
+    }
+    if(ev.data.command=="get_messages"){
+        callback_get_messages(ev.data);
+    }
 }
+function callback_subscribe(data){
+    if(data.result=="ok"){
+        createSubsribeRow(data.topic);
+    }
+}
+function callback_unsubscribe(data){
+    channel=data.topic;
+    var table=document.getElementById('channelTable');
+    var row=document.getElementById(channel+'channel_row');
+    table.removeChild(row);
+    
+}
+function callback_get_messages(data){
+    console.log(data.messages);
+}
+function callback_get_subscriptions(data){
 
-function socket_subscribe(topic){
-    var message={
-        "command":"subscribe",
-        "topic":topic
-    }
-    socket.send(message);
+    var table=document.getElementById("channelTable");
+    table.innerHTML='';
+    var subscriptions=data.subscriptions;
+    subscriptions.forEach(element => {
+       createSubsribeRow(element);
+    });
+    
 }
- function socket_unsubscribe(topic){
-    var message={
-        "command":"unsubscribe",
-        "topic":topic
-    }
-     socket.send(message)
+function createSubsribeRow(channelName){
+    var table=document.getElementById("channelTable");
+
+    var channelRow=document.createElement("tr");
+    channelRow.id=channelName+'_channel_row';
+
+    var cell1=document.createElement("td");
+    var label=document.createElement("label");
+    label.innerText=channelName;
+    cell1.appendChild(label);
+    
+    var cell2=document.createElement("td");
+    var unsubscribeBtn=document.createElement("button");
+    unsubscribeBtn.id=channelName+'_unsubscribe_btn';
+    unsubscribeBtn.innerText="X";
+    unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
+    cell2.appendChild(unsubscribeBtn);
+
+    channelRow.appendChild(cell1);
+    channelRow.appendChild(cell2);
+    table.appendChild(channelRow);
 }
 
 
