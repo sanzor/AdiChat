@@ -16,8 +16,8 @@ function onDisconnect(){
     
 }
 function subscribe(){
-    var topic=document.getElementById("topicBox").innerText;
-    command_subscribe(topic);
+    var channelToSubscribe=document.getElementById("subscribeToChannelBox").textContent;
+    command_subscribe(channelToSubscribe);
 }
 
 function clickHandler(element){

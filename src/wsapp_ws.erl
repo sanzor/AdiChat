@@ -66,7 +66,7 @@ handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
     Reply=#{command=> <<"get_subscriptions">>},
     case wsapp_server:get_subscriptions(User) of
         {ok,Result}->{ok,reply,Reply#{result =>Result}};  
-        user_does_not_exist->{ok,reply,Reply#{result=> atom_to_binary(user_does_not_exist)}};
+        no_subscriptions->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};
         {error,Reason}->{error,Reason}
 end;
    

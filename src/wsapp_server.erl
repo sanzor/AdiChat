@@ -27,7 +27,7 @@
 get_messages(Topic)->
     gen_server:call(?MODULE,{get_messages,Topic}).
 
--spec get_subscriptions(User::string())->{ok,Channels::list()} | user_does_not_exist | {error,Reason::any()}.
+-spec get_subscriptions(User::string())->{ok,Channels::list()} | no_subscriptions | {error,Reason::any()}.
 get_subscriptions(User)->
     gen_server:call(?MODULE,{get_subscriptions,User}).
 
@@ -78,14 +78,14 @@ handle_call({get_messages,Topic},_,State)->
 
 handle_call({get_subscriptions,User},_,State)->
     case ets:match(subscribers,{'$1',User}) of
-        []->{reply,user_does_not_exist,State};
+        []->{reply,no_subscriptions,State};
         Elements -> {reply,{ok,Elements},State}
     end;
 
-handle_call({subscribe,{Topic,User}},_,State)->
-    true=ets:insert(subsribers, {Topic,User}),
+handle_call({subscribe,{User,Topic}},_,State)->
+    true=ets:insert(subscribers, {Topic,User}),
     {reply,ok,State};
-handle_call({unsubscribe,{Topic,User}},_,State)->
+handle_call({unsubscribe,{User,Topic}},_,State)->
     case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
             ets:delete_object(subscribers,{Topic,User}),

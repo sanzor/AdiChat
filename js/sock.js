@@ -8,13 +8,14 @@ var socket=null;
         command_get_subscriptions();
     }
     socket.onmessage=function(ev){
-        console.log("Received socket message:"+ev.data);
+      
         if(ev.data=="ping"){
             console.log("Received ping");
             socket.send("pong");
         }
-    
-        handle_callback_message(ev);
+        var message=JSON.parse(ev.data);
+        
+        handle_callback_message(message);
 
     }
     socket.onclose=function(e){
@@ -23,19 +24,21 @@ var socket=null;
     }
 }
 
-function command_subscribe(topic){
+function command_subscribe(channelToSubscribe){
     var message={
         "command":"subscribe",
-        "topic":topic
+        "topic":channelToSubscribe
     }
-    socket.send(message);
+    console.log("sending command:" + JSON.stringify(message));
+    socket.send(JSON.stringify(message))
 }
  function command_unsubscribe(topic){
     var message={
         "command":"unsubscribe",
         "topic":topic
     }
-     socket.send(message)
+    console.log("sending command:" + JSON.stringify(message));
+     socket.send(JSON.stringify(message));
 }
 
 function command_get_subscriptions(){
@@ -57,25 +60,28 @@ function command_publish(message,topic){
         "topic":topic,
         "message":message
     }
-    socket.send(message)
+    console.log("sending command:" + JSON.stringify(message));
+    socket.send(JSON.stringify(message));
 }
-function handle_callback_message(ev){
-  
-    if(ev.data.command=="subscribe"){
-        callback_subscribe(ev.data);
+function handle_callback_message(data){
+    console.log("Command:"+ data.command +', result:'+ data.result);
+    if(data.command=="subscribe"){
+        console.log("xx");
+        callback_subscribe(data);
     }
-    if(ev.data.command=="unsubscribe"){
-        callback_unsubscribe(ev.data);
+    if(data.command=="unsubscribe"){
+        callback_unsubscribe(data);
     }
-    if(ev.data.command=="get_subscriptions"){
-        callback_get_subscriptions(ev.data);
+    if(data.command=="get_subscriptions"){
+        callback_get_subscriptions(data);
     }
-    if(ev.data.command=="get_messages"){
-        callback_get_messages(ev.data);
+    if(data.command=="get_messages"){
+        callback_get_messages(data);
     }
 }
 function callback_subscribe(data){
     if(data.result=="ok"){
+       
         createSubsribeRow(data.topic);
     }
 }
