@@ -46,8 +46,8 @@ handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := U
     ok=wsapp_server:subscribe(User, Topic),
     Reply=#{command=> <<"subscribe">>,result=> <<"ok">> , topic=> Topic},
     {ok,reply,Reply};
-handle_command(<<"unsubscribe">>,_=#{<<topic>> :=Topic},_State=#{<<"user">>:=User})->
-    ok=wsapp_server:unsubscribe(Topic,User),
+handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
+    ok=wsapp_server:unsubscribe(User,Topic),
     Reply=#{command=> <<"unsubscribe">>, result=> <<"ok">>, topic=>Topic},
     {ok,reply,Reply};
   

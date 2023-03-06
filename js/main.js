@@ -16,7 +16,7 @@ function onDisconnect(){
     
 }
 function subscribe(){
-    var channelToSubscribe=document.getElementById("subscribeToChannelBox").textContent;
+    var channelToSubscribe=document.getElementById("subscribeBox").value;
     command_subscribe(channelToSubscribe);
 }
 

@@ -15,6 +15,7 @@ function handle_callback_message(data){
         callback_get_messages(data);
     }
 }
+
 function callback_subscribe(data){
     if(data.result=="ok"){
        
