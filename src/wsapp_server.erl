@@ -27,7 +27,7 @@
 get_messages(Topic)->
     gen_server:call(?MODULE,{get_messages,Topic}).
 
--spec get_subscriptions(User::string())->{ok,Channels::list()} | no_subscriptions | {error,Reason::any()}.
+-spec get_subscriptions(User::string())->{ok,Channels::list()}  | {error,Reason::any()}.
 get_subscriptions(User)->
     gen_server:call(?MODULE,{get_subscriptions,User}).
 
@@ -64,6 +64,7 @@ start_link()->
 %-------------callbacks---------------------------------------%
 
 init(Args)->
+    
     process_flag(trap_exit,true),
     self() ! start,
     {ok,#state{}}.
@@ -79,7 +80,7 @@ handle_call({get_messages,Topic},_,State)->
 handle_call({get_subscriptions,User},_,State)->
     case ets:match(subscribers,{'$1',User}) of
         []->{reply,no_subscriptions,State};
-        Elements -> {reply,{ok,Elements},State}
+        [Elements] -> {reply,{ok,Elements},State}
     end;
 
 handle_call({subscribe,{User,Topic}},_,State)->
