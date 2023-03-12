@@ -80,7 +80,7 @@ handle_call({get_messages,Topic},_,State)->
 handle_call({get_subscriptions,User},_,State)->
     case ets:match(subscribers,{'$1',User}) of
         []->{reply,no_subscriptions,State};
-        [Elements] -> {reply,{ok,Elements},State}
+        Elements -> {reply,{ok,Elements},State}
     end;
 
 handle_call({subscribe,{User,Topic}},_,State)->
@@ -92,7 +92,7 @@ handle_call({unsubscribe,{User,Topic}},_,State)->
             ets:delete_object(subscribers,{Topic,User}),
             {reply,ok,State};
         [] ->
-            logger:info("Nothing to unsubscribe user:~p topic:~p~n",[User,Topic]),
+            logger:info("User :~p not subscribed to topic:~p~n",[User,Topic]),
             {reply,ok,State}
     end;
 handle_call({online,{User,Socket}},_,State)->

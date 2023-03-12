@@ -1,8 +1,9 @@
 <html>
     <body>
-        <script scr="./callbacks.js"></script>
+        <script src="./callbacks.js"></script>
         <script  src="./sock.js"></script>
         <script  src="./main.js"></script>
+        <script  src="./table.js"></script>
        
         <link rel="stylesheet" type="text/css" href="container.css">
         <div>
@@ -19,12 +20,15 @@
                     <input type="text" id="subscribeBox" class="commandArea" value="[enter_topic]"></input>
                 </div>
             </div>
-            <div id="channelist">
-                <table id="channelTable">
-                    <tr><td>Channels</td></tr>
-                   
-                </table>
+            <div id="tableBorder" style="border:green;border-style:double;width: 400px;">
+                <div id="channelist">
+                    <table id="channelTable">
+                        <th><td>Channel</td></th>
+                        <th>-</th>
+                    </table>
+                </div>
             </div>
+           
         </div>
     </body>
 </html>

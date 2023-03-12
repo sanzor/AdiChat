@@ -20,8 +20,3 @@ function subscribe(){
     command_subscribe(channelToSubscribe);
 }
 
-function clickHandler(element){
-    element.addEventListener("click",function(){
-        
-    })
-}
