@@ -16,14 +16,14 @@ function handle_callback_message(data){
 
 function callback_subscribe(data){
     if(data.result=="ok"){
-        command_get_subscriptions();
+        createSubscriptionTable(data.subscriptions);
     }
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
         // channel=data.topic;
         // removeSubscriptionRow(channel);
-        command_get_subscriptions();
+        createSubscriptionTable(data.subscriptions);
     }
 }
 function callback_get_messages(data){

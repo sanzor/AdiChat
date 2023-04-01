@@ -78,22 +78,27 @@ handle_call({get_messages,Topic},_,State)->
     {reply,{ok,Messages},State};
 
 handle_call({get_subscriptions,User},_,State)->
-    case ets:match(subscribers,{'$1',User}) of
-        []->{reply,no_subscriptions,State};
+    case get_subs(User) of
+        no_subscriptions->{reply,no_subscriptions,State};
         Elements -> {reply,{ok,Elements},State}
     end;
 
 handle_call({subscribe,{User,Topic}},_,State)->
     true=ets:insert(subscribers, {Topic,User}),
-    {reply,ok,State};
+    Subs=get_subs(User),
+    {reply,{ok,Subs},State};
 handle_call({unsubscribe,{User,Topic}},_,State)->
     case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
-            ets:delete_object(subscribers,{Topic,User}),
-            {reply,ok,State};
+            io:format("deleting"),
+            true=ets:delete_object(subscribers,{Topic,User}),
+            Subs=get_subs(User),
+            io:format("Remaining subs :~p",[Subs]),
+            {reply,{ok,Subs},State};
         [] ->
             logger:info("User :~p not subscribed to topic:~p~n",[User,Topic]),
-            {reply,ok,State}
+            Subs=get_subs(User),
+            {reply,{ok,Subs},State}
     end;
 handle_call({online,{User,Socket}},_,State)->
     true=ets:insert(online,{User,Socket}),
@@ -133,3 +138,7 @@ send(Socket,Message)->
 online_sockets(User)->
     Sockets=ets:match(online, {User,'$1'}),
     Sockets.
+
+
+get_subs(User)->
+    lists:concat(ets:match(subscribers,{'$1',User})).

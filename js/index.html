@@ -12,11 +12,11 @@
                     <div>
                         <textarea class="commandArea"  id="controlText">http://localhost:8080/user/adi/cookie/cook</textarea>
                         <button  id="connectBtn" onclick="onConnect()">Connect</button>
-                        <button id="disconnectBtn" onclick="onDisconnect()">Disconnect</button>
+                        <button id="disconnectBtn" onclick="onDisconnect()" disabled>Disconnect</button>
                     </div>
                 </div>
                 <div id="channel-buttons">
-                    <button id="subscribeBtn" onclick="subscribe()">Subscribe</button>
+                    <button id="subscribeBtn" onclick="subscribe()" disabled>Subscribe</button>
                     <input type="text" id="subscribeBox" class="commandArea" value="[enter_topic]"></input>
                 </div>
             </div>

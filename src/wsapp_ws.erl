@@ -43,12 +43,12 @@ terminate(_,_,State)->
 
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
-    ok=wsapp_server:subscribe(User, Topic),
-    Reply=#{command=> <<"subscribe">>,result=> <<"ok">> , topic=> Topic},
+    {ok,Subs}=wsapp_server:subscribe(User, Topic),
+    Reply=#{command=> <<"subscribe">>, result=> <<"ok">> , topic=> Topic, subscriptions=>Subs},
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
-    ok=wsapp_server:unsubscribe(User,Topic),
-    Reply=#{command=> <<"unsubscribe">>, result=> <<"ok">>, topic=>Topic},
+    {ok,Subs}=wsapp_server:unsubscribe(User,Topic),
+    Reply=#{command=> <<"unsubscribe">>, result=> <<"ok">>, topic=>Topic, subscriptions=>Subs},
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->
@@ -65,8 +65,8 @@ handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
     Reply=#{command=> <<"get_subscriptions">>},
     case wsapp_server:get_subscriptions(User) of
+        {ok,no_subscriptions}->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};
         {ok,Result}->{ok,reply,Reply#{result =>Result}};  
-        no_subscriptions->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};
         {error,Reason}->{error,Reason}
 end;
    

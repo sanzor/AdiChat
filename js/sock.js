@@ -14,8 +14,8 @@ var socket=null;
             socket.send("pong");
         }
         var message=JSON.parse(ev.data);
-        console.log("\nReceived:");
-        console.log("\nReceived:"+ message);
+        console.log("\nReceived: ");
+        console.log(message);
         handle_callback_message(message);
 
     }
@@ -38,7 +38,7 @@ function command_subscribe(topic){
         "command":"unsubscribe",
         "topic":topic
     }
-    console.log("\nSending:" + JSON.stringify(message));
+     console.log("\nSending:" + JSON.stringify(message));
      socket.send(JSON.stringify(message));
 }
 
