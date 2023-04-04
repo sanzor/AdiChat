@@ -9,7 +9,7 @@ function onConnect(){
     disconnectBtn.disabled=false;
     connectBtn.disabled=true;
     subscribeBtn.disabled=false;
-    subscribeBox.disabled=true;
+    subscribeBox.disabled=false;
 }
 function onDisconnect(){
     command_disconnect();
@@ -19,7 +19,7 @@ function onDisconnect(){
     connectBtn.disabled=false;
     disconnectBtn.disabled=true;
     subscribeBtn.disabled=true;
-    subscribeBox.disabled=false;
+    subscribeBox.disabled=true;
     
 }
 function subscribe(){

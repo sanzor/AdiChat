@@ -26,6 +26,7 @@ function createSubscriptionRow(channelName){
     var channelRow=document.createElement("tr");
     channelRow.id=channelName+'_channel_row';
 
+    var cell1=document.createElement("td");
     var buttonCell=createChannelCell(channelName);
     cell1.appendChild(buttonCell);
     
@@ -41,10 +42,10 @@ function createSubscriptionRow(channelName){
     table.appendChild(channelRow);
 }
 
-function createChannelCell(){
+function createChannelCell(channelName){
     var cell1=document.createElement("td");
     var messageStreamBtn=document.createElement("button");
-    messageStreamBtn.innerText=channelName;
+    messageStreamBtn.innerHTML=channelName;
     messageStreamBtn.click=function(){showMessageStream(channelName)};
     return cell1;
 }
