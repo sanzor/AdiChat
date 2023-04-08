@@ -45,8 +45,11 @@ function createSubscriptionRow(channelName){
 function createChannelCell(channelName){
     var cell1=document.createElement("td");
     var messageStreamBtn=document.createElement("button");
-    messageStreamBtn.innerHTML=channelName;
+    messageStreamBtn.setAttribute('content',channelName);
+    messageStreamBtn.setAttribute("class",'button');
+    messageStreamBtn.textContent=channelName;
     messageStreamBtn.click=function(){showMessageStream(channelName)};
+    cell1.appendChild(messageStreamBtn);
     return cell1;
 }
 function removeSubscriptionRow(){
