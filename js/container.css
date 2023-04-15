@@ -11,3 +11,9 @@
   }
 
 /* "https://css-tricks.com/snippets/css/complete-guide-grid/" */
+
+.channelButton{
+  background-color: green;
+  max-width: 400px;
+  width: auto;
+}

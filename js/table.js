@@ -31,14 +31,15 @@ function createSubscriptionRow(channelName){
     cell1.appendChild(buttonCell);
     
     var cell2=document.createElement("td");
+    cell2.setAttribute("bgcolor","red");
     var unsubscribeBtn=document.createElement("button");
     unsubscribeBtn.id=channelName+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
     cell2.appendChild(unsubscribeBtn);
 
-    channelRow.appendChild(cell1);
     channelRow.appendChild(cell2);
+    channelRow.appendChild(cell1);
     table.appendChild(channelRow);
 }
 
@@ -47,6 +48,7 @@ function createChannelCell(channelName){
     var messageStreamBtn=document.createElement("button");
     messageStreamBtn.setAttribute('content',channelName);
     messageStreamBtn.setAttribute("class",'button');
+    messageStreamBtn.setAttribute("style","channelButton");
     messageStreamBtn.textContent=channelName;
     messageStreamBtn.click=function(){showMessageStream(channelName)};
     cell1.appendChild(messageStreamBtn);

@@ -21,7 +21,8 @@ websocket_info(send_ping,State)->
     {reply,ping,State};
 
 websocket_info(Message,State)->
-    {reply,Message,State}.
+    Reply=#{kind=>"chat",message=>Message},
+    {reply,Reply,State}.
 
 websocket_handle({text, Message},State)->
     Decode=json:decode(Message,[maps]),
@@ -44,11 +45,11 @@ terminate(_,_,State)->
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
     {ok,Subs}=wsapp_server:subscribe(User, Topic),
-    Reply=#{command=> <<"subscribe">>, result=> <<"ok">> , topic=> Topic, subscriptions=>Subs},
+    Reply=#{command=> <<"subscribe">>, kind=><<"command_result">>, result=> <<"ok">> , topic=> Topic, subscriptions=>Subs},
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
     {ok,Subs}=wsapp_server:unsubscribe(User,Topic),
-    Reply=#{command=> <<"unsubscribe">>, result=> <<"ok">>, topic=>Topic, subscriptions=>Subs},
+    Reply=#{command=> <<"unsubscribe">>,kind=><<"command_result">>, result=> <<"ok">>, topic=>Topic, subscriptions=>Subs},
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->
@@ -60,10 +61,10 @@ handle_command(<<"publish">>,Decode,_State)->
 
 handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
     {ok,Messages}=wsapp_server:get_messages(Topic),
-    {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages}};
+    {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages, kind=><<"command_result">>}};
 
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
-    Reply=#{command=> <<"get_subscriptions">>},
+    Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},
     case wsapp_server:get_subscriptions(User) of
         {ok,no_subscriptions}->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};
         {ok,Result}->{ok,reply,Reply#{result =>Result}};  
