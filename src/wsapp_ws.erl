@@ -17,7 +17,6 @@ websocket_init(State)->
     {reply,ping,State}.
 
 websocket_info(send_ping,State)->
-    logger:info("Sending ping"),
     {reply,ping,State};
 
 websocket_info(Message,State)->
@@ -26,7 +25,7 @@ websocket_info(Message,State)->
 
 websocket_handle({text, Message},State)->
     Decode=json:decode(Message,[maps]),
-    io:format("Received :~p",[Decode]),
+    io:format("\nReceived :~p\n",[Decode]),
     #{<<"command">>:= Command}=Decode,
     case handle_command(Command,Decode,State) of
             {ok,noreply} -> {ok,State};
@@ -34,7 +33,6 @@ websocket_handle({text, Message},State)->
     end;
 
 websocket_handle(pong, State)->
-    logger:info("Received pong"),
     erlang:send_after(?HEARTBEAT, self(), send_ping),
     {ok,State}.
 terminate(_,_,State)->
@@ -55,6 +53,7 @@ handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=U
 handle_command(<<"publish">>,Decode,_State)->
     #{<<"topic">> := Topic}=Decode,
     #{<<"user">>:= User}=_State,
+    
     Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
     ok=wsapp_server:publish(Topic, Json),
     {ok,noreply};

@@ -27,3 +27,7 @@ function subscribe(){
     command_subscribe(channelToSubscribe);
 }
 
+function onPublish(){
+    var textValue=document.getElementById("publishBox").value;
+    command_publish("hello",textValue);
+}

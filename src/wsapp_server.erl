@@ -116,7 +116,7 @@ handle_call({offline,{User,Socket}},_,State)->
 handle_cast({publish,{Topic,Message}},State)->
     true=ets:insert(messages, {Topic,Message}),
     Subscribers=ets:match(subscribers,{Topic,'$1'}),
-    [[send(Socket,Message)|| [Socket]<-online_sockets(Subscriber)] || [Subscriber]<-Subscribers ],
+    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
     {noreply,State}.
 
 
@@ -137,6 +137,7 @@ send(Socket,Message)->
     Socket ! Message.
 online_sockets(User)->
     Sockets=ets:match(online, {User,'$1'}),
+    io:format("\nInside online sockets sending...\n"),
     Sockets.
 
 

@@ -9,7 +9,7 @@
 index(_Req) ->
     {ok, [{message, "Hello world!"}]}.
 
-publish(_Req=#{parsed_qs := #{ <<"topic">> := Topic , <<"sender">> := _Sender , <<"message">> := Message}})->
+publish(_Req=#{json := #{ <<"topic">> := Topic , <<"sender">> := _Sender , <<"message">> := Message}})->
     ok=wsapp_server:publish(Topic,Message),
     {status,200}.
 
