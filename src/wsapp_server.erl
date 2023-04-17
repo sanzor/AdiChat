@@ -138,6 +138,7 @@ send(Socket,Message)->
 online_sockets(User)->
     Sockets=ets:match(online, {User,'$1'}),
     io:format("\nInside online sockets sending...\n"),
+    io:format("\nSockets: ~p\n",[Sockets]),
     Sockets.
 
 
