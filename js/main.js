@@ -28,6 +28,7 @@ function subscribe(){
 }
 
 function onPublish(){
-    var textValue=document.getElementById("publishBox").value;
-    command_publish("hello",textValue);
+    var topic=document.getElementById("publishTopicBox").value;
+    var message=document.getElementById("publishMessageBox").value;
+    command_publish(topic,message);
 }

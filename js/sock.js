@@ -56,14 +56,14 @@ function command_disconnect(url){
     resetSubscriptionTable();
 }
 
-function command_publish(message,topic){
-    var message={
+function command_publish(topic,message){
+    var toSend={
         "command":"publish",
         "topic":topic,
         "message":message
     }
-    console.log("\nSending:" + JSON.stringify(message));
-    socket.send(JSON.stringify(message));
+    console.log("\nSending:" + JSON.stringify(toSend));
+    socket.send(JSON.stringify(toSend));
 }
 
 

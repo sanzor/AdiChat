@@ -115,7 +115,8 @@ handle_call({offline,{User,Socket}},_,State)->
 %% @end
 handle_cast({publish,{Topic,Message}},State)->
     true=ets:insert(messages, {Topic,Message}),
-    Subscribers=ets:match(subscribers,{Topic,'$1'}),
+    Subscribers=lists:concat(ets:match(subscribers,{Topic,'$1'})),
+    io:format("\nSubscribers to topic ~p : ~p\n", [Topic,Subscribers]),
     [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
     {noreply,State}.
 
@@ -134,11 +135,10 @@ handle_info(Message,State)->
 
 terminate(_Reason,_State)->ok.
 send(Socket,Message)->
+    io:format("\n Sending to socket: ~p\n Message : ~p",[Socket,Message]),
     Socket ! Message.
 online_sockets(User)->
-    Sockets=ets:match(online, {User,'$1'}),
-    io:format("\nInside online sockets sending...\n"),
-    io:format("\nSockets: ~p\n",[Sockets]),
+    Sockets=lists:concat(ets:match(online, {User,'$1'})),
     Sockets.
 
 
