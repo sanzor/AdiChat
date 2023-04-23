@@ -90,13 +90,10 @@ handle_call({subscribe,{User,Topic}},_,State)->
 handle_call({unsubscribe,{User,Topic}},_,State)->
     case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
-            io:format("deleting"),
             true=ets:delete_object(subscribers,{Topic,User}),
             Subs=get_subs(User),
-            io:format("Remaining subs :~p",[Subs]),
             {reply,{ok,Subs},State};
         [] ->
-            logger:info("User :~p not subscribed to topic:~p~n",[User,Topic]),
             Subs=get_subs(User),
             {reply,{ok,Subs},State}
     end;
@@ -143,4 +140,4 @@ online_sockets(User)->
 
 
 get_subs(User)->
-    ets:match(subscribers,{'$1',User}).
+    lists:concat(ets:match(subscribers,{'$1',User})).

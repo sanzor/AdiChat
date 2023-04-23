@@ -21,7 +21,7 @@ websocket_info(send_ping,State)->
 
 websocket_info(Message,State)->
     Reply=#{kind=>"chat",message=>Message},
-    {reply,Reply,State}.
+    {reply,{text,thoas:encode(Reply)},State}.
 
 websocket_handle({text, Message},State)->
     Decode=json:decode(Message,[maps]),

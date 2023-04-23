@@ -35,6 +35,7 @@ function createSubscriptionRow(channelName){
     var unsubscribeBtn=document.createElement("button");
     unsubscribeBtn.id=channelName+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
+    console.log(channelName);
     unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
     cell2.appendChild(unsubscribeBtn);
 

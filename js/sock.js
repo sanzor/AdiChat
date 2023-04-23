@@ -35,6 +35,7 @@ function command_subscribe(topic){
     socket.send(JSON.stringify(message))
 }
  function command_unsubscribe(topic){
+    console.log(topic);
     var message={
         "command":"unsubscribe",
         "topic":topic
