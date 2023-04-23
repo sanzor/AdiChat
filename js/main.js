@@ -13,6 +13,10 @@ function onConnect(){
 }
 function onDisconnect(){
     command_disconnect();
+    reset();
+    
+}
+function reset(){
     var connectBtn=document.getElementById("connectBtn");
     var disconnectBtn=document.getElementById("disconnectBtn");
     var subscribeBox=document.getElementById("subscribeBox");
@@ -20,7 +24,6 @@ function onDisconnect(){
     disconnectBtn.disabled=true;
     subscribeBtn.disabled=true;
     subscribeBox.disabled=true;
-    
 }
 function subscribe(){
     var channelToSubscribe=document.getElementById("subscribeBox").value;

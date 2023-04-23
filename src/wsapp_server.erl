@@ -143,4 +143,4 @@ online_sockets(User)->
 
 
 get_subs(User)->
-    lists:concat(ets:match(subscribers,{'$1',User})).
+    ets:match(subscribers,{'$1',User}).

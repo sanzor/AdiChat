@@ -21,6 +21,7 @@ var socket=null;
     }
     socket.onclose=function(e){
         console.log(`Socket closed with code: ${e.code} , reason: ${e.reason}`);
+        reset();
        
     }
 }
