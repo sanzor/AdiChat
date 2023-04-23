@@ -2,7 +2,8 @@
 var socket=null;
 
  function connect (url){
-   socket=new WebSocket("ws://localhost:8080/ws/user/adi/cookie/cook");
+    var url=document.getElementById("urlBox").value;
+    socket=new WebSocket(url);
     socket.onopen=function (e){
         console.log("\nConnection established\n");
         command_get_subscriptions();
