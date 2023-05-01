@@ -20,10 +20,12 @@ websocket_info(send_ping,State)->
     {reply,ping,State};
 
 websocket_info(Message,State)->
-    Reply=#{kind=>"chat",message=>Message},
+    {ok,NewMessage}=thoas:decode(Message),
+    Reply=NewMessage#{ kind=><<"chat">>},
     {reply,{text,thoas:encode(Reply)},State}.
 
 websocket_handle({text, Message},State)->
+    io:format("\nInput :~p\n",[Message]),
     Decode=json:decode(Message,[maps]),
     io:format("\nReceived :~p\n",[Decode]),
     #{<<"command">>:= Command}=Decode,

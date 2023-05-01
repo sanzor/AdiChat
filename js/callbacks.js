@@ -1,5 +1,4 @@
 function handle_callback_message(data){
-    console.log("Command:"+ data.command +', result:'+ data.result);
     if(data.kind=="chat"){
         handle_chat_message(data);
     }
@@ -10,7 +9,7 @@ function handle_callback_message(data){
     
 }
 function handle_chat_message(data){
-    console.log("Incoming chat message\n:"+data.message+"\n");
+    console.log("\nIncoming chat message\n");
 }
 function handle_command_result(data){
     if(data.command=="subscribe"){

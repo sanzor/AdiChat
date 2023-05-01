@@ -1,8 +1,10 @@
 
 var socket=null;
 
- function connect (url){
+ function connect (){
+    
     var url=document.getElementById("urlBox").value;
+    console.log(url);
     socket=new WebSocket(url);
     socket.onopen=function (e){
         console.log("\nConnection established\n");

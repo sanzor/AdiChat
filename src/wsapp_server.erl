@@ -132,7 +132,6 @@ handle_info(Message,State)->
 
 terminate(_Reason,_State)->ok.
 send(Socket,Message)->
-    io:format("\n Sending to socket: ~p\n Message : ~p",[Socket,Message]),
     Socket ! Message.
 online_sockets(User)->
     Sockets=lists:concat(ets:match(online, {User,'$1'})),
