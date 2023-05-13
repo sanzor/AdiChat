@@ -98,10 +98,10 @@ handle_call({unsubscribe,{User,Topic}},_,State)->
             {reply,{ok,Subs},State}
     end;
 handle_call({online,{User,Socket}},_,State)->
-    true=ets:insert(online,{User,Socket}),
+    ok=pg:join(User, Socket),
     {reply,ok,State};
 handle_call({offline,{User,Socket}},_,State)->
-    ets:delete_object(online,{User,Socket}),
+    ok=pg:leave(User, Socket),
     {reply,ok,State}.
 
 
@@ -134,7 +134,7 @@ terminate(_Reason,_State)->ok.
 send(Socket,Message)->
     Socket ! Message.
 online_sockets(User)->
-    Sockets=lists:concat(ets:match(online, {User,'$1'})),
+    Sockets=pg:get_members(User),
     Sockets.
 
 
