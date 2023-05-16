@@ -36,7 +36,15 @@ init([]) ->
         shutdown =>5000,
         type=>worker,
         modules=>[wsapp_server]
-     }
+     },
+     #{
+        id=>pg,
+        start=>{pg,start_link,[]},
+        restart=>permanent,
+        shutdown=>5000,
+        type=>worker,
+        modules=>[pg]
+    }
     ],
     Strategy={one_for_all,100,1},
     {ok, { Strategy, ChildSpecs} }.

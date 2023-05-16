@@ -9,7 +9,8 @@
    [
     kernel,
     stdlib,
-    nova
+    nova,
+    runtime_tools
    ]},
   {env,[{dbconn,""}]},
   {modules, [wsapp_server]},
