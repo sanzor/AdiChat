@@ -19,6 +19,9 @@ websocket_init(State)->
 websocket_info(send_ping,State)->
     {reply,ping,State};
 
+websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
+    Reply=#{kind=><<"user_event">>,user=>User,event=>UserEventMessage},
+    {reply,{text,thoase:encode(Reply)},State};
 websocket_info(Message,State)->
     {ok,NewMessage}=thoas:decode(Message),
     Reply=NewMessage#{ kind=><<"chat">>},

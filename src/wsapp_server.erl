@@ -18,7 +18,8 @@
          get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
-
+-define(CONSTANT,<<"_events">>).
+-define(F(User),<<User,?CONSTANT>>).
 -record(state,{
 
 }).
@@ -85,12 +86,16 @@ handle_call({get_subscriptions,User},_,State)->
 
 handle_call({subscribe,{User,Topic}},_,State)->
     true=ets:insert(subscribers, {Topic,User}),
+    UserEvent={user_event,User,{subscribe,Topic}},
+    [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
     Subs=get_subs(User),
     {reply,{ok,Subs},State};
 handle_call({unsubscribe,{User,Topic}},_,State)->
     case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
             true=ets:delete_object(subscribers,{Topic,User}),
+            UserEvent={user_event,User,{unsubscribe,Topic}},
+            [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
             Subs=get_subs(User),
             {reply,{ok,Subs},State};
         [] ->
@@ -98,10 +103,15 @@ handle_call({unsubscribe,{User,Topic}},_,State)->
             {reply,{ok,Subs},State}
     end;
 handle_call({online,{User,Socket}},_,State)->
-    ok=pg:join(User, Socket),
+    UserEventGroup= ?F(User),
+    ok=pg:join(UserEventGroup, Socket),
+    ok=pg:join(User,Socket),
     {reply,ok,State};
+    
 handle_call({offline,{User,Socket}},_,State)->
+    UserEventGroup=?F(User),
     ok=pg:leave(User, Socket),
+    ok=pg:leave(UserEventGroup,Socket),
     {reply,ok,State}.
 
 
@@ -123,7 +133,6 @@ handle_cast({publish,{Topic,Message}},State)->
 %% @end
 handle_info(start,State)->
     ets:new(subscribers,[named_table,bag]),
-    ets:new(online,[named_table,bag]),
     ets:new(messages,[named_table,bag]),
     {noreply,State};
 
@@ -140,3 +149,4 @@ online_sockets(User)->
 
 get_subs(User)->
     lists:concat(ets:match(subscribers,{'$1',User})).
+
