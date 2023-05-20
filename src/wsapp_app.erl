@@ -16,8 +16,11 @@
 
 start(_StartType, _StartArgs) ->
     {ok,Hosts}=application:get_env(wsapp, hosts),
-    io:format("\nFound Hosts: ~p\n",[Hosts]),
-    io:format("\nResults from pinging~p",[{Host,ping_node(Host)}||Host<-Hosts]),
+    case Hosts of
+      [] -> ok;
+      Hosts ->io:format("\nFound Hosts: ~p\n",[Hosts]),
+              io:format("\nResults from pinging~p",[{Host,ping_node(Host)}||Host<-Hosts])
+    end,
     wsapp_sup:start_link().
 
 %%--------------------------------------------------------------------

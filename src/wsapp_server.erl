@@ -19,7 +19,7 @@
 
 -define(SERVER,?MODULE).
 -define(CONSTANT,<<"_events">>).
--define(F(User),<<User,?CONSTANT>>).
+-define(F(User),<<User/binary,?CONSTANT/binary>>).
 -record(state,{
 
 }).
@@ -84,28 +84,35 @@ handle_call({get_subscriptions,User},_,State)->
         Elements -> {reply,{ok,Elements},State}
     end;
 
+
 handle_call({subscribe,{User,Topic}},_,State)->
-    true=ets:insert(subscribers, {Topic,User}),
-    UserEvent={user_event,User,{subscribe,Topic}},
-    [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
-    Subs=get_subs(User),
-    {reply,{ok,Subs},State};
+    Reply=case lists:any(fun(TargetUser)->TargetUser=:=User end,pg:get_members(Topic)) of
+        true ->  already_subscribed;
+        false -> true=ets:insert(subscribers, {Topic,User}),
+                 UserEvent=#{kind => <<"subscribe">>,topic => Topic, subs=>get_subs(User)},
+                 [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
+                 ok
+        end,
+    {reply,Reply,State};
+
+
 handle_call({unsubscribe,{User,Topic}},_,State)->
-    case ets:match_object(subscribers, {Topic,User}) of
+    Reply=case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
             true=ets:delete_object(subscribers,{Topic,User}),
-            UserEvent={user_event,User,{unsubscribe,Topic}},
+            UserEvent=#{kind => <<"unsubscribe">>,topic => Topic, subs=>get_subs(User)},
             [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
-            Subs=get_subs(User),
-            {reply,{ok,Subs},State};
-        [] ->
-            Subs=get_subs(User),
-            {reply,{ok,Subs},State}
-    end;
+            ok;
+        [] -> not_joined
+            
+    end,
+    {reply,Reply,State};
+
+
 handle_call({online,{User,Socket}},_,State)->
     UserEventGroup= ?F(User),
-    ok=pg:join(UserEventGroup, Socket),
     ok=pg:join(User,Socket),
+    ok=pg:join(UserEventGroup, Socket),
     {reply,ok,State};
     
 handle_call({offline,{User,Socket}},_,State)->
