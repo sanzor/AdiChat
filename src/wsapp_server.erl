@@ -89,8 +89,8 @@ handle_call({subscribe,{User,Topic}},_,State)->
     Reply=case lists:any(fun(TargetUser)->TargetUser=:=User end,pg:get_members(Topic)) of
         true ->  already_subscribed;
         false -> true=ets:insert(subscribers, {Topic,User}),
-                 UserEvent=#{kind => <<"subscribe">>,topic => Topic, subs=>get_subs(User)},
-                 [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
+                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic, subscriptions=>get_subs(User)},
+                 [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User))],
                  ok
         end,
     {reply,Reply,State};
@@ -100,8 +100,8 @@ handle_call({unsubscribe,{User,Topic}},_,State)->
     Reply=case ets:match_object(subscribers, {Topic,User}) of
         [{Topic,User}] -> 
             true=ets:delete_object(subscribers,{Topic,User}),
-            UserEvent=#{kind => <<"unsubscribe">>,topic => Topic, subs=>get_subs(User)},
-            [send(Socket,UserEvent)|| Socket<-pg:get_members(?F(User))],
+            UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => Topic, subscriptions=>get_subs(User)},
+            [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User))],
             ok;
         [] -> not_joined
             

@@ -5,6 +5,9 @@ function handle_callback_message(data){
     if(data.kind=="command_result"){
         handle_command_result(data);
     }
+    if(data.kind="user_event"){
+        handle_user_event(data);
+    }
 
     
 }
@@ -25,10 +28,24 @@ function handle_command_result(data){
         callback_get_messages(data);
     }
 }
+function handle_user_event(data){
+    if(data.user_event_kind=="subscribe"){
+        handle_user_event_subscribe(data);
+    }
+    if(data.user_event_kind=="unsubscribe"){
+        handle_user_event_unsubscribe(data);
+    }
+}
 
+function handle_user_event_subscribe(data){
+    createSubscriptionTable(data.subs);
+}
+function handle_user_event_unsubscribe(data){
+    createSubscriptionTable(data.subs);
+}
 function callback_subscribe(data){
     if(data.result=="ok"){
-        createSubscriptionTable(data.subscriptions);
+        //createSubscriptionTable(data.subscriptions);
     }
 }
 function callback_unsubscribe(data){
