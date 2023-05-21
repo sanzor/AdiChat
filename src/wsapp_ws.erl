@@ -21,7 +21,7 @@ websocket_info(send_ping,State)->
 
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
-    {reply,{text,thoase:encode(Reply)},State};
+    {reply,{text,thoas:encode(Reply)},State};
     
 websocket_info(Message,State)->
     {ok,NewMessage}=thoas:decode(Message),
@@ -49,11 +49,11 @@ terminate(_,_,State)->
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
     Result=wsapp_server:subscribe(User, Topic),
-    Reply=#{ kind=><<"command_result">>, command=> <<"subscribe">>, result=> Result , topic=> Topic},
+    Reply=Result#{ kind=><<"command_result">>, command=> <<"subscribe">>, topic=> Topic},
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
     Result=wsapp_server:unsubscribe(User,Topic),
-    Reply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>, result=> Result, topic=>Topic},
+    Reply=Result#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->

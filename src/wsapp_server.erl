@@ -85,25 +85,29 @@ handle_call({get_subscriptions,User},_,State)->
     end;
 
 
-handle_call({subscribe,{User,Topic}},_,State)->
+handle_call({subscribe,{User,Topic}},{From,_},State)->
     Reply=case lists:any(fun(TargetUser)->TargetUser=:=User end,pg:get_members(Topic)) of
-        true ->  already_subscribed;
+        true ->  #{result=> <<"already_subscribed">>};
         false -> true=ets:insert(subscribers, {Topic,User}),
-                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic, subscriptions=>get_subs(User)},
-                 [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User))],
-                 ok
+                 Subscriptions=get_subs(User),
+                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic, subscriptions=>Subscriptions},
+                 [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/=From],
+                 #{result=> <<"ok">> ,subscriptions=>Subscriptions}
+                 
         end,
     {reply,Reply,State};
 
 
-handle_call({unsubscribe,{User,Topic}},_,State)->
+handle_call({unsubscribe,{User,Topic}},{From,_},State)->
     Reply=case ets:match_object(subscribers, {Topic,User}) of
-        [{Topic,User}] -> 
+        [{Topic,User}] ->
             true=ets:delete_object(subscribers,{Topic,User}),
-            UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => Topic, subscriptions=>get_subs(User)},
-            [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User))],
-            ok;
-        [] -> not_joined
+            Subscriptions=get_subs(User),
+            UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => Topic, subscriptions=>Subscriptions},
+            io:format("\nFrom:~p, Existing:~p\n",[From,pg:get_members(?F(User))]),
+            [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/= From],
+            #{result=> <<"ok">> ,subscriptions=>Subscriptions};
+        [] ->#{result=> <<"not joined">>}
             
     end,
     {reply,Reply,State};

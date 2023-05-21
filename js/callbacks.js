@@ -38,14 +38,17 @@ function handle_user_event(data){
 }
 
 function handle_user_event_subscribe(data){
-    createSubscriptionTable(data.subs);
+    createSubscriptionTable(data.subscriptions);
 }
 function handle_user_event_unsubscribe(data){
-    createSubscriptionTable(data.subs);
+    createSubscriptionTable(data.subscriptions);
 }
 function callback_subscribe(data){
     if(data.result=="ok"){
-        //createSubscriptionTable(data.subscriptions);
+        createSubscriptionTable(data.subscriptions);
+    }
+    if(data.result="already_subscribed"){
+        console.log("\nAlready subscribed to topic:",data.topic,"\n");
     }
 }
 function callback_unsubscribe(data){
