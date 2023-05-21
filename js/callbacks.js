@@ -5,6 +5,9 @@ function handle_callback_message(data){
     if(data.kind=="command_result"){
         handle_command_result(data);
     }
+    if(data.kind="user_event"){
+        handle_user_event(data);
+    }
 
     
 }
@@ -25,10 +28,27 @@ function handle_command_result(data){
         callback_get_messages(data);
     }
 }
+function handle_user_event(data){
+    if(data.user_event_kind=="subscribe"){
+        handle_user_event_subscribe(data);
+    }
+    if(data.user_event_kind=="unsubscribe"){
+        handle_user_event_unsubscribe(data);
+    }
+}
 
+function handle_user_event_subscribe(data){
+    createSubscriptionTable(data.subscriptions);
+}
+function handle_user_event_unsubscribe(data){
+    createSubscriptionTable(data.subscriptions);
+}
 function callback_subscribe(data){
     if(data.result=="ok"){
         createSubscriptionTable(data.subscriptions);
+    }
+    if(data.result="already_subscribed"){
+        console.log("\nAlready subscribed to topic:",data.topic,"\n");
     }
 }
 function callback_unsubscribe(data){

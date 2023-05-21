@@ -23,6 +23,7 @@
          {plugins, [
                     {pre_request, nova_request_plugin, #{parse_bindings => true}}
                    ]}
-        ]}
+        ]},
+  {wsapp,[{hosts,[]}]}
   %% Please change your app.src-file instead if you intend to add app-specific configurations
 ].

@@ -15,7 +15,6 @@ function createSubscriptionTable(subscriptions){
     if(subscriptions==='no_subscriptions'){
         return;
     }
-    
     subscriptions.forEach(element => {
        createSubscriptionRow(element);
     });

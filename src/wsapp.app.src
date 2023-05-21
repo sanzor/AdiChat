@@ -9,9 +9,10 @@
    [
     kernel,
     stdlib,
-    nova
+    nova,
+    runtime_tools
    ]},
-  {env,[]},
+  {env,[{dbconn,""}]},
   {modules, [wsapp_server]},
   {maintainers, []},
   {licenses, ["Apache 2.0"]},

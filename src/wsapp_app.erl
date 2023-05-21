@@ -15,12 +15,26 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
+    {ok,Hosts}=application:get_env(wsapp, hosts),
+    case Hosts of
+      [] -> ok;
+      Hosts ->io:format("\nFound Hosts: ~p\n",[Hosts]),
+              io:format("\nResults from pinging~p",[{Host,ping_node(Host)}||Host<-Hosts])
+    end,
     wsapp_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->
     ok.
 
+ping_node(Node)->
+    try 
+      pong=net_adm:ping(Node)
+    catch
+      Error:Reason -> io:format("\nError:~p, Reason~p\n",[Error,Reason]),
+                      timer:sleep(20000),
+                      net_adm:ping(Node)
+    end.
 %%====================================================================
 %% Internal functions
 %%====================================================================

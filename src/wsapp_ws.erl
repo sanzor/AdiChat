@@ -19,6 +19,10 @@ websocket_init(State)->
 websocket_info(send_ping,State)->
     {reply,ping,State};
 
+websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
+    Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
+    {reply,{text,thoas:encode(Reply)},State};
+    
 websocket_info(Message,State)->
     {ok,NewMessage}=thoas:decode(Message),
     Reply=NewMessage#{ kind=><<"chat">>},
@@ -44,18 +48,17 @@ terminate(_,_,State)->
 
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
-    {ok,Subs}=wsapp_server:subscribe(User, Topic),
-    Reply=#{command=> <<"subscribe">>, kind=><<"command_result">>, result=> <<"ok">> , topic=> Topic, subscriptions=>Subs},
+    Result=wsapp_server:subscribe(User, Topic),
+    Reply=Result#{ kind=><<"command_result">>, command=> <<"subscribe">>, topic=> Topic},
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
-    {ok,Subs}=wsapp_server:unsubscribe(User,Topic),
-    Reply=#{command=> <<"unsubscribe">>,kind=><<"command_result">>, result=> <<"ok">>, topic=>Topic, subscriptions=>Subs},
+    Result=wsapp_server:unsubscribe(User,Topic),
+    Reply=Result#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->
     #{<<"topic">> := Topic}=Decode,
     #{<<"user">>:= User}=_State,
-    
     Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
     ok=wsapp_server:publish(Topic, Json),
     {ok,noreply};
