@@ -10,7 +10,8 @@
     kernel,
     stdlib,
     nova,
-    runtime_tools
+    runtime_tools,
+    epgsql
    ]},
   {env,[{dbconn,""}]},
   {modules, [wsapp_server]},
