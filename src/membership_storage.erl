@@ -4,38 +4,59 @@
 
 -spec subscribe(Topic::binary(),User::binary()) -> ok | already_subscribed | {error,Error::term()}.
 subscribe(Topic,User)->
-    Statement= <<"INSERT INTO table wschat_user(topic,user_id) values($1,$2)">>,
+    Pg=application:get_env(wsapp,pg),
+    Hostname=proplists:get_value(hostname,Pg),
+    Port=proplists:get_value(port,Pg),
+    Username=proplists:get_value(username,Pg),
+    Password=proplists:get_value(password,Pg),
+    Database=proplists:get_value(database,Pg),
+    Statement= <<"INSERT INTO  wschat_user(topic,user_id) values ($1,$2)">>,
     {ok,C}=epgsql:connect(#{
-        host=>"127.0.0.1",
-        username=>"postgres",
-        password=>"sanzor93",
-        database=>"postgres_db",
+        host=>Hostname,
+        port=>Port,
+        username=>Username,
+        password=>Password,
+        database=>Database,
         timeout=>4000
     }),
-    {ok,_}=epgsql:execute(C,Statement,[Topic,User]),
+    {ok,_}=epgsql:equery(C,Statement,[Topic,User]),
     ok.
 
 -spec unsubscribe(Topic::binary(),User::binary())-> ok | not_joined | {error,Error::term()}.
 unsubscribe(Topic,User)->
-    Statement= <<"DELETE FROM table wschat_user WHERE user_id = $1 AND topic =$2">>,
+    Pg=application:get_env(wsapp,pg),
+    Hostname=proplists:get_value(hostname,Pg),
+    Port=proplists:get_value(port,Pg),
+    Username=proplists:get_value(username,Pg),
+    Password=proplists:get_value(password,Pg),
+    Database=proplists:get_value(database,Pg),
+    Statement= <<"DELETE FROM  wschat_user WHERE user_id = $1 AND topic =$2">>,
     {ok,C}=epgsql:connect(#{
-        host=>"127.0.0.1",
-        username=>"postgres",
-        password=>"sanzor93",
-        database=>"postgres_db",
+        host=>Hostname,
+        port=>Port,
+        username=>Username,
+        password=>Password,
+        database=>Database,
         timeout=>4000
     }),
-    {ok,_}=epgsql:execute(C,Statement,[Topic,User]),
+    {ok,_}=epgsql:equery(C,Statement,[Topic,User]),
     ok.
 -spec get_subscriptions_for_topic(Topic::binary())-> {ok,list()} | {error,Reason::term()}.
 get_subscriptions_for_topic(Topic)->
-    Statement= <<"SELECT user_id FROM table wschat_user WHERE topic = $1">>,
+    Pg=application:get_env(wsapp,pg),
+    Hostname=proplists:get_value(hostname,Pg),
+    Port=proplists:get_value(port,Pg),
+    Username=proplists:get_value(username,Pg),
+    Password=proplists:get_value(password,Pg),
+    Database=proplists:get_value(database,Pg),
+    Statement= <<"SELECT user_id FROM  wschat_user WHERE topic = $1">>,
     {ok,C}=epgsql:connect(#{
-        host=>"127.0.0.1",
-        username=>"postgres",
-        password=>"sanzor93",
-        database=>"postgres_db",
+        host=>Hostname,
+        port=>Port,
+        username=>Username,
+        password=>Password,
+        database=>Database,
         timeout=>4000
     }),
-    {ok,_}=epgsql:execute(C,Statement,[Topic]),
+    {ok,_}=epgsql:equery(C,Statement,[Topic]),
     ok.
