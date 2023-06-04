@@ -1,0 +1,9 @@
+https://phoenixnap.com/kb/postgresql-kubernetes
+kubectl exec -it postgres-7b9fb8d6c5-b52vt -- psql -U admin -p 5432 -d postgresdb --password test123
+
+CREATE TABLE wschat_user
+(
+user_id varchar NOT NULL,
+topic varchar NOT NULL,
+UNIQUE(user_id, topic)
+)

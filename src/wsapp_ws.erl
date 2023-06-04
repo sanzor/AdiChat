@@ -21,6 +21,7 @@ websocket_info(send_ping,State)->
 
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
+    % update ets if distributed , or add database !
     {reply,{text,thoas:encode(Reply)},State};
     
 websocket_info(Message,State)->

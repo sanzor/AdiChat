@@ -10,9 +10,16 @@
     kernel,
     stdlib,
     nova,
-    runtime_tools
+    runtime_tools,
+    epgsql
    ]},
-  {env,[{dbconn,""}]},
+  {env,[{pg,[
+    {hostname,"localhost"},
+    {port,30762},
+    {username,"admin"},
+    {password,"test123"},
+    {database,"postgresdb"}
+    ]}]},
   {modules, [wsapp_server]},
   {maintainers, []},
   {licenses, ["Apache 2.0"]},
