@@ -1,5 +1,9 @@
 -module(membership_storage).
--export([subscribe/2,unsubscribe/2,get_subscriptions_for_topic/1,get_user_subscriptions/1]).
+-export([subscribe/2,
+         unsubscribe/2,
+         check_if_subscribed/2,
+         get_subscriptions_for_topic/1,
+         get_user_subscriptions/1]).
 
 
 -spec subscribe(Topic::binary(),User::binary()) -> ok  | {error,Error::term()}.
@@ -32,7 +36,7 @@ unsubscribe(Topic,User)->
     Username=proplists:get_value(username,Pg),
     Password=proplists:get_value(password,Pg),
     Database=proplists:get_value(database,Pg),
-    Statement= <<"DELETE FROM  wschat_user WHERE user_id = $1 AND topic =$2">>,
+    Statement= <<"DELETE FROM  wschat_user WHERE topic=$1 and user_id = $2">>,
     {ok,C}=epgsql:connect(#{
         host=>Hostname,
         port=>Port,
@@ -41,7 +45,8 @@ unsubscribe(Topic,User)->
         database=>Database,
         timeout=>4000
     }),
-    {ok,Rows,Columns}=epgsql:equery(C,Statement,[Topic,User]),
+    {ok,Rows}=epgsql:equery(C,Statement,[Topic,User]),
+    io:format("\n Rows:~p",[Rows]),
     if Rows>0 -> ok ; true -> not_joined end.
     
 -spec get_subscriptions_for_topic(Topic::binary())-> {ok,list()} | {error,Reason::term()}.
@@ -61,8 +66,8 @@ get_subscriptions_for_topic(Topic)->
         database=>Database,
         timeout=>4000
     }),
-    {ok,_}=epgsql:equery(C,Statement,[Topic]),
-    ok.
+    {ok,_,Result}=epgsql:equery(C,Statement,[Topic]),
+    {ok,Result}.
 
 -spec get_user_subscriptions(User::binary())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(User)-> 
@@ -81,8 +86,9 @@ get_user_subscriptions(User)->
         database=>Database,
         timeout=>4000
     }),
-    {ok,_}=epgsql:equery(C,Statement,[User]),
-    ok.
+    {ok,_,Result}=epgsql:equery(C,Statement,[User]),
+    {ok,Result}.
+    
 -spec check_if_subscribed(Topic::binary(),User::binary())->{ok,boolean()}|{error,Error::term()}.
 check_if_subscribed(Topic,User)->
     {ok,Pg}=application:get_env(wsapp,pg),
@@ -100,5 +106,5 @@ check_if_subscribed(Topic,User)->
         database=>Database,
         timeout=>4000
     }),
-    {ok,Count}=epgsql:equery(C,Statement,[Topic,User]),
+    {ok,_,[{Count}]}=epgsql:equery(C,Statement,[Topic,User]),
     {ok,Count>0}.

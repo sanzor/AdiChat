@@ -22,6 +22,8 @@ websocket_info(send_ping,State)->
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
     % update ets if distributed , or add database !
+
+
     {reply,{text,thoas:encode(Reply)},State};
     
 websocket_info(Message,State)->
@@ -46,6 +48,7 @@ terminate(_,_,State)->
     #{<<"user">> := User}=State,
     wsapp_server:offline(User,self()),
     ok.
+
 
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
