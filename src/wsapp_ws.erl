@@ -38,7 +38,9 @@ websocket_handle({text, Message},State)->
     #{<<"command">>:= Command}=Decode,
     case handle_command(Command,Decode,State) of
             {ok,noreply} -> {ok,State};
-            {ok,reply,Reply} ->{reply,{text,thoas:encode(Reply)},State}
+            {ok,reply,Reply} ->
+                io:format("\n~p\n",[Reply]),
+                {reply,{text,thoas:encode(Reply)},State}
     end;
 
 websocket_handle(pong, State)->
@@ -52,12 +54,19 @@ terminate(_,_,State)->
 
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
-    Result=wsapp_server:subscribe(User, Topic),
-    Reply=Result#{ kind=><<"command_result">>, command=> <<"subscribe">>, topic=> Topic},
+    BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
+    Reply=case wsapp_server:subscribe(User, Topic) of
+        already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
+        {<<"ok">>,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
+    end,    
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
-    Result=wsapp_server:unsubscribe(User,Topic),
-    Reply=Result#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
+    BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
+    Reply=case wsapp_server:unsubscribe(User,Topic) of
+        not_joined -> BaseReply#{result=><<"not_joined">>};
+        {_,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
+    end,
+   
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->

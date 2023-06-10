@@ -42,17 +42,16 @@ online(User,Socket)->
     gen_server:call(?MODULE, {online,{User,Socket}}).
 
 
-
 -spec offline(User::string() |iodata(),Socket::pid())->ok.
 offline(User,Socket)->
     gen_server:call(?MODULE, {offline,{User,Socket}}).
 
--spec subscribe(User::string() | iodata(),Topic::string() |iodata())->ok.
+-spec subscribe(User::string() | iodata(),Topic::string() |iodata())->OkResult::map() | already_subscribed | {error,Error::term()}.
 subscribe(User,Topic)->
     gen_server:call(?MODULE, {subscribe,{User,Topic}}).
 
 
--spec unsubscribe(User::string(),Topic::string())->ok.
+-spec unsubscribe(User::string(),Topic::string())->OkResult::map()| not_joined | {error,Error::term()}.
 unsubscribe(User,Topic)->
     gen_server:call(?MODULE, {unsubscribe,{User, Topic}}).
 
@@ -119,10 +118,6 @@ handle_call({offline,{User,Socket}},_,State)->
     ok=pg:leave(User, Socket),
     ok=pg:leave(UserEventGroup,Socket),
     {reply,ok,State}.
-
-
-
-
 
 
 

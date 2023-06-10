@@ -15,10 +15,10 @@
    ]},
   {env,[{pg,[
     {hostname,"localhost"},
-    {port,30762},
-    {username,"admin"},
-    {password,"test123"},
-    {database,"postgresdb"}
+    {port,5432},
+    {username,"postgres"},
+    {password,"sanzor93"},
+    {database,"ws_db"}
     ]}]},
   {modules, [wsapp_server]},
   {maintainers, []},
