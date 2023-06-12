@@ -14,6 +14,7 @@ websocket_init(State)->
     #{<<"user">> :=User, <<"cookie">> :=Cookie}=State,
     io:format("New User: ~p , Cookie:~p~n",[User,Cookie]),
     ok=wsapp_server:online(User,self()),
+    self() ! node_data,
     {reply,ping,State}.
 
 websocket_info(send_ping,State)->
@@ -22,9 +23,12 @@ websocket_info(send_ping,State)->
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
     % update ets if distributed , or add database !
-
-
     {reply,{text,thoas:encode(Reply)},State};
+
+websocket_info(session_data, State=#{<<"user">> :=User})->
+        Reply=system_data(),
+        % update ets if distributed , or add database !
+        {reply,{text,thoas:encode(Reply#{kind=><<"session_data">>})},State};
     
 websocket_info(Message,State)->
     {ok,NewMessage}=thoas:decode(Message),
@@ -54,17 +58,17 @@ terminate(_,_,State)->
 
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
+    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
     Reply=case wsapp_server:subscribe(User, Topic) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
-        {<<"ok">>,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
+        {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,    
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
     Reply=case wsapp_server:unsubscribe(User,Topic) of
         not_joined -> BaseReply#{result=><<"not_joined">>};
-        {_,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
+        {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,
    
     {ok,reply,Reply};
@@ -88,5 +92,11 @@ handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
         {error,Reason}->{error,Reason}
 end;
    
+
 handle_command(_,_,_State)->
     {error,unknown_command}.
+
+system_data()->
+    BinPid=list_to_binary(pid_to_list(self())),
+    NodePid=atom_to_binary(node()),
+    #{node=>NodePid,pid=>BinPid}.

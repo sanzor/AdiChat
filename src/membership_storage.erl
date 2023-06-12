@@ -67,7 +67,7 @@ get_subscriptions_for_topic(Topic)->
         timeout=>4000
     }),
     {ok,_,Result}=epgsql:equery(C,Statement,[Topic]),
-    {ok,Result}.
+    {ok,normalize(Result)}.
 
 -spec get_user_subscriptions(User::binary())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(User)-> 
