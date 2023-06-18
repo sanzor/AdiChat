@@ -1,20 +1,39 @@
 <!DOCTYPE html>
 <html>
+    <link rel="stylesheet" type="text/css" href="styles.css" ></script>
     <body>
-        <div style="flex:50%">
-            <div id="messageList">
-                <table id="messageTable" style="display:block;height:150px;overflow: auto;border: 1px;border-color: green;">
-                    
-                </table>
+        <div id="parentPanel" class="parent">
+            <div id="buttonGroupsPanel" class="buttonGroupsPanel">
+                <div class="subscribeButtonPanel">
+                    <input class="subscribeBox" id="" type="text" value="">
+                    <label class="subscribeLabel">Channel</label>
+                    <input class="subscribeButton" type="button" value="Subscribe" onclick="subscribe()"></input>
+                </div>
+                <div id="connectButtonsPanel" class="connectButtonsPanel">
+                    <label id="urlLabel" class="urlLabel"> Url</label>
+                    <input id="urlBox" class="urlBox" type="text"></input>
+                    <input id="connectBtn" class="connectButton" type="button" value="Connect" onclick="onConnect()"></input>
+                    <input id="disconnectBtn" class="disconnectButton" type="button" value="Disconnect" onclick="onDisconnect()">
+                    </input>
+                </div>
             </div>
-            
-        </div>
-        <div id="chat-message">
-            <div>
-                    <button id="sendMsgBtn">Send</button>
-                    <textbox id="msgBox"></textbox>
+            <div id="channelAndChatPanel" class="channelAndChatPanel">
+                <div id="channelPanel" class="channelPanel">
+                    <div id="channel">Channels</div>
+                    <div id="c1">c1</div>
+                    <div id="c2">c2</div>
+                    <div id="c3">channel3</div>
+                </div>
+                <div id="chatPanel" class="chatPanel">
+                    <div id="chatMessagesPanel" class="chatMessagesPanel">
+                        <div id="chat"
+                    </div>
+                    <div id="chatSendMessagePanel" class="chatSendMessagePanel">
+                            <input class="chatSendMessageBox" id="chatSendMessageBox" onclick="onPublish()"></input>
+                            <input id="chatSendMessageButton" class="chatSendMessageButton" type="button" value="Send"></input>
+                    </div>
+                </div>
             </div>
         </div>
-       
     </body>
 </html>

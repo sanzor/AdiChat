@@ -42,17 +42,16 @@ online(User,Socket)->
     gen_server:call(?MODULE, {online,{User,Socket}}).
 
 
-
 -spec offline(User::string() |iodata(),Socket::pid())->ok.
 offline(User,Socket)->
     gen_server:call(?MODULE, {offline,{User,Socket}}).
 
--spec subscribe(User::string() | iodata(),Topic::string() |iodata())->ok.
+-spec subscribe(User::string() | iodata(),Topic::string() |iodata())->OkResult::map() | already_subscribed | {error,Error::term()}.
 subscribe(User,Topic)->
     gen_server:call(?MODULE, {subscribe,{User,Topic}}).
 
 
--spec unsubscribe(User::string(),Topic::string())->ok.
+-spec unsubscribe(User::string(),Topic::string())->OkResult::map()| not_joined | {error,Error::term()}.
 unsubscribe(User,Topic)->
     gen_server:call(?MODULE, {unsubscribe,{User, Topic}}).
 
@@ -91,7 +90,7 @@ handle_call({subscribe,{User,Topic}},{From,_},State)->
                 {ok,Subscriptions}=membership_storage:get_user_subscriptions(User),
                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic, subscriptions=>Subscriptions},
                 [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/=From],
-                #{result=> <<"ok">> ,subscriptions=>Subscriptions}
+                {ok,Subscriptions}
     end,
     {reply,Reply,State};
 
@@ -102,7 +101,7 @@ handle_call({unsubscribe,{User,Topic}},{From,_},State)->
                         UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => Topic, subscriptions=>Subscriptions},
                         io:format("\nFrom:~p, Existing:~p\n",[From,pg:get_members(?F(User))]),
                         [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/= From],
-                        #{result=> <<"ok">> ,subscriptions=>Subscriptions};
+                        {ok,Subscriptions};
                 not_joined->#{result=> <<"not joined">>}
           end,
     {reply,Reply,State};      
@@ -122,10 +121,6 @@ handle_call({offline,{User,Socket}},_,State)->
 
 
 
-
-
-
-
 %% @doc 
 %% 
 %% Handling cast messages
@@ -133,6 +128,7 @@ handle_call({offline,{User,Socket}},_,State)->
 handle_cast({publish,{Topic,Message}},State)->
     true=ets:insert(messages, {Topic,Message}),
     {ok,Subscribers}=membership_storage:get_subscriptions_for_topic(Topic),
+    io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [Topic,Subscribers]),
     [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
     {noreply,State}.

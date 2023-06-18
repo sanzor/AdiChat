@@ -67,7 +67,7 @@ get_subscriptions_for_topic(Topic)->
         timeout=>4000
     }),
     {ok,_,Result}=epgsql:equery(C,Statement,[Topic]),
-    {ok,Result}.
+    {ok,normalize(Result)}.
 
 -spec get_user_subscriptions(User::binary())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(User)-> 
@@ -87,7 +87,8 @@ get_user_subscriptions(User)->
         timeout=>4000
     }),
     {ok,_,Result}=epgsql:equery(C,Statement,[User]),
-    {ok,Result}.
+   
+    {ok,normalize(Result)}.
     
 -spec check_if_subscribed(Topic::binary(),User::binary())->{ok,boolean()}|{error,Error::term()}.
 check_if_subscribed(Topic,User)->
@@ -108,3 +109,12 @@ check_if_subscribed(Topic,User)->
     }),
     {ok,_,[{Count}]}=epgsql:equery(C,Statement,[Topic,User]),
     {ok,Count>0}.
+
+
+normalize(List)->
+    normalize(List,[]).
+-spec normalize(List::list(),Acc::list())->list().
+normalize([],Acc) ->
+    Acc;
+normalize([{Head}|Tail], Acc) when is_list([Head|Tail])->
+    normalize(Tail,[Head|Acc]).
