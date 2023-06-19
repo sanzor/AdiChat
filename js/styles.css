@@ -35,7 +35,8 @@
     grid-column-end:2;
 }
 .subscribeButton{
-    grid-column-start:2;
+    
+    grid-column-start:1;
     grid-row-start:2;
 }
 .subscribeLabel{
@@ -114,13 +115,19 @@
 }
 .chatSendMessagePanel{
     display: grid;
+
 }
 .chatSendMessageBox{
-    
-    grid-column-end:6;  
+   grid-row-start: 1;
+   grid-row-end: 12;
+   grid-column-start:1;
+   grid-column-end:4;
 }
 .chatSendMessageButton{
-    grid-column-end: 8;
+    grid-row-start:1;
+    grid-row-end:12;
+    grid-column-start: 4;
+    grid-column-end:8;
 }
 
 
