@@ -2,9 +2,12 @@
     display: flex;
     flex-direction: column;
     justify-items:start;
-    align-items: center;
+    align-items: stretch;
     height:850px;
     width: 1000px;
+    padding-top:20px;
+    padding-left: 20px;
+
 }
 
 
@@ -12,7 +15,9 @@
     display: flex;
     flex-direction: row;
     justify-items: flex-start;
-    align-items: stretch;    
+    align-items: stretch;  
+    padding-left: 30px;  
+    
 }
 
 
@@ -23,6 +28,7 @@
     border-color: black;
     border:solid;
     border-left: 1;
+    border: ridge;
 }
 .subscribeBox{
     grid-column-start: 1;
@@ -40,6 +46,7 @@
 
 .connectButtonsPanel{
     display: grid;
+    border: ridge;
 }
 
 .urlBox{
@@ -67,6 +74,7 @@
     flex-direction: row;
     justify-items:flex-start ; 
     align-items: stretch;
+    
 }
 
 
@@ -75,8 +83,12 @@
     flex-direction: column;
     justify-items: flex-start;
     align-items: center; 
+    border-style: dotted;
+    background-color: bisque;
 }
-
+.channelsLabel{
+    border-style: double;
+}
 .chatPanel{
     display: flex;
     flex-direction: column;
@@ -93,8 +105,12 @@
    width:500px;
    height:500px;
 }
-.channelNamePanel{
-    align-self: flex-start;
+.currentChannelNamePanel{
+    align-self: center;
+    border-style: groove;
+}
+.currentChannelNameLabel{
+    
 }
 .chatSendMessagePanel{
     display: grid;

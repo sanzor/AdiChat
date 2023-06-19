@@ -19,14 +19,16 @@
             </div>
             <div id="channelAndChatPanel" class="channelAndChatPanel">
                 <div id="channelPanel" class="channelPanel">
-                    <div id="channel">Channels</div>
+                    <label class="channelsLabel" id="channel">Channels</label>
                     <div id="c1">c1</div>
                     <div id="c2">c2</div>
                     <div id="c3">channel3</div>
                 </div>
                 <div id="chatPanel" class="chatPanel">
                     <div id="chatMessagesPanel" class="chatMessagesPanel">
-                        <div id="chat"
+                        <div class="currentChannelNamePanel" id="currentChannelNamePanel">
+                            <label id="currentChannelNameLabel" class="currentChannelNameLabel" >Channel 1</label>
+                        </div>
                     </div>
                     <div id="chatSendMessagePanel" class="chatSendMessagePanel">
                             <input class="chatSendMessageBox" id="chatSendMessageBox" onclick="onPublish()"></input>
