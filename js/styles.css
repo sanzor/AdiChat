@@ -79,7 +79,7 @@
 }
 
 
-.channelPanel{
+.channelsPanel{
     display: flex;
     flex-direction: column;
     justify-items: flex-start;
@@ -100,11 +100,12 @@
 .chatMessagesPanel{
    display: flex;
    flex-direction: column;
+   justify-self: flex-start;
    border-style: double;
    border-color: cornflowerblue;
    background-color: beige;
-   width:500px;
-   height:500px;
+   /* width:500px;
+   height:500px; */
 }
 .currentChannelNamePanel{
     align-self: center;
@@ -114,6 +115,7 @@
     
 }
 .chatSendMessagePanel{
+    justify-content: flex-end;
     display: grid;
 
 }
