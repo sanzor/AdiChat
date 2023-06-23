@@ -1,0 +1,16 @@
+button{
+    border-color: none;
+    width:150px;
+    height: 30px;
+    border-radius: 8px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 5px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.panelBorder{
+    border-color: #123;
+    border-style: solid;
+    border-width: 1px;
+}

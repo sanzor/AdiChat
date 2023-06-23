@@ -10,25 +10,32 @@
 
 }
 
-
+.parent > * {
+    margin-bottom: 1%;
+}
 .buttonGroupsPanel{
     display: flex;
+    height:10%;
     flex-direction: row;
     justify-items: flex-start;
-    align-items: stretch;  
-    padding-left: 30px;  
-    
+    border-spacing: 2px;
+    align-items: stretch; 
+}
+.buttonGroupsPanel > *{
+    margin:1%
 }
 
 
 
 .subscribeButtonPanel{
     display: grid;
-    column-gap: 10px;
     border-color: black;
     border:solid;
     border-left: 1;
     border: ridge;
+}
+.subscribeButtonPanel > *{
+    margin-left:5%
 }
 .subscribeBox{
     grid-column-start: 1;
@@ -69,12 +76,15 @@
 
 
 .channelAndChatPanel{
-    width: 800px;
-    height:600px;
+    width: 60%;
+    height:60%;
     display: flex;
     flex-direction: row;
     justify-items:flex-start ; 
     align-items: stretch;
+    border-radius: 1%;
+    border-color: #123;
+    border-style:solid ;
     
 }
 
