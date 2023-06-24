@@ -1,13 +1,10 @@
-.parent{
+.parent {
     display: flex;
     flex-direction: column;
-    justify-items:start;
-    align-items: stretch;
-    height:850px;
-    width: 1000px;
-    padding-top:20px;
-    padding-left: 20px;
-
+    justify-items: start;
+    height: inherit;
+    padding-left: 1%;
+    padding-right: 1%;
 }
 
 .parent > * {
@@ -15,20 +12,19 @@
 }
 .buttonGroupsPanel{
     display: flex;
-    height:10%;
     flex-direction: row;
     justify-items: flex-start;
     border-spacing: 2px;
     align-items: stretch; 
 }
 .buttonGroupsPanel > *{
-    margin:1%
+    margin:1%   
 }
-
-
 
 .subscribeButtonPanel{
     display: grid;
+    row-gap:5px;
+    column-gap: 5px;
     border-color: black;
     border:solid;
     border-left: 1;
@@ -54,6 +50,8 @@
 
 .connectButtonsPanel{
     display: grid;
+    row-gap: 5px;
+    column-gap: 5px;
     border: ridge;
 }
 
@@ -76,8 +74,8 @@
 
 
 .channelAndChatPanel{
-    width: 60%;
-    height:60%;
+    width: 80%;
+    height:70%;
     display: flex;
     flex-direction: row;
     justify-items:flex-start ; 
@@ -85,16 +83,20 @@
     border-radius: 1%;
     border-color: #123;
     border-style:solid ;
+    padding-left: 2%;
+    background-color: darkcyan;
     
 }
 
 
 .channelsPanel{
     display: flex;
+    width: 25%;
     flex-direction: column;
     justify-items: flex-start;
     align-items: center; 
-    border-style: dotted;
+    border-style: #cc2;
+    border-color: red;
     background-color: bisque;
 }
 .channelsLabel{
@@ -114,8 +116,6 @@
    border-style: double;
    border-color: cornflowerblue;
    background-color: beige;
-   /* width:500px;
-   height:500px; */
 }
 .currentChannelNamePanel{
     align-self: center;

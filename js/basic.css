@@ -9,8 +9,21 @@ button{
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
-.panelBorder{
-    border-color: #123;
-    border-style: solid;
-    border-width: 1px;
+.panel {
+    padding-left: 0.8%;
+    padding-top: 0.7%;
+    padding-bottom: 0.5%;
+    padding-right: 0.7%;
+}
+
+.panelbuttonGroupPanel{
+    border-style: ridge;
+    border-color: #313212;
+    
+}
+html,
+body,
+#wrapper{
+    height: 100%;
+    min-height: 100%;
 }

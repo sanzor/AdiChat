@@ -10,7 +10,7 @@
     <body>
         <div id="parentPanel" class="parent">
             <div id="buttonGroupsPanel" class="buttonGroupsPanel">
-                <div id="connectButtonsPanel" class="connectButtonsPanel">
+                <div id="connectButtonsPanel" class="connectButtonsPanel panel">
                     <label id="urlLabel" class="urlLabel"> Url</label>
                     <input id="urlBox" class="urlBox" type="text" value="ws://localhost:8080/ws/user/adi/cookie/ad"></input>
                     <button id="connectBtn" class="connectButton" type="button"  onclick="onConnect()">Connect</button>
@@ -18,7 +18,7 @@
                         Disconnect
                     </button>
                 </div>
-                <div class="subscribeButtonPanel">
+                <div class="subscribeButtonPanel panel">
                     <input class="subscribeBox" id="subscribeBox" type="text" value="">
                     <label class="subscribeLabel">Channel</label>
                     <button id="subscribeBtn" class="subscribeButton" type="button" onclick="subscribe()">Subscribe</button>
