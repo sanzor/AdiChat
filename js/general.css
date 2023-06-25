@@ -1,0 +1,29 @@
+button{
+    border-color: none;
+    width:150px;
+    height: 30px;
+    border-radius: 8px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 5px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.panel {
+    padding-left: 0.8%;
+    padding-top: 0.7%;
+    padding-bottom: 0.5%;
+    padding-right: 0.7%;
+}
+
+.panelbuttonGroupPanel{
+    border-style: ridge;
+    border-color: #313212;
+    
+}
+html,
+body,
+#wrapper{
+    height: 100%;
+    min-height: 100%;
+}

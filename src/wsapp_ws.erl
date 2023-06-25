@@ -90,11 +90,13 @@ handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
         {ok,no_subscriptions}->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};
         {ok,Result}->{ok,reply,Reply#{result =>Result}};  
         {error,Reason}->{error,Reason}
-end;
+    end;
    
 
 handle_command(_,_,_State)->
     {error,unknown_command}.
+
+
 
 system_data()->
     BinPid=list_to_binary(pid_to_list(self())),

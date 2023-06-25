@@ -1,0 +1,146 @@
+#parentPanel {
+    display: flex;
+    flex-direction: column;
+    justify-items: start;
+    height: inherit;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
+#parent > * {
+    margin-bottom: 1%;
+}
+#buttonGroupsPanel{
+    display: flex;
+    flex-direction: row;
+    justify-items: flex-start;
+    border-spacing: 2px;
+    align-items: stretch; 
+}
+#buttonGroupsPanel > *{
+    margin:1%   
+}
+
+#subscribeButtonPanel{
+    display: grid;
+    row-gap:5px;
+    column-gap: 5px;
+    border-color: black;
+    border:solid;
+    border-left: 1;
+    border: ridge;
+}
+#subscribeButtonPanel > *{
+    margin-left:5%
+}
+#subscribeBox{
+    grid-column-start: 1;
+    grid-column-end:2;
+}
+#subscribeButton{
+    
+    grid-column-start:1;
+    grid-row-start:2;
+}
+#subscribeLabel{
+    grid-column-start:2;
+    grid-row-start:1;
+}
+
+
+#connectButtonsPanel{
+    display: grid;
+    row-gap: 5px;
+    column-gap: 5px;
+    border: ridge;
+}
+
+#urlBox{
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 1;
+}
+#urlLabel{
+    grid-row-start: 1;
+    grid-column-start: 4;
+}
+#connectButton{
+    grid-row-start:2;
+}
+#disconnectButton{
+    grid-row-start: 2;
+}
+
+
+#channelAndChatPanel{
+    width: 80%;
+    height:70%;
+    display: flex;
+    flex-direction: row;
+    justify-items:flex-start ; 
+    align-items: stretch;
+    border-radius: 1%;
+    border-color: #123;
+    border-style:solid ;
+    padding-left: 2%;
+    background-color: darkcyan;
+    
+}
+
+
+#channelsPanel{
+    display: flex;
+    width: 25%;
+    flex-direction: column;
+    justify-items: flex-start;
+    align-items: center; 
+    border-style: #cc2;
+    border-color: red;
+    background-color: bisque;
+}
+#channelsLabel{
+    border-style: double;
+}
+#chatPanel{
+    display: flex;
+    flex-direction: column;
+    justify-items: flex-start;
+    align-items: inherit;
+}
+
+#chatMessagesPanel{
+   display: flex;
+   flex-direction: column;
+   justify-self: flex-start;
+   border-style: double;
+   border-color: cornflowerblue;
+   background-color: beige;
+}
+#currentChannelNamePanel{
+    align-self: center;
+    border-style: groove;
+}
+#currentChannelNameLabel{
+    
+}
+#chatSendMessagePanel{
+    justify-content: flex-end;
+    display: grid;
+
+}
+#chatSendMessageBox{
+   grid-row-start: 1;
+   grid-row-end: 12;
+   grid-column-start:1;
+   grid-column-end:4;
+}
+#chatSendMessageButton{
+    grid-row-start:1;
+    grid-row-end:12;
+    grid-column-start: 4;
+    grid-column-end:8;
+}
+
+
+

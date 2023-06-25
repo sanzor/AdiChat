@@ -31,7 +31,7 @@ function subscribe(){
 }
 
 function onPublish(){
-    var topic=document.getElementById("publishTopicBox").value;
+    var channel=document.getElementById("currentChannelNameLabel").value;
     var message=document.getElementById("publishMessageBox").value;
-    command_publish(topic,message);
+    command_publish(channel,message);
 }
