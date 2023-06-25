@@ -4,21 +4,21 @@
     <script  src="./sock.js"></script>
     <script  src="./main.js"></script>
     <script  src="./table.js"></script>
-    <link rel="stylesheet" type="text/css" href="styles.css" ></script>
-    <link rel="stylesheet" type="text/css" href="basic.css" ></script>
+    <link rel="stylesheet" type="text/css" href="specific.css" ></script>
+    <link rel="stylesheet" type="text/css" href="general.css" ></script>
     
     <body>
         <div id="parentPanel" class="parent">
             <div id="buttonGroupsPanel" class="buttonGroupsPanel">
-                <div id="connectButtonsPanel" class="connectButtonsPanel panel">
-                    <label id="urlLabel" class="urlLabel"> Url</label>
+                <div id="connectButtonsPanel" >
+                    <label id="urlLabel"> Url</label>
                     <input id="urlBox" class="urlBox" type="text" value="ws://localhost:8080/ws/user/adi/cookie/ad"></input>
-                    <button id="connectBtn" class="connectButton" type="button"  onclick="onConnect()">Connect</button>
+                    <button id="connectBtn" type="button"  onclick="onConnect()">Connect</button>
                     <button id="disconnectBtn" class="disconnectButton" type="button" value="Disconnect" onclick="onDisconnect()">
                         Disconnect
                     </button>
                 </div>
-                <div class="subscribeButtonPanel panel">
+                <div id="subscribeButtonPanel" class="panel">
                     <input class="subscribeBox" id="subscribeBox" type="text" value="">
                     <label class="subscribeLabel">Channel</label>
                     <button id="subscribeBtn" class="subscribeButton" type="button" onclick="subscribe()">Subscribe</button>
