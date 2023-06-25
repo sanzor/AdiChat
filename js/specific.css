@@ -103,7 +103,11 @@
     border-style: double;
 }
 #chatPanel{
+    margin-left: 0.7%;
+    margin-top:0.5%;
+    margin-bottom: 0.7%;
     display: flex;
+    width: 70%;
     flex-direction: column;
     justify-items: flex-start;
     align-items: inherit;
