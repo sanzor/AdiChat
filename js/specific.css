@@ -151,5 +151,28 @@
     grid-column-end:8;
 }
 
+#channelTable{
+    border:solid;
+    border-top-color: rebeccapurple;
+    height: inherit;
+    width:auto;
+}
+
+#channelTableRow{
+    display: flex;
+    flex-direction: column;
+
+}
+
+#channelTableRowX{
+
+}
+
+#channelTableRowButton{
+
+}
+#channelTableRowMessagesCount{
+    
+}
 
 

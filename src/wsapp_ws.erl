@@ -14,7 +14,6 @@ websocket_init(State)->
     #{<<"user">> :=User, <<"cookie">> :=Cookie}=State,
     io:format("New User: ~p , Cookie:~p~n",[User,Cookie]),
     ok=wsapp_server:online(User,self()),
-    self() ! node_data,
     {reply,ping,State}.
 
 websocket_info(send_ping,State)->
@@ -22,15 +21,11 @@ websocket_info(send_ping,State)->
 
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
-    % update ets if distributed , or add database !
     {reply,{text,thoas:encode(Reply)},State};
 
-websocket_info(session_data, State=#{<<"user">> :=User})->
-        Reply=system_data(),
-        % update ets if distributed , or add database !
-        {reply,{text,thoas:encode(Reply#{kind=><<"session_data">>})},State};
     
 websocket_info(Message,State)->
+    io:format("\nWeird: ~p\ntrace",[Message]),
     {ok,NewMessage}=thoas:decode(Message),
     Reply=NewMessage#{ kind=><<"chat">>},
     {reply,{text,thoas:encode(Reply)},State}.
@@ -91,7 +86,10 @@ handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
         {ok,Result}->{ok,reply,Reply#{result =>Result}};  
         {error,Reason}->{error,Reason}
     end;
-   
+handle_command(<<"get_session_info">>, _,_State)->
+    Reply=(system_data())#{command=><<"get_session_info">>,kind=><<"command_result">>},
+    {ok,reply,Reply};
+
 
 handle_command(_,_,_State)->
     {error,unknown_command}.
