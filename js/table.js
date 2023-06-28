@@ -23,36 +23,43 @@ function createSubscriptionTable(subscriptions){
 function createSubscriptionRow(channelName){
     var table=document.getElementById("channelTable");
     var channelRow=document.createElement("tr");
+    channelRow.setAttribute("class","channelTableRow");
     channelRow.id=channelName+'_channel_row';
 
-    var cell1=document.createElement("td");
-    var buttonCell=createChannelCell(channelName);
-    cell1.appendChild(buttonCell);
+    var channelButtonCell=document.createElement("td");
+    var channelButton=createChannelButton(channelName);
+    channelButtonCell.appendChild(channelButton);
     
-    var cell2=document.createElement("td");
-    cell2.setAttribute("bgcolor","red");
-    var unsubscribeBtn=document.createElement("button");
-    unsubscribeBtn.id=channelName+'_unsubscribe_btn';
-    unsubscribeBtn.innerText="X";
-    console.log(channelName);
-    unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
-    cell2.appendChild(unsubscribeBtn);
+    
+    var unsubscribeBtnCell=document.createElement("td");
+    var unsubscribeBtn=createUnsubscribeChannelButton(channelName);
+   
+    unsubscribeBtnCell.appendChild(unsubscribeBtn);
 
-    channelRow.appendChild(cell2);
-    channelRow.appendChild(cell1);
+    channelRow.appendChild(unsubscribeBtnCell);
+    channelRow.appendChild(channelButtonCell);
+    
     table.appendChild(channelRow);
 }
 
-function createChannelCell(channelName){
-    var cell1=document.createElement("td");
-    var messageStreamBtn=document.createElement("button");
-    messageStreamBtn.setAttribute('content',channelName);
-    messageStreamBtn.setAttribute("class",'button');
-    messageStreamBtn.setAttribute("style","channelButton");
-    messageStreamBtn.textContent=channelName;
-    messageStreamBtn.click=function(){showMessageStream(channelName)};
-    cell1.appendChild(messageStreamBtn);
-    return cell1;
+function createUnsubscribeChannelButton(channelName){
+    var unsubscribeBtn=document.createElement("button");
+    unsubscribeBtn.id=channelName+'_unsubscribe_btn';
+    unsubscribeBtn.innerText="X";
+    unsubscribeBtn.setAttribute("class","channelTableRowUnsubscribeBtn")
+    console.log(channelName);
+    unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
+    return unsubscribeBtn;
+}
+function createChannelButton(channelName){
+    var channelButton=document.createElement("button");
+    channelButton.id=channelName;
+    channelButton.setAttribute('content',channelName);
+    channelButton.setAttribute("class",'button');
+    channelButton.setAttribute("style","channelButton");
+    channelButton.textContent=channelName;
+    channelButton.click=function(){showMessageStream(channelName)};
+    return channelButton;
 }
 function removeSubscriptionRow(){
     var table=document.getElementById('channelTable');

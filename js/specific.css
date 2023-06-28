@@ -97,13 +97,14 @@
     width: 25%;
     flex-direction: column;
     justify-items: flex-start;
-    align-items: center; 
     border-style: #cc2;
     border-color: red;
     background-color: bisque;
 }
 #channelsLabel{
-    border-style: double;
+    border-style: ridge;
+    width: initial;
+    text-align: center;
 }
 #chatPanel{
     margin-left: 0.7%;
@@ -158,20 +159,21 @@
     width:auto;
 }
 
-#channelTableRow{
-    display: flex;
-    flex-direction: column;
-
+.channelTableRow{
+    width: initial;
 }
 
-#channelTableRowX{
-
+.channelTableRowUnsubscribeBtn{
+    border-style: inset;
+    background-color: red;
+    text-align: center;
 }
 
-#channelTableRowButton{
-
+.channelTableRowBtn{
+    text-align: center;
+    padding: 0.2%;
 }
-#channelTableRowMessagesCount{
+.channelTableRowMessagesCount{
     
 }
 
