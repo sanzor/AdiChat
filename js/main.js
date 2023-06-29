@@ -6,6 +6,8 @@ function onConnect(){
     var connectBtn=document.getElementById("connectBtn");
     var subscribeBtn=document.getElementById("subscribeBtn");
     var subscribeBox=document.getElementById("subscribeBox");
+    var urlBox=document.getElementById("urlBox");
+    urlBox.setAttribute("disabled",true);
     disconnectBtn.disabled=false;
     connectBtn.disabled=true;
     subscribeBtn.disabled=false;
@@ -20,6 +22,8 @@ function reset(){
     var connectBtn=document.getElementById("connectBtn");
     var disconnectBtn=document.getElementById("disconnectBtn");
     var subscribeBox=document.getElementById("subscribeBox");
+    var urlBox=document.getElementById("urlBox");
+    urlBox.disabled=false;
     connectBtn.disabled=false;
     disconnectBtn.disabled=true;
     subscribeBtn.disabled=true;

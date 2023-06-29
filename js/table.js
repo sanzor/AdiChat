@@ -33,14 +33,13 @@ function createSubscriptionRow(channelName){
     
     var unsubscribeBtnCell=document.createElement("td");
     var unsubscribeBtn=createUnsubscribeChannelButton(channelName);
-   
     unsubscribeBtnCell.appendChild(unsubscribeBtn);
-
     channelRow.appendChild(unsubscribeBtnCell);
     channelRow.appendChild(channelButtonCell);
-    
     table.appendChild(channelRow);
 }
+
+
 
 function createUnsubscribeChannelButton(channelName){
     var unsubscribeBtn=document.createElement("button");
@@ -58,7 +57,7 @@ function createChannelButton(channelName){
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
     channelButton.textContent=channelName;
-    channelButton.click=function(){showMessageStream(channelName)};
+    channelButton.onclick=function(args){openChannelChat(channelName)};
     return channelButton;
 }
 function removeSubscriptionRow(){
