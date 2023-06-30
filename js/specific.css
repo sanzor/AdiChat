@@ -152,28 +152,32 @@
     grid-column-end:8;
 }
 
-#channelTable{
+#channelsContainer{
     border:solid;
     border-top-color: rebeccapurple;
     height: inherit;
     width:auto;
 }
 
-.channelTableRow{
+.channelRow{
     width: initial;
+    display: flex;
+    flex-direction: row;
 }
 
-.channelTableRowUnsubscribeBtn{
+.channelRowUnsubscribeBtn{
     border-style: inset;
     background-color: red;
     text-align: center;
+    width: 20%;
 }
 
-.channelTableRowBtn{
+.channelRowBtn{
     text-align: center;
-    padding: 0.2%;
+    width: 80%
+    
 }
-.channelTableRowMessagesCount{
+.channelRowMessagesCount{
     
 }
 

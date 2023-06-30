@@ -38,14 +38,14 @@ function handle_user_event(data){
 }
 
 function handle_user_event_subscribe(data){
-    createSubscriptionTable(data.subscriptions);
+    createChannelsContainer(data.subscriptions);
 }
 function handle_user_event_unsubscribe(data){
-    createSubscriptionTable(data.subscriptions);
+    createChannelsContainer(data.subscriptions);
 }
 function callback_subscribe(data){
     if(data.result=="ok"){
-        createSubscriptionTable(data.subscriptions);
+        createChannelsContainer(data.subscriptions);
     }
     if(data.result="already_subscribed"){
         console.log("\nAlready subscribed to topic:",data.topic,"\n");
@@ -55,7 +55,7 @@ function callback_unsubscribe(data){
     if(data.result=="ok"){
         // channel=data.topic;
         // removeSubscriptionRow(channel);
-        createSubscriptionTable(data.subscriptions);
+        createChannelsContainer(data.subscriptions);
     }
 }
 function callback_get_messages(data){
@@ -63,5 +63,5 @@ function callback_get_messages(data){
 }
 function callback_get_subscriptions(data){
     var subscriptions=data.result;
-    createSubscriptionTable(subscriptions);
+    createChannelsContainer(subscriptions);
 }
