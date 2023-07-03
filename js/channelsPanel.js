@@ -37,7 +37,7 @@ function createUnsubscribeChannelButton(channelName){
     var unsubscribeBtn=document.createElement("button");
     unsubscribeBtn.id=channelName+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
-    unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn")
+    unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
     console.log(channelName);
     unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
     return unsubscribeBtn;
@@ -56,4 +56,13 @@ function removeSubscriptionRow(){
     var table=document.getElementById('channelsContainer');
     var row=document.getElementById(channel+'channel_row');
     table.removeChild(row);
+}
+
+function checkScroll(){
+    var parentHeight=document.getElementById("channelsAreaPanel").offsetHeight;
+    var childHeight=document.getElementById("channelsContainer").offsetHeight;
+    var treshold=parentHeight*0.25;
+    if(childHeight>=treshold){
+
+    }
 }

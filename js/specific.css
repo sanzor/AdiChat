@@ -94,6 +94,8 @@
 
 #channelsPanel{
     display: flex;
+    margin-top:0.2em;
+    margin-bottom:0.4em;
     width: 25%;
     flex-direction: column;
     justify-items: flex-start;
@@ -105,6 +107,8 @@
     border-style: ridge;
     width: initial;
     text-align: center;
+    padding-top:1%;
+    padding-bottom: 1%;
 }
 #chatPanel{
     margin-left: 0.7%;
@@ -131,9 +135,9 @@
     align-self: center;
     border-style: groove;
 }
-#currentChannelNameLabel{
-    
-}
+
+
+
 #chatSendMessagePanel{
     justify-content: flex-end;
     display: grid;
@@ -152,17 +156,32 @@
     grid-column-end:8;
 }
 
-#channelsContainer{
-    border:solid;
-    border-top-color: rebeccapurple;
-    height: inherit;
-    width:auto;
+
+
+#channelsAreaPanel{
+    width: initial;
+    height: 40%;
+    border-bottom: solid;
+    border-bottom-color: #cc2;
+
 }
 
+#channelsContainer{
+    max-height: 90%;
+    height: initial;
+    width:auto;
+    overflow-y: scroll;
+    padding-left: 1%;
+    padding-top:5%;
+    border-bottom-style: solid;
+    border-bottom-color: cadetblue;
+    
+}
 .channelRow{
     width: initial;
     display: flex;
     flex-direction: row;
+    margin-bottom: 0.2em;
 }
 
 .channelRowUnsubscribeBtn{
