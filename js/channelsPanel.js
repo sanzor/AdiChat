@@ -57,12 +57,3 @@ function removeSubscriptionRow(){
     var row=document.getElementById(channel+'channel_row');
     table.removeChild(row);
 }
-
-function checkScroll(){
-    var parentHeight=document.getElementById("channelsAreaPanel").offsetHeight;
-    var childHeight=document.getElementById("channelsContainer").offsetHeight;
-    var treshold=parentHeight*0.25;
-    if(childHeight>=treshold){
-
-    }
-}
