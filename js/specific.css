@@ -88,7 +88,7 @@
     border-color: rgb(44, 97, 57);
     border-style:solid ;
     padding-left: 2%;
-    background-color: #92c8d8d2;
+    background-color:#195a717a;
     
 }
 
@@ -102,7 +102,7 @@
     justify-items: flex-start;
     border-style: #cc2;
     border-color: red;
-    background-color: bisque;
+    background-color: #995b6252;
     grid-row-start:2;
     grid-row-end:5;
     grid-column-end:2;
@@ -149,17 +149,21 @@
 
 
 #chatSendMessagePanel{
-    justify-content: flex-end;
-    display: grid;
+    justify-content: flex-start;
+    display: flex;
     grid-row-start:5;
     grid-row-end:6;
     grid-column-start: 2;
+    flex-direction: row;
 }
 #chatSendMessageBox{
-   grid-row-start: 1;
-   grid-row-end: 12;
-   grid-column-start:1;
-   grid-column-end:4;
+  margin-right: 0.7%;
+  margin-left:0.7%;
+  width: 90%;
+  height: 20%;
+  padding-top:0.2%;
+  padding-bottom:0.4%;
+  
 }
 #chatSendMessageButton{
     grid-row-start:1;

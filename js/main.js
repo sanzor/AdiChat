@@ -36,6 +36,6 @@ function subscribe(){
 
 function onPublish(){
     var channel=document.getElementById("currentChannelNameLabel").value;
-    var message=document.getElementById("publishMessageBox").value;
+    var message=document.getElementById("chatSendMessageBox").value;
     command_publish(channel,message);
 }
