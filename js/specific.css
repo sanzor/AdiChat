@@ -81,7 +81,7 @@
     height:85%;
     display: grid;
     gap: 1rem;
-    grid-template-rows: 5% 4fr 1% 3fr 1fr;
+    grid-template-rows: 5% 4fr 1% 3fr 2fr 1fr;
     grid-template-columns: 3fr 8fr 1fr;
     align-items: stretch;
     border-radius: 1%;
@@ -103,6 +103,10 @@
     border-style: #cc2;
     border-color: red;
     background-color: bisque;
+    grid-row-start:2;
+    grid-row-end:5;
+    grid-column-end:2;
+    width: initial;
 }
 #channelsLabel{
     border-style: ridge;
@@ -116,13 +120,18 @@
     margin-top:0.5%;
     margin-bottom: 0.7%;
     display: flex;
-    width: 70%;
+    width: 100%;
     flex-direction: column;
     justify-items: flex-start;
     align-items: inherit;
+    grid-row-start:2;
+    grid-row-end:5;
+    border-style: double;
+    border-color: cornflowerblue;
+   background-color: beige;
 }
 
-#chatMessagesPanel{
+/* #chatMessagesPanel{
    height: 90%;
    width: 100%;
    display: flex;
@@ -131,7 +140,7 @@
    border-style: double;
    border-color: cornflowerblue;
    background-color: beige;
-}
+} */
 #currentChannelNamePanel{
     align-self: center;
     border-style: groove;
@@ -142,7 +151,9 @@
 #chatSendMessagePanel{
     justify-content: flex-end;
     display: grid;
-
+    grid-row-start:5;
+    grid-row-end:6;
+    grid-column-start: 2;
 }
 #chatSendMessageBox{
    grid-row-start: 1;
