@@ -67,6 +67,7 @@ function command_publish(topic,message){
         "topic":topic,
         "message":message
     }
+    console.log("topic:"+topic);
     console.log("\nSending:" + JSON.stringify(toSend));
     socket.send(JSON.stringify(toSend));
 }
