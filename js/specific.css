@@ -127,7 +127,6 @@
     margin-left: 0.7%;
     margin-top:0.5%;
     margin-bottom: 0.7%;
-    display: flex;
     width: 100%;
     flex-direction: row;
     justify-items: flex-start;
@@ -139,32 +138,48 @@
     background-color: beige;
     border:solid;
     border-radius: 2em;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 5% 90% 5%;
+    grid-template-rows: 5% 90% 1fr;
+}
+#scrollPanel{
+    grid-column-start: 3;
+    grid-row-start:2;
+    grid-row-end:5;
+    
+}
+
+#chatScroll{
+    overflow-y: scroll;
+    max-height: 15%;
 }
 #chatScroll::-webkit-scrollbar{
-    width: 2em;   
+    width: 2em; 
+    
 }
-#chatScroll ::-webkit-scrollbar-track{
+#chatScroll::-webkit-scrollbar-track{
     margin-block: 0.5em;
     border-radius: 100vw;
     background: hsl(120 75% 75% /1);
 }
     
-#chatScroll ::-webkit-scrollbar-thumb{
+#chatScroll::-webkit-scrollbar-thumb{
         background: hsl(60 60% 35%);
         border: 0.25em hsl(120 75% 75% /1) solid;
         border-radius: 100vw;
 }
     
-#chatScroll ::-webkit-scrollbar-thumb:hover{
+#chatScroll::-webkit-scrollbar-thumb:hover{
         background: hsl(30, 20%, 20%);
 }
 
 
 #currentChannelNamePanel{
-    margin-top: 0.2%;
-    width: 50%;
+    grid-column-start: 2;
+    grid-column-end:3;
+    margin:0.5%;
+    margin-inline-end: 2%;
+    width: 90%;
     align-self: center;
     border-style: groove;
     border:solid;
