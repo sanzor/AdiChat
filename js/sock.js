@@ -3,7 +3,7 @@ var socket=null;
 
  function connect (){
     
-    var url=document.getElementById("urlBox").value;
+    var url=urlBox.value;
     console.log(url);
     socket=new WebSocket(url);
     socket.onopen=function (e){

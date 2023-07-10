@@ -1,3 +1,54 @@
+
+/* channels panel */
+.channelRow{
+    width: initial;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0.2em;
+}
+
+.channelRowUnsubscribeBtn{
+    border-style: inset;
+    background-color: red;
+    text-align: center;
+    width: 20%;
+}
+
+.channelRowBtn{
+    text-align: center;
+    
+}
+.channelRowMessagesCount{
+    
+}
+
+/* chat container  */
+.chatMessageContainer{
+    width: initial  ;
+    display:grid;
+    grid-template-columns: 10% 1fr;
+    grid-template-rows: 20% 1fr;
+}
+.chatMessageIcon{
+    align-self: center;
+    padding: 1em;
+    margin-inline: 0.7%;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end:2;
+   
+}
+.chatMessageMeta{
+    grid-column-start: 2;
+    grid-row-start:1;
+    grid-row-end:2;
+}
+.chatMessageContent{
+    grid-row-start:2;
+    grid-column-start:2;
+}
+
 button{
     border-color: none;
     width:150px;
@@ -32,4 +83,8 @@ body,
     margin:0.8%;
     padding:0.5%;
     height: 20%;
+}
+
+.icon{
+
 }

@@ -88,7 +88,7 @@
     border-color: rgb(44, 97, 57);
     border-style:solid ;
     padding-left: 2%;
-    background-color:#195a717a;
+    background-color:#66a4a987;
     
 }
 
@@ -146,41 +146,18 @@
     grid-column-start: 3;
     grid-row-start:2;
     grid-row-end:5;
-    
 }
-
-#chatScroll{
-    overflow-y: scroll;
-    max-height: 15%;
-}
-#chatScroll::-webkit-scrollbar{
-    width: 2em; 
-    
-}
-#chatScroll::-webkit-scrollbar-track{
-    margin-block: 0.5em;
-    border-radius: 100vw;
-    background: hsl(120 75% 75% /1);
-}
-    
-#chatScroll::-webkit-scrollbar-thumb{
-        background: hsl(60 60% 35%);
-        border: 0.25em hsl(120 75% 75% /1) solid;
-        border-radius: 100vw;
-}
-    
-#chatScroll::-webkit-scrollbar-thumb:hover{
-        background: hsl(30, 20%, 20%);
-}
-
 
 #currentChannelNamePanel{
     grid-column-start: 2;
     grid-column-end:3;
-    margin:0.5%;
+    grid-row-start:1;
+    grid-row-end:2;
+    margin-top:2%;
+    margin-bottom: 0.5%;
     margin-inline-end: 2%;
     width: 90%;
-    align-self: center;
+    align-self: stretch;
     border-style: groove;
     border:solid;
     border-color: rgb(18, 163, 120);
@@ -190,6 +167,36 @@
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
+.chatScroll::-webkit-scrollbar{
+    width: 2em;
+}
+.chatScroll::-webkit-scrollbar-track{
+    margin-block: 0.5em;
+    border-radius: 100vw;
+    background: hsl(120 75% 75% /1);
+}
+.chatScroll::-webkit-scrollbar-thumb{
+    background: hsl(60 60% 35%);
+    border: 0.25em hsl(120 75% 75% /1) solid;
+    border-radius: 100vw;
+    height: 0.2em;
+}
+#messagesPanel{
+    display:flex;
+    flex-direction: column;
+    grid-column-start:2;
+    grid-column-end: 3;
+    grid-row-start:2;
+    grid-row-end:3;
+    width:100%;
+    margin-top:2%;
+    margin-bottom: 0.5%;
+    border:solid;
+    border-radius:1em;
+    overflow-y:scroll;
+    scroll-margin-right: 1%;
+    background-color: rgba(139, 139, 129, 0.842);
+}
 
 
 #chatSendMessagePanel{
@@ -237,26 +244,6 @@
     border-bottom-color: cadetblue;
     
 }
-.channelRow{
-    width: initial;
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 0.2em;
-}
 
-.channelRowUnsubscribeBtn{
-    border-style: inset;
-    background-color: red;
-    text-align: center;
-    width: 20%;
-}
-
-.channelRowBtn{
-    text-align: center;
-    
-}
-.channelRowMessagesCount{
-    
-}
 
 
