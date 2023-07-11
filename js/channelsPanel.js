@@ -57,3 +57,7 @@ function removeSubscriptionRow(){
     var row=document.getElementById(channel+'channel_row');
     table.removeChild(row);
 }
+
+function updateChannelsOnMessage(data){
+
+}

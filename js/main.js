@@ -6,6 +6,7 @@ const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
 const currentChannel=document.getElementById("currentChannelNameLabel");
 const channels=document.getElementById("channelsContainer");
+const chatContainer=document.getElementById("messagesContainer");
 
 function onConnect(){
     connect();
@@ -33,6 +34,7 @@ function subscribe(){
 
 function onPublish(){
     var channel=currentChannel.innerText;
+    var date=new Date().toDateString();
     console.log("Channel publish:"+channel);
     var message=document.getElementById("chatSendMessageBox").value;
     command_publish(channel,message);

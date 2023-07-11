@@ -11,8 +11,22 @@ function handle_callback_message(data){
 
     
 }
+
+function onNewChatMessage(data){
+   
+}
 function handle_chat_message(data){
-    console.log("\nIncoming chat message\n");
+    var topic=data.topic;
+    
+    if(topic==currentChannel.innerText){
+        console.log("\nUpdating chat on message\n");
+        updateChatOnMessage(data);
+    
+    }else{
+        console.log("\nUpdating channels on message\n");
+        updateChannelsOnMessage(data);
+    }
+    
 }
 function handle_command_result(data){
     if(data.command=="subscribe"){
