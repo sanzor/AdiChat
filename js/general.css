@@ -27,7 +27,7 @@
     width: initial  ;
     display:grid;
     grid-template-columns: 10% 1fr;
-    grid-template-rows: 20% 1fr;
+    grid-template-rows: 1fr 2fr;
 }
 .chatMessageIcon{
     align-self: center;
@@ -37,16 +37,29 @@
     grid-column-end: 2;
     grid-row-start: 1;
     grid-row-end:2;
+    width: 15%;
+    height: 30%;
+    border-radius: 50%;
+    border:solid black;
    
 }
+.chatMessageContainer:hover{
+    background-color: #384139;
+}
 .chatMessageMeta{
+    padding:1%;
     grid-column-start: 2;
     grid-row-start:1;
     grid-row-end:2;
+    font-size: small;
+    font-weight: 600;
+    
+    
 }
 .chatMessageContent{
     grid-row-start:2;
     grid-column-start:2;
+    padding:1%;
 }
 
 button{

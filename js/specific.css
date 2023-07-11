@@ -173,11 +173,11 @@
 .chatScroll::-webkit-scrollbar-track{
     margin-block: 0.5em;
     border-radius: 100vw;
-    background: hsl(120 75% 75% /1);
+    background: hsl(120, 12%, 41%);
 }
 .chatScroll::-webkit-scrollbar-thumb{
-    background: hsl(60 60% 35%);
-    border: 0.25em hsl(120 75% 75% /1) solid;
+    background: hsl(60, 15%, 45%);
+    border: 0.25em hsl(120, 27%, 41%) solid;
     border-radius: 100vw;
     height: 0.2em;
 }
