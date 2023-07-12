@@ -5,10 +5,10 @@
          get_subscriptions_for_topic/1,
          get_user_subscriptions/1]).
 
-
+-define(DB_SERVER_KEY,pg2).
 -spec subscribe(Topic::binary(),User::binary()) -> ok  | {error,Error::term()}.
 subscribe(Topic,User)->
-    {ok,Pg}=application:get_env(wsapp,pg),
+    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
     Hostname=proplists:get_value(hostname,Pg),
     Port=proplists:get_value(port,Pg),
     Username=proplists:get_value(username,Pg),
@@ -30,7 +30,7 @@ subscribe(Topic,User)->
 
 -spec unsubscribe(Topic::binary(),User::binary())-> ok | not_joined | {error,Error::term()}.
 unsubscribe(Topic,User)->
-    {ok,Pg}=application:get_env(wsapp,pg),
+    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
     Hostname=proplists:get_value(hostname,Pg),
     Port=proplists:get_value(port,Pg),
     Username=proplists:get_value(username,Pg),
@@ -51,7 +51,7 @@ unsubscribe(Topic,User)->
     
 -spec get_subscriptions_for_topic(Topic::binary())-> {ok,list()} | {error,Reason::term()}.
 get_subscriptions_for_topic(Topic)->
-    {ok,Pg}=application:get_env(wsapp,pg),
+    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
     Hostname=proplists:get_value(hostname,Pg),
     Port=proplists:get_value(port,Pg),
     Username=proplists:get_value(username,Pg),
@@ -71,7 +71,8 @@ get_subscriptions_for_topic(Topic)->
 
 -spec get_user_subscriptions(User::binary())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(User)-> 
-    {ok,Pg}=application:get_env(wsapp,pg),
+    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
+    io:format("\n PgEnv:~p\n",[Pg]),
     Hostname=proplists:get_value(hostname,Pg),
     Port=proplists:get_value(port,Pg),
     Username=proplists:get_value(username,Pg),
@@ -87,12 +88,12 @@ get_user_subscriptions(User)->
         timeout=>4000
     }),
     {ok,_,Result}=epgsql:equery(C,Statement,[User]),
-   
+    io:format("\n query ok\n"),
     {ok,normalize(Result)}.
     
 -spec check_if_subscribed(Topic::binary(),User::binary())->{ok,boolean()}|{error,Error::term()}.
 check_if_subscribed(Topic,User)->
-    {ok,Pg}=application:get_env(wsapp,pg),
+    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
     Hostname=proplists:get_value(hostname,Pg),
     Port=proplists:get_value(port,Pg),
     Username=proplists:get_value(username,Pg),

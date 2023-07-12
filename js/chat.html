@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
     <script src="./callbacks.js"></script>
-    <script  src="./sock.js"></script>
-    <script  src="./main.js"></script>
-    <script  src="./table.js"></script>
+    <script src="./sock.js"></script>
+   
+    <script src="./channelsPanel.js"></script>
+    <script src="chat.js"></script>
     <link rel="stylesheet" type="text/css" href="specific.css" ></script>
     <link rel="stylesheet" type="text/css" href="general.css" ></script>
     
     <body>
         <div id="parentPanel" class="parent">
+            
             <div id="buttonGroupsPanel" class="buttonGroupsPanel">
                 <div id="connectButtonsPanel" >
                     <label id="urlLabel"> Url</label>
@@ -19,28 +21,80 @@
                     </button>
                 </div>
                 <div id="subscribeButtonPanel" class="panel">
-                    <input class="subscribeBox" id="subscribeBox" type="text" value="">
-                    <label class="subscribeLabel">Channel</label>
+                    <input  id="subscribeBox" type="text" value="">
+                    <label id="subscribeLabel" class="subscribeLabel">Channel</label>
                     <button id="subscribeBtn" class="subscribeButton" type="button" onclick="subscribe()">Subscribe</button>
                 </div>
                 
             </div>
-            <div id="channelAndChatPanel" class="channelAndChatPanel">
+            <div id="mainPanel">
                 <div id="channelsPanel" class="channelsPanel">
-                    <label class="channelsLabel" id="channel">Channels</label>
+                    <label id="channelsLabel">Channels</label>
+                    <div id="channelsAreaPanel">
+                        <div id="channelsContainer">
+                            
+                        </div>
+                    </div>
+                    
                 </div>
                 <div id="chatPanel" class="chatPanel">
-                    <div id="chatMessagesPanel" class="chatMessagesPanel">
                         <div class="currentChannelNamePanel" id="currentChannelNamePanel">
                             <label id="currentChannelNameLabel" class="currentChannelNameLabel" >Channel 1</label>
                         </div>
-                    </div>
-                    <div id="chatSendMessagePanel" class="chatSendMessagePanel">
-                            <input class="chatSendMessageBox" id="chatSendMessageBox" ></input>
-                            <button id="chatSendMessageButton"  onclick="onPublish()" class="chatSendMessageButton" type="button">Send</button>
-                    </div>
+                       <div id="messagesContainer" class="chatScroll">
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:32 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                                
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:32 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:32 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:32 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:33 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:33 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:34 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                            <div class="chatMessageContainer">
+                                <img class="icon" class="chatMessageIcon"/>
+                                <div class="chatMessageMeta"> 12:32 GMT +2 </div>
+                                <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                            </div>
+                           
+                          
+                       </div>
                 </div>
+               
+                <div id="chatSendMessagePanel" class="chatSendMessagePanel">
+                    <button class="button sendPanelButton" id="attachItemsBtn">+</button>
+                    <input class="chatSendMessageBox" id="chatSendMessageBox" ></input>
+                    <button id="chatSendMessageButton sendPanelButton"  onclick="onPublish()" class="chatSendMessageButton" type="button">Send</button>
+            </div>
             </div>
         </div>
     </body>
+    <script src="./main.js"></script>
 </html>

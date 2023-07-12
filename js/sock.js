@@ -3,9 +3,8 @@ var socket=null;
 
  function connect (){
     
-    var url=document.getElementById("urlBox").value;
-    console.log(url);
-    socket=new WebSocket(url);
+
+    socket=new WebSocket(urlBox.value);
     socket.onopen=function (e){
         console.log("\nConnection established\n");
         command_get_subscriptions();
@@ -67,6 +66,7 @@ function command_publish(topic,message){
         "topic":topic,
         "message":message
     }
+    console.log("topic:"+topic);
     console.log("\nSending:" + JSON.stringify(toSend));
     socket.send(JSON.stringify(toSend));
 }
