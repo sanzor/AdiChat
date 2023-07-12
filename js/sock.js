@@ -3,9 +3,8 @@ var socket=null;
 
  function connect (){
     
-    var url=urlBox.value;
-    console.log(url);
-    socket=new WebSocket(url);
+
+    socket=new WebSocket(urlBox.value);
     socket.onopen=function (e){
         console.log("\nConnection established\n");
         command_get_subscriptions();

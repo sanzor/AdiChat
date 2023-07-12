@@ -5,7 +5,7 @@ const subscribeBtn=document.getElementById("subscribeBtn");
 const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
 const currentChannel=document.getElementById("currentChannelNameLabel");
-const channels=document.getElementById("channelsContainer");
+const channelsContainer=document.getElementById("channelsContainer");
 const chatContainer=document.getElementById("messagesContainer");
 
 function onConnect(){

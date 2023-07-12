@@ -181,7 +181,7 @@
     border-radius: 100vw;
     height: 0.2em;
 }
-#messagesPanel{
+#messagesContainer{
     display:flex;
     flex-direction: column;
     grid-column-start:2;

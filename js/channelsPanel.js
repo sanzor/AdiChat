@@ -59,5 +59,5 @@ function removeSubscriptionRow(){
 }
 
 function updateChannelsOnMessage(data){
-
+    var targetChannel=channelsContainer.children.filter(child=>child.innerText==data.topic);
 }
