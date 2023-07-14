@@ -78,16 +78,16 @@ handle_call({get_messages,Topic},_,State)->
     {reply,{ok,Messages},State};
 
 handle_call({get_subscriptions,User},_,State)->
-    {ok,Subscriptions}=membership_storage:get_user_subscriptions(User),
+    {ok,Subscriptions}=storage:get_user_subscriptions(User),
     {reply,{ok,Subscriptions},State};
  
 
 
 handle_call({subscribe,{User,Topic}},{From,_},State)->
-    Reply=case membership_storage:check_if_subscribed(Topic, User) of
+    Reply=case storage:check_if_subscribed(Topic, User) of
         {ok,true} -> already_subscribed;
-        {ok,false} ->ok=membership_storage:subscribe(Topic, User),
-                {ok,Subscriptions}=membership_storage:get_user_subscriptions(User),
+        {ok,false} ->ok=storage:subscribe(Topic, User),
+                {ok,Subscriptions}=storage:get_user_subscriptions(User),
                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic, subscriptions=>Subscriptions},
                 [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/=From],
                 {ok,Subscriptions}
@@ -96,8 +96,8 @@ handle_call({subscribe,{User,Topic}},{From,_},State)->
 
 
 handle_call({unsubscribe,{User,Topic}},{From,_},State)->
-    Reply=case membership_storage:unsubscribe(Topic, User) of 
-                ok ->   {ok,Subscriptions}=membership_storage:get_user_subscriptions(User),
+    Reply=case storage:unsubscribe(Topic, User) of 
+                ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(User),
                         UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => Topic, subscriptions=>Subscriptions},
                         io:format("\nFrom:~p, Existing:~p\n",[From,pg:get_members(?F(User))]),
                         [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/= From],
@@ -127,7 +127,7 @@ handle_call({offline,{User,Socket}},_,State)->
 %% @end
 handle_cast({publish,{Topic,Message}},State)->
     true=ets:insert(messages, {Topic,Message}),
-    {ok,Subscribers}=membership_storage:get_subscriptions_for_topic(Topic),
+    {ok,Subscribers}=storage:get_subscriptions_for_topic(Topic),
     io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [Topic,Subscribers]),
     [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],

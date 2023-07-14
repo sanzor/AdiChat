@@ -27,8 +27,7 @@
     {username,"admin"},
     {password,"test123"},
     {database,"postgresdb"}
-      ]
-    }]},
+    ]}]},
   {modules, [wsapp_server]},
   {maintainers, []},
   {licenses, ["Apache 2.0"]},
