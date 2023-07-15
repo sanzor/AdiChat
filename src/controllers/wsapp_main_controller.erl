@@ -13,7 +13,7 @@
 index(_Req) ->
     {ok, [{message, "Hello world!"}]}.
 
-create_user(UserData)->
+create_user(_Req=#{json := UserData})->
     case wsapp_server:create_user(UserData) of
         {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
         {error,{bad_request,ValidationErrors}}->
@@ -22,14 +22,14 @@ create_user(UserData)->
             {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
 end.
         
-delete_user(UserId)->
+delete_user(_Req=#{parsed_qs:=#{id := UserId}})->
     case wsapp_server:delete_user(UserId) of
         ok -> {status,200};
         {error,Error}->
             {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
 end.  
 
-create_topic(TopicData)->
+create_topic(_Req=#{json := TopicData})->
     case wsapp_server:create_topic(TopicData) of
         {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
         {error,{bad_request,ValidationErrors}}->
@@ -38,7 +38,7 @@ create_topic(TopicData)->
             {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
 end.
         
-delete_topic(TopicId)->
+delete_topic(_Req=#{parsed_qs:=#{id := TopicId}})->
     case wsapp_server:delete_topic(TopicId) of
         ok -> {status,200};
         {error,Error}->

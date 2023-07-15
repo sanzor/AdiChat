@@ -12,6 +12,10 @@ routes(_Environment) ->
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
                  {"/ws/user/:user/cookie/:cookie",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
+                 {"/create_user",{wsapp_main_controller,create_user},#{methods=>[post]}},
+                 {"/delete_user",{wsapp_main_controller,delete_user},#{methods=>[delete]}},
+                 {"/create_topic",{wsapp_main_controller,create_topic},#{methods=>[post]}},
+                 {"/delete_topic",{wsapp_main_controller,delete_topic},#{methods=>[delete]}},
                  {"/publish",{wsapp_main_controller,publish},#{ methods =>[post]}},
                  {"/subscribe",{wsapp_main_controller,subscribe},#{ methods =>[post]}},
                  {"/unsubscribe",{wsapp_main_controller,unsubscribe},#{ methods =>[post]}},

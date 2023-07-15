@@ -23,7 +23,7 @@
 
 -define(SERVER,?MODULE).
 -define(CONSTANT,<<"_events">>).
--define(G(UserIdBinary),<<UserIdBinary,?CONSTANT/binary>>).
+-define(F(UserId),<<(integer_to_binary(UserId))/binary,?CONSTANT/binary>>).
 -record(state,{
 
 }).
@@ -156,7 +156,7 @@ handle_call({subscribe,{UserId,TopicId}},{From,_},State)->
                 UserEvent=#{user_event_kind => <<"subscribe">>,
                 topic => TopicId, subscriptions=>Subscriptions},
                 [send(Socket,{user_event,UserId,UserEvent})|| 
-                            Socket<-pg:get_members(to_binary(UserId)), Socket =/=From],
+                            Socket<-pg:get_members(?F(UserId)), Socket =/=From],
                 {ok,Subscriptions}
     end,
     {reply,Reply,State};
@@ -167,7 +167,7 @@ handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
                 ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
                         UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => TopicId, subscriptions=>Subscriptions},
                         [send(Socket,{user_event,UserId,UserEvent})
-                            || Socket<-pg:get_members(to_binary(UserId)), Socket =/= From],
+                            || Socket<-pg:get_members(?F(UserId)), Socket =/= From],
                         {ok,Subscriptions};
                 not_joined->#{result=> <<"not joined">>}
           end,
@@ -175,13 +175,13 @@ handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
 
 
 handle_call({online,{UserId,Socket}},_,State)->
-    UserEventGroup= to_binary(UserId),
+    UserEventGroup= ?F(UserId),
     ok=pg:join(UserId,Socket),
     ok=pg:join(UserEventGroup, Socket),
     {reply,ok,State};
     
 handle_call({offline,{UserId,Socket}},_,State)->
-    UserEventGroup=to_binary(UserId),
+    UserEventGroup=?F(UserId),
     ok=pg:leave(UserId, Socket),
     ok=pg:leave(UserEventGroup,Socket),
     {reply,ok,State}.
@@ -219,6 +219,3 @@ online_sockets(User)->
     Sockets.
 
 
-to_binary(Num)->
-    Value=integer_to_binary(Num),
-    ?G(Value).
