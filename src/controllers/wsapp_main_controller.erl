@@ -1,6 +1,8 @@
 -module(wsapp_main_controller).
 -export([
          index/1,
+         create_user/1,
+         delete_user/1,
          publish/1,
          subscribe/1,
          unsubscribe/1
@@ -8,6 +10,22 @@
 
 index(_Req) ->
     {ok, [{message, "Hello world!"}]}.
+
+create_user(UserData)->
+    case wsapp_server:create_user(UserData) of
+        {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
+        {error,{bad_request,ValidationErrors}}->
+            {json,400,#{<<"Content-Type">>=> <<"application/json">>},ValidationErrors};
+        {error,Error}->
+            {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
+end.
+        
+delete_user(UserId)->
+    case wsapp_server:delete_user(UserId) of
+        ok -> {status,200};
+        {error,Error}->
+            {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
+end.  
 
 publish(_Req=#{json := #{ <<"topic">> := Topic , <<"sender">> := _Sender , <<"message">> := Message}})->
     ok=wsapp_server:publish(Topic,Message),

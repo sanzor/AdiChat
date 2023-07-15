@@ -1,182 +1,162 @@
 -module(storage).
--export([subscribe/2,
+-export([
+         create_user/1,
+         delete_user/1,
+         create_topic/1,
+         delete_topic/1,
+         does_topic_exist/1,
+         subscribe/2,
          unsubscribe/2,
          check_if_subscribed/2,
          get_subscriptions_for_topic/1,
          get_user_subscriptions/1,
          get_messages_for_topic/3,
-         write_message_to_topic/2,
-         write_messages_to_topic/2]).
+         write_chat_message/1,
+         write_chat_messages/1]).
 
 -define(DB_SERVER_KEY,pg2).
 -spec subscribe(Topic::binary(),User::binary()) -> ok  | {error,Error::term()}.
-subscribe(Topic,User)->
+
+
+
+create_connection()->
     {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
     Hostname=proplists:get_value(hostname,Pg),
     Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
+    UserName=proplists:get_value(username,Pg),
     Password=proplists:get_value(password,Pg),
     Database=proplists:get_value(database,Pg),
-    Statement= <<"INSERT INTO  wschat_user(topic,user_id) values ($1,$2)">>,
     {ok,C}=epgsql:connect(#{
         host=>Hostname,
         port=>Port,
-        username=>Username,
+        username=>UserName,
         password=>Password,
         database=>Database,
         timeout=>4000
     }),
+    {ok,C}.
+
+-spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
+create_user(_UserData=#{name :=UserName})->
+    Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNIN *">>,
+    {ok,C}=create_connection(),
+    {ok,_,[Result]}=epgsql:equery(C,Statement,[UserName]),
+    {ok,maps:from_list(Result)}.
+     
+
+
+
+-spec delete_user(UserId::number())-> ok  | {error,Error::any()}.
+delete_user(UserId)->
+    Statement= <<"DELETE FROM  wsuser WHERE id = $1">>,
+    {ok,C}=create_connection(),
+    {ok,_}=epgsql:equery(C,Statement,[UserId]),
+     ok.
+
+
+
+-spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
+create_topic(_TopicData = #{user_id := UserId,name := TopicName , user_id := UserId})->
+    Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2)">>,
+    {ok,C}=create_connection(),
+    {ok,_}=epgsql:equery(C,Statement,[TopicName,UserId]),
+     ok.
+
+
+
+
+-spec delete_topic(Id::integer())-> ok | {error,Error::any()}.
+delete_topic(Id)->
+    Statement= <<"DELETE FROM  topic WHERE id=$1">>,
+    {ok,C}=create_connection(),
+    {ok,Rows}=epgsql:equery(C,Statement,[Id]),
+    if Rows>0 -> ok ; true -> {error,could_not_delete} end.
+
+subscribe(Topic,User)->
+    Statement= <<"INSERT INTO  user_topic(topic,user_id) values ($1,$2)">>,
+    {ok,C}=create_connection(),
     {ok,_}=epgsql:equery(C,Statement,[Topic,User]),
      ok.                 
    
 
 
--spec unsubscribe(Topic::binary(),User::binary())-> ok | not_joined | {error,Error::term()}.
-unsubscribe(Topic,User)->
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"DELETE FROM  wschat_user WHERE topic=$1 and user_id = $2">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
-    {ok,Rows}=epgsql:equery(C,Statement,[Topic,User]),
-    io:format("\n Rows:~p",[Rows]),
+-spec unsubscribe(TopicId::number(),UserId::number())-> ok | not_joined | {error,Error::term()}.
+unsubscribe(TopicId,UserId)->
+    Statement= <<"DELETE FROM  user_topic WHERE topic_id=$1 and user_id = $2">>,
+    {ok,C}=create_connection(),
+    {ok,Rows}=epgsql:equery(C,Statement,[TopicId,UserId]),
     if Rows>0 -> ok ; true -> not_joined end.
-    
--spec get_subscriptions_for_topic(Topic::binary())-> {ok,list()} | {error,Reason::term()}.
-get_subscriptions_for_topic(Topic)->
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"SELECT user_id FROM  wschat_user WHERE topic = $1">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
-    {ok,_,Result}=epgsql:equery(C,Statement,[Topic]),
+
+
+
+
+-spec get_subscriptions_for_topic(TopicId::number())-> {ok,list()} | {error,Reason::term()}.
+get_subscriptions_for_topic(TopicId)->
+    Statement= <<"SELECT user_id FROM  user_topic WHERE topic_id = $1">>,
+    {ok,C}=create_connection(),
+    {ok,_,Result}=epgsql:equery(C,Statement,[TopicId]),
     {ok,normalize(Result)}.
 
--spec get_user_subscriptions(User::binary())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
-get_user_subscriptions(User)-> 
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    io:format("\n PgEnv:~p\n",[Pg]),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"SELECT topic FROM  wschat_user WHERE user_id = $1">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
-    {ok,_,Result}=epgsql:equery(C,Statement,[User]),
+-spec get_user_subscriptions(UserId::number())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
+get_user_subscriptions(UserId)-> 
+    Statement= <<"SELECT topic FROM  user_topic WHERE user_id = $1">>,
+    {ok,C}=create_connection(),
+    {ok,_,Result}=epgsql:equery(C,Statement,[UserId]),
     io:format("\n query ok\n"),
     {ok,normalize(Result)}.
     
--spec check_if_subscribed(Topic::binary(),User::binary())->{ok,boolean()}|{error,Error::term()}.
-check_if_subscribed(Topic,User)->
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"SELECT Count(user_id) FROM  wschat_user WHERE topic = $1 AND user_id=$2">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
-    {ok,_,[{Count}]}=epgsql:equery(C,Statement,[Topic,User]),
+-spec check_if_subscribed(Topic::number(),User::number())->{ok,boolean()}|{error,Error::term()}.
+check_if_subscribed(TopicId,UserId)->
+    
+    Statement= <<"SELECT Count(user_id) FROM  user_topic WHERE topic_id = $1 AND user_id=$2">>,
+    {ok,C}=create_connection(),
+    {ok,_,[{Count}]}=epgsql:equery(C,Statement,[TopicId,UserId]),
     {ok,Count>0}.
+
+-spec does_topic_exist(TopicId::number())-> true | false | {error,Error::any()}.
+does_topic_exist(TopicId)->
+    Statement= <<"SELECT 1 FROM topic WHERE id = $1;">>,
+    {ok,C}=create_connection(),
+    {ok, Result} = epgsql:equery(C, Statement, [TopicId]),
+    % Check if the topic exists
+    Exists= length(Result)>0,
+    Exists.
+
 
 
 -spec get_messages_for_topic(Topic::binary(),StartIndex::binary(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
 
 get_messages_for_topic(Topic,StartIndex,Count)->
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    io:format("\n PgEnv:~p\n",[Pg]),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"SELECT * FROM messages WHERE topic = $1 AND index >= $2 ORDER BY index ASC LIMIT $3">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
+    Statement= <<"SELECT * FROM message WHERE topic = $1 AND index >= $2 ORDER BY index ASC LIMIT $3">>,
+    {ok,C}=create_connection(),
     {ok,_,Result}=epgsql:equery(C,Statement,[Topic,StartIndex,Count]),
     io:format("\n query ok\n"),
     {ok,normalize(Result)}.
 
--spec write_message_to_topic(Topic::binary(),Message::any())->ok | {error,Error::any()}.
-write_message_to_topic(Topic,_Message=#{ topic:=Topic,user_id :=UserId,content:=Content,createdAt:=CreatedAt})->
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"INSERT INTO  messages(topic,user_id,content,createdAt) values ($1,$2,$3,$4)">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
-    {ok,_}=epgsql:equery(C,Statement,[Topic,UserId,Content,CreatedAt]),
+-spec write_chat_message(Message::any())->ok | {error,Error::any()}.
+write_chat_message(_Message=#{ topic:=TopicId,user_id :=UserId,content:=Content,createdAt:=CreatedAt,timezone :=Timezone})->
+    
+    Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) values ($1,$2,$3,$4,$5)">>,
+    {ok,C}=create_connection(),
+    {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]),
      ok.   
 
--spec write_messages_to_topic(Topic::binary(),Messages::list())->{ok,Inserted::integer()} | {error,Error::any()}.
-write_messages_to_topic(Topic,Messages)->
-    {ok,Pg}=application:get_env(wsapp,?DB_SERVER_KEY),
-    Hostname=proplists:get_value(hostname,Pg),
-    Port=proplists:get_value(port,Pg),
-    Username=proplists:get_value(username,Pg),
-    Password=proplists:get_value(password,Pg),
-    Database=proplists:get_value(database,Pg),
-    Statement= <<"INSERT INTO  messages(topic,user_id,content,createdAt) values ($1,$2,$3,$4)">>,
-    {ok,C}=epgsql:connect(#{
-        host=>Hostname,
-        port=>Port,
-        username=>Username,
-        password=>Password,
-        database=>Database,
-        timeout=>4000
-    }),
-    {ok,_}=epgsql:equery(C,Statement,[Topic,UserId,Content,CreatedAt]),
+-spec write_chat_messages(Messages::list())->{ok,Inserted::integer()} | {error,Error::any()}.
+write_chat_messages(Messages)->
+    Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) values ($1,$2,$3,$4)">>,
+    {ok,C}=create_connection(),
+    epgsql:transaction_start(C),
+    {ok,Stmt}=epgsql:prepare(C,"insert_statement",Statement),
+    ok=write_messages(C,Stmt, Messages),
      ok.   
+
+write_messages(_Connection,_Stmt,[])->ok;
+write_messages(Connection,Stmt,[Message|Rest])->
+    #{topic_id :=TopicId,user_id :=UserId,content:=Content,
+      created_at:=CreatedAt,timezone:=Timezone}=Message,
+    epgsql:execute(Connection,Stmt,[TopicId,UserId,Content,CreatedAt,Timezone]),
+    write_messages(Connection, Stmt, Rest).
+
 normalize(List)->
     normalize(List,[]).
 -spec normalize(List::list(),Acc::list())->list().

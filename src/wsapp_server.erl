@@ -9,6 +9,8 @@
 
 -export([
          start_link/0,
+         create_user/1,
+         delete_user/1,
          publish/2,
          online/2,
          offline/2,
@@ -24,6 +26,36 @@
 
 }).
 %----------------------------API ----------------------------------%
+
+-spec create_user(UserData::any())->{ok,User::any()} 
+                        | {error,{400,ValidationErrors::list()}}
+                        | {error,Error::any()}.
+
+create_user(UserData)->
+    gen_server:call(?MODULE,{create_user,UserData}).
+
+
+-spec delete_user(UserId::number())->ok | {error,Error::any()}.
+delete_user(UserId)->
+    gen_server:call(?MODULE,{delete_user,UserId}).
+
+
+-spec create_topic(TopicData::any())->{ok,Topic::any()} 
+                        | {error,{400,ValidationErrors::list()}}
+                        | {error,Error::any()}.
+
+create_topic(TopicData)->
+    gen_server:call(?MODULE,{create_user,TopicData}).
+
+
+-spec delete_topic(TopicId::number())->ok | {error,Error::any()}.
+delete_topic(TopicId)->
+    gen_server:call(?MODULE,{delete_user,TopicId}).
+
+
+
+
+
 -spec get_messages(Topic::binary())->{ok,Messages::list()} | error .
 get_messages(Topic)->
     gen_server:call(?MODULE,{get_messages,Topic}).
@@ -73,6 +105,37 @@ init(Args)->
 %% Handling call messages
 %% @end
 
+handle_call({create_user,UserData},_,State)->
+    case validator:validate_user_data(UserData) of
+        {false,ValidationErrors} -> {error,{400,ValidationErrors}};
+         true -> case storage:create_user(UserData) of
+                    {ok,User} -> {reply,{ok,User},State};
+                    {error,Error}->{reply,{error,Error},State}
+                 end
+    end;
+
+handle_call({delete_user,UserId},_,State)->
+    case storage:delete_user(UserId) of
+         ok -> {reply,ok,State};
+        {error,Error}->{reply,{error,Error},State}
+        
+    end;
+
+handle_call({create_topic,TopicData},_,State)->
+    case validator:validate_topic_data(TopicData) of
+        {false,ValidationErrors} -> {error,{400,ValidationErrors}};
+         true -> case storage:create_topic(TopicData) of
+                    {ok,Topic} -> {reply,{ok,Topic},State};
+                    {error,Error}->{reply,{error,Error},State}
+                 end
+    end;
+
+handle_call({delete_topic,TopicId},_,State)->
+    case storage:delete_user(TopicId) of
+         ok -> {reply,ok,State};
+        {error,Error}->{reply,{error,Error},State}
+            
+    end;
 handle_call({get_messages,Topic},_,State)->
     Messages=ets:match(messages, {Topic,'$1'}),
     {reply,{ok,Messages},State};

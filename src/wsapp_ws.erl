@@ -51,7 +51,6 @@ terminate(_,_,State)->
     ok.
 
 
-
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
     Reply=case wsapp_server:subscribe(User, Topic) of
