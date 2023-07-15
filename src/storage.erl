@@ -10,12 +10,11 @@
          check_if_subscribed/2,
          get_subscriptions_for_topic/1,
          get_user_subscriptions/1,
-         get_messages_for_topic/3,
+         get_messages/3,
          write_chat_message/1,
          write_chat_messages/1]).
 
 -define(DB_SERVER_KEY,pg2).
--spec subscribe(Topic::binary(),User::binary()) -> ok  | {error,Error::term()}.
 
 
 
@@ -38,7 +37,7 @@ create_connection()->
 
 -spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
 create_user(_UserData=#{name :=UserName})->
-    Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNIN *">>,
+    Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNING *">>,
     {ok,C}=create_connection(),
     {ok,_,[Result]}=epgsql:equery(C,Statement,[UserName]),
     {ok,maps:from_list(Result)}.
@@ -57,7 +56,7 @@ delete_user(UserId)->
 
 -spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
 create_topic(_TopicData = #{user_id := UserId,name := TopicName , user_id := UserId})->
-    Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2)">>,
+    Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
     {ok,C}=create_connection(),
     {ok,_}=epgsql:equery(C,Statement,[TopicName,UserId]),
      ok.
@@ -72,10 +71,11 @@ delete_topic(Id)->
     {ok,Rows}=epgsql:equery(C,Statement,[Id]),
     if Rows>0 -> ok ; true -> {error,could_not_delete} end.
 
-subscribe(Topic,User)->
+-spec subscribe(TopicId::integer(),UserId::integer())-> ok | {error,Error::any()}.
+subscribe(TopicId,UserId)->
     Statement= <<"INSERT INTO  user_topic(topic,user_id) values ($1,$2)">>,
     {ok,C}=create_connection(),
-    {ok,_}=epgsql:equery(C,Statement,[Topic,User]),
+    {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId]),
      ok.                 
    
 
@@ -124,12 +124,12 @@ does_topic_exist(TopicId)->
 
 
 
--spec get_messages_for_topic(Topic::binary(),StartIndex::binary(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
+-spec get_messages(TopicId::integer(),StartIndex::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
 
-get_messages_for_topic(Topic,StartIndex,Count)->
+get_messages(TopicId,StartIndex,Count)->
     Statement= <<"SELECT * FROM message WHERE topic = $1 AND index >= $2 ORDER BY index ASC LIMIT $3">>,
     {ok,C}=create_connection(),
-    {ok,_,Result}=epgsql:equery(C,Statement,[Topic,StartIndex,Count]),
+    {ok,_,Result}=epgsql:equery(C,Statement,[TopicId,StartIndex,Count]),
     io:format("\n query ok\n"),
     {ok,normalize(Result)}.
 

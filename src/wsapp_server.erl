@@ -11,17 +11,19 @@
          start_link/0,
          create_user/1,
          delete_user/1,
+         create_topic/1,
+         delete_topic/1,
          publish/2,
          online/2,
          offline/2,
          subscribe/2,
          unsubscribe/2,
-         get_messages/1,
+         get_messages/3,
          get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
 -define(CONSTANT,<<"_events">>).
--define(F(User),<<User/binary,?CONSTANT/binary>>).
+-define(G(UserIdBinary),<<UserIdBinary,?CONSTANT/binary>>).
 -record(state,{
 
 }).
@@ -56,36 +58,36 @@ delete_topic(TopicId)->
 
 
 
--spec get_messages(Topic::binary())->{ok,Messages::list()} | error .
-get_messages(Topic)->
-    gen_server:call(?MODULE,{get_messages,Topic}).
+-spec get_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
+get_messages(TopicId,StartIndex,Count)->
+    gen_server:call(?MODULE,{get_messages,{TopicId,StartIndex,Count}}).
 
--spec get_subscriptions(User::string())->{ok,Channels::list()}  | {error,Reason::any()}.
-get_subscriptions(User)->
-    gen_server:call(?MODULE,{get_subscriptions,User}).
+-spec get_subscriptions(UserId::integer())->{ok,Channels::list()}  | {error,Reason::any()}.
+get_subscriptions(UserId)->
+    gen_server:call(?MODULE,{get_subscriptions,UserId}).
 
--spec publish(Topic::string(),Message::any())->ok.
-publish(Topic,Message)->
-    gen_server:cast(?MODULE, {publish,{Topic,Message}}).
-
-
--spec online(User::string(),Socket::pid())->ok.
-online(User,Socket)->
-    gen_server:call(?MODULE, {online,{User,Socket}}).
+-spec publish(TopicId::integer(),Message::any())->ok.
+publish(TopicId,Message)->
+    gen_server:cast(?MODULE, {publish,{TopicId,Message}}).
 
 
--spec offline(User::string() |iodata(),Socket::pid())->ok.
-offline(User,Socket)->
-    gen_server:call(?MODULE, {offline,{User,Socket}}).
-
--spec subscribe(User::string() | iodata(),Topic::string() |iodata())->OkResult::map() | already_subscribed | {error,Error::term()}.
-subscribe(User,Topic)->
-    gen_server:call(?MODULE, {subscribe,{User,Topic}}).
+-spec online(UserId::integer(),Socket::pid())->ok.
+online(UserId,Socket)->
+    gen_server:call(?MODULE, {online,{UserId,Socket}}).
 
 
--spec unsubscribe(User::string(),Topic::string())->OkResult::map()| not_joined | {error,Error::term()}.
-unsubscribe(User,Topic)->
-    gen_server:call(?MODULE, {unsubscribe,{User, Topic}}).
+-spec offline(UserId::integer() |iodata(),Socket::pid())->ok.
+offline(UserId,Socket)->
+    gen_server:call(?MODULE, {offline,{UserId,Socket}}).
+
+-spec subscribe(UserId::integer(),TopicId::integer() )->OkResult::map() | already_subscribed | {error,Error::term()}.
+subscribe(UserId,TopicId)->
+    gen_server:call(?MODULE, {subscribe,{UserId,TopicId}}).
+
+
+-spec unsubscribe(UserId::integer(),TopicId::integer())->OkResult::map()| not_joined | {error,Error::term()}.
+unsubscribe(UserId,TopicId)->
+    gen_server:call(?MODULE, {unsubscribe,{UserId, TopicId}}).
 
 
 start_link()->
@@ -136,49 +138,51 @@ handle_call({delete_topic,TopicId},_,State)->
         {error,Error}->{reply,{error,Error},State}
             
     end;
-handle_call({get_messages,Topic},_,State)->
-    Messages=ets:match(messages, {Topic,'$1'}),
+handle_call({get_messages,{TopicId,StartIndex,Count}},_,State)->
+    {ok,Messages}=storage:get_messages(TopicId, StartIndex, Count),
     {reply,{ok,Messages},State};
 
-handle_call({get_subscriptions,User},_,State)->
-    {ok,Subscriptions}=storage:get_user_subscriptions(User),
+handle_call({get_subscriptions,UserId},_,State)->
+    {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
     {reply,{ok,Subscriptions},State};
  
 
 
-handle_call({subscribe,{User,Topic}},{From,_},State)->
-    Reply=case storage:check_if_subscribed(Topic, User) of
+handle_call({subscribe,{UserId,TopicId}},{From,_},State)->
+    Reply=case storage:check_if_subscribed(TopicId, UserId) of
         {ok,true} -> already_subscribed;
-        {ok,false} ->ok=storage:subscribe(Topic, User),
-                {ok,Subscriptions}=storage:get_user_subscriptions(User),
-                UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic, subscriptions=>Subscriptions},
-                [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/=From],
+        {ok,false} ->ok=storage:subscribe(TopicId, UserId),
+                {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
+                UserEvent=#{user_event_kind => <<"subscribe">>,
+                topic => TopicId, subscriptions=>Subscriptions},
+                [send(Socket,{user_event,UserId,UserEvent})|| 
+                            Socket<-pg:get_members(to_binary(UserId)), Socket =/=From],
                 {ok,Subscriptions}
     end,
     {reply,Reply,State};
 
 
-handle_call({unsubscribe,{User,Topic}},{From,_},State)->
-    Reply=case storage:unsubscribe(Topic, User) of 
-                ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(User),
-                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => Topic, subscriptions=>Subscriptions},
-                        io:format("\nFrom:~p, Existing:~p\n",[From,pg:get_members(?F(User))]),
-                        [send(Socket,{user_event,User,UserEvent})|| Socket<-pg:get_members(?F(User)), Socket =/= From],
+handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
+    Reply=case storage:unsubscribe(TopicId, UserId) of 
+                ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
+                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => TopicId, subscriptions=>Subscriptions},
+                        [send(Socket,{user_event,UserId,UserEvent})
+                            || Socket<-pg:get_members(to_binary(UserId)), Socket =/= From],
                         {ok,Subscriptions};
                 not_joined->#{result=> <<"not joined">>}
           end,
     {reply,Reply,State};      
 
 
-handle_call({online,{User,Socket}},_,State)->
-    UserEventGroup= ?F(User),
-    ok=pg:join(User,Socket),
+handle_call({online,{UserId,Socket}},_,State)->
+    UserEventGroup= to_binary(UserId),
+    ok=pg:join(UserId,Socket),
     ok=pg:join(UserEventGroup, Socket),
     {reply,ok,State};
     
-handle_call({offline,{User,Socket}},_,State)->
-    UserEventGroup=?F(User),
-    ok=pg:leave(User, Socket),
+handle_call({offline,{UserId,Socket}},_,State)->
+    UserEventGroup=to_binary(UserId),
+    ok=pg:leave(UserId, Socket),
     ok=pg:leave(UserEventGroup,Socket),
     {reply,ok,State}.
 
@@ -188,11 +192,11 @@ handle_call({offline,{User,Socket}},_,State)->
 %% 
 %% Handling cast messages
 %% @end
-handle_cast({publish,{Topic,Message}},State)->
-    true=ets:insert(messages, {Topic,Message}),
-    {ok,Subscribers}=storage:get_subscriptions_for_topic(Topic),
+handle_cast({publish,{TopicId,Message}},State)->
+    ok=storage:write_chat_message(Message),
+    {ok,Subscribers}=storage:get_subscriptions_for_topic(TopicId),
     io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
-    io:format("\nSubscribers to topic ~p : ~p\n", [Topic,Subscribers]),
+    io:format("\nSubscribers to topic ~p : ~p\n", [TopicId,Subscribers]),
     [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
     {noreply,State}.
 
@@ -202,7 +206,6 @@ handle_cast({publish,{Topic,Message}},State)->
 %% @end
 handle_info(start,State)->
     ets:new(subscribers,[named_table,bag]),
-    ets:new(messages,[named_table,bag]),
     {noreply,State};
 
 handle_info(Message,State)->
@@ -216,3 +219,6 @@ online_sockets(User)->
     Sockets.
 
 
+to_binary(Num)->
+    Value=integer_to_binary(Num),
+    ?G(Value).

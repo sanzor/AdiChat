@@ -11,10 +11,11 @@ init(#{req :=Req})->
     {ok,UserMap}.
 
 websocket_init(State)->
-    #{<<"user">> :=User, <<"cookie">> :=Cookie}=State,
-    io:format("New User: ~p , Cookie:~p~n",[User,Cookie]),
-    ok=wsapp_server:online(User,self()),
-    {reply,ping,State}.
+    #{<<"user">> :=UserName, <<"cookie">> :=Cookie}=State,
+    {ok,User}=wsapp_server:create_user(#{name =>UserName}),
+    io:format("New User: ~p , Cookie:~p~n",[UserName,Cookie]),
+    ok=wsapp_server:online(UserName,self()),
+    {reply,ping,State#{<<"user">>=>User}}.
 
 websocket_info(send_ping,State)->
     {reply,ping,State};
@@ -51,9 +52,9 @@ terminate(_,_,State)->
     ok.
 
 
-handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">> := User})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
-    Reply=case wsapp_server:subscribe(User, Topic) of
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicId},_State=#{<<"user">> := User})->
+    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>TopicId},
+    Reply=case wsapp_server:subscribe(User, TopicId) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
         {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,    
@@ -68,10 +69,10 @@ handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=U
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Decode,_State)->
-    #{<<"topic">> := Topic}=Decode,
-    #{<<"user">>:= User}=_State,
-    Json=json:encode(Decode#{<<"user">>=>User},[maps,binary]),
-    ok=wsapp_server:publish(Topic, Json),
+    #{<<"topic">> := TopicId}=Decode,
+    #{<<"user">>:= #{ id:=Id}}=_State,
+    Json=json:encode(Decode#{<<"user_id">>=>Id},[maps,binary]),
+    ok=wsapp_server:publish(TopicId, Json),
     {ok,noreply};
 
 handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->

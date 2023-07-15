@@ -3,6 +3,8 @@
          index/1,
          create_user/1,
          delete_user/1,
+         create_topic/1,
+         delete_topic/1,
          publish/1,
          subscribe/1,
          unsubscribe/1
@@ -27,6 +29,21 @@ delete_user(UserId)->
             {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
 end.  
 
+create_topic(TopicData)->
+    case wsapp_server:create_topic(TopicData) of
+        {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
+        {error,{bad_request,ValidationErrors}}->
+            {json,400,#{<<"Content-Type">>=> <<"application/json">>},ValidationErrors};
+        {error,Error}->
+            {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
+end.
+        
+delete_topic(TopicId)->
+    case wsapp_server:delete_topic(TopicId) of
+        ok -> {status,200};
+        {error,Error}->
+            {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
+end.  
 publish(_Req=#{json := #{ <<"topic">> := Topic , <<"sender">> := _Sender , <<"message">> := Message}})->
     ok=wsapp_server:publish(Topic,Message),
     {status,200}.
