@@ -55,10 +55,14 @@ create_user(_UserData=#{<<"name">> :=UserName})->
 
 -spec delete_user(UserId::number())-> ok  | {error,Error::any()}.
 delete_user(UserId)->
-    Statement= <<"DELETE FROM  wsuser WHERE id = $1">>,
-    {ok,C}=create_connection(),
-    {ok,Rows}=epgsql:equery(C,Statement,[UserId]),
-    if Rows>0 -> ok ; true -> {error,user_does_not_exist} end.
+    try
+        Statement= <<"DELETE FROM  wsuser WHERE id = $1">>,
+        {ok,C}=create_connection(),
+        {ok,Rows}=epgsql:equery(C,Statement,[UserId]),
+        if Rows>0 -> ok ; true -> {error,user_does_not_exist} end
+    catch
+        Error:Reason -> {error,{Error,Reason}}
+    end.
 
 
 
@@ -80,10 +84,14 @@ create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName , <<
 
 -spec delete_topic(Id::integer())-> ok | {error,Error::any()}.
 delete_topic(Id)->
-    Statement= <<"DELETE FROM  topic WHERE id=$1">>,
-    {ok,C}=create_connection(),
-    {ok,Rows}=epgsql:equery(C,Statement,[Id]),
-    if Rows>0 -> ok ; true -> {error,topic_does_not_exist} end.
+    try
+        Statement= <<"DELETE FROM  topic WHERE id=$1">>,
+        {ok,C}=create_connection(),
+        {ok,Rows}=epgsql:equery(C,Statement,[Id]),
+        if Rows>0 -> ok ; true -> {error,topic_does_not_exist} end
+    catch
+    Error:Reason->{error,{Error,Reason}}
+end.
 
 -spec subscribe(TopicId::integer(),UserId::integer())-> ok | {error,Error::any()}.
 subscribe(TopicId,UserId)->
