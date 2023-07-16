@@ -108,9 +108,11 @@ init(Args)->
 %% @end
 
 handle_call({create_user,UserData},_,State)->
+    
     case validator:validate_user_data(UserData) of
         {false,ValidationErrors} -> {error,{400,ValidationErrors}};
-         true -> case storage:create_user(UserData) of
+         true -> io:format("\nserver:~p\n",[UserData]),
+                case storage:create_user(UserData) of
                     {ok,User} -> {reply,{ok,User},State};
                     {error,Error}->{reply,{error,Error},State}
                  end

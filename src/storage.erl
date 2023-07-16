@@ -1,5 +1,6 @@
 -module(storage).
 -export([
+         to_map/3,
          create_user/1,
          delete_user/1,
          create_topic/1,
@@ -36,11 +37,18 @@ create_connection()->
     {ok,C}.
 
 -spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
-create_user(_UserData=#{name :=UserName})->
-    Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNING *">>,
-    {ok,C}=create_connection(),
-    {ok,_,[Result]}=epgsql:equery(C,Statement,[UserName]),
-    {ok,maps:from_list(Result)}.
+create_user(_UserData=#{<<"name">> :=UserName})->
+   
+    try
+        Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNING *">>,
+        {ok,C}=create_connection(),
+        {ok,_,Columns,[Values]}=epgsql:equery(C,Statement,[UserName]),
+        Value=to_map(Columns, tuple_to_list(Values),#{}),
+        {ok,Value}
+    catch
+        Error:Reason -> {error,{Error,Reason}}
+    end.
+
      
 
 
@@ -49,17 +57,23 @@ create_user(_UserData=#{name :=UserName})->
 delete_user(UserId)->
     Statement= <<"DELETE FROM  wsuser WHERE id = $1">>,
     {ok,C}=create_connection(),
-    {ok,_}=epgsql:equery(C,Statement,[UserId]),
-     ok.
+    {ok,Rows}=epgsql:equery(C,Statement,[UserId]),
+    if Rows>0 -> ok ; true -> {error,user_does_not_exist} end.
 
 
 
 -spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
-create_topic(_TopicData = #{user_id := UserId,name := TopicName , user_id := UserId})->
-    Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
-    {ok,C}=create_connection(),
-    {ok,_}=epgsql:equery(C,Statement,[TopicName,UserId]),
-     ok.
+create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName , <<"user_id">> := UserId})->
+    try
+        Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
+        {ok,C}=create_connection(),
+        {ok,_,Columns,[Values]}=epgsql:equery(C,Statement,[TopicName,UserId]),
+         Value=to_map(Columns, tuple_to_list(Values),#{}),
+        {ok,Value}
+    catch
+        Error:Reason -> {error,{Error,Reason}}
+    end.
+   
 
 
 
@@ -69,7 +83,7 @@ delete_topic(Id)->
     Statement= <<"DELETE FROM  topic WHERE id=$1">>,
     {ok,C}=create_connection(),
     {ok,Rows}=epgsql:equery(C,Statement,[Id]),
-    if Rows>0 -> ok ; true -> {error,could_not_delete} end.
+    if Rows>0 -> ok ; true -> {error,topic_does_not_exist} end.
 
 -spec subscribe(TopicId::integer(),UserId::integer())-> ok | {error,Error::any()}.
 subscribe(TopicId,UserId)->
@@ -134,9 +148,15 @@ get_messages(TopicId,StartIndex,Count)->
     {ok,normalize(Result)}.
 
 -spec write_chat_message(Message::any())->ok | {error,Error::any()}.
-write_chat_message(_Message=#{ topic:=TopicId,user_id :=UserId,content:=Content,createdAt:=CreatedAt,timezone :=Timezone})->
+write_chat_message(_Message=#{ 
+                   <<"topic">>:=TopicId,
+                   <<"user_id">> :=UserId,
+                   <<"content">>:=Content,
+                   <<"createdAt">>:=CreatedAt,
+                   <<"timezone">> :=Timezone})->
     
-    Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) values ($1,$2,$3,$4,$5)">>,
+    Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) 
+                values ($1,$2,$3,$4,$5)">>,
     {ok,C}=create_connection(),
     {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]),
      ok.   
@@ -164,3 +184,8 @@ normalize([],Acc) ->
     Acc;
 normalize([{Head}|Tail], Acc) when is_list([Head|Tail])->
     normalize(Tail,[Head|Acc]).
+
+to_map([],[],Acc)->Acc;
+to_map([Column|Columns],[Value|Values],Map)->
+    Key=lists:nth(2, tuple_to_list(Column)),
+    to_map(Columns,Values,Map#{Key=>Value}).
