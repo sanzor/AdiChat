@@ -11,6 +11,7 @@
          start_link/0,
          create_user/1,
          delete_user/1,
+         get_user/1,
          create_topic/1,
          delete_topic/1,
          publish/2,
@@ -29,6 +30,11 @@
 }).
 %----------------------------API ----------------------------------%
 
+-spec get_user(UserId::integer())->{ok,User::map()} | {error,Error::any()} | user_does_not_exist.
+
+get_user(UserId)->
+    gen_serrver:call(?MODULE,{get_user,UserId}).
+
 -spec create_user(UserData::any())->{ok,User::any()} 
                         | {error,{400,ValidationErrors::list()}}
                         | {error,Error::any()}.
@@ -42,7 +48,8 @@ delete_user(UserId)->
     gen_server:call(?MODULE,{delete_user,UserId}).
 
 
--spec create_topic(TopicData::any())->{ok,Topic::any()} 
+-spec create_topic(TopicData::any())->
+                        {ok,Topic::any()} 
                         | {error,{400,ValidationErrors::list()}}
                         | {error,Error::any()}.
 
@@ -107,6 +114,11 @@ init(Args)->
 %% Handling call messages
 %% @end
 
+handle_call({get_user,UserId},_,State)->
+    case storage:create_user(UserId) of
+        {ok,User} ->{reply,{ok,User},State};
+        user_does_not_exist ->{reply,user_does_not_exist,State}
+    end;
 handle_call({create_user,UserData},_,State)->
     
     case validator:validate_user_data(UserData) of

@@ -8,13 +8,18 @@ const currentChannel=document.getElementById("currentChannelNameLabel");
 const channelsContainer=document.getElementById("channelsContainer");
 const chatContainer=document.getElementById("messagesContainer");
 
-function onConnect(){
+ function  onConnect(){
+    
     connect();
-    urlBox.setAttribute("disabled",true);
-    disconnectBtn.disabled=false;
-    connectBtn.disabled=true;
-    subscribeBtn.disabled=false;
-    subscribeBox.disabled=false;
+    
+        urlBox.setAttribute("disabled",true);
+        disconnectBtn.disabled=false;
+        connectBtn.disabled=true;
+        subscribeBtn.disabled=false;
+        subscribeBox.disabled=false;
+  
+   
+   
 }
 function onDisconnect(){
     command_disconnect();
@@ -22,6 +27,9 @@ function onDisconnect(){
     
 }
 function reset(){
+
+
+
     urlBox.disabled=false;
     connectBtn.disabled=false;
     disconnectBtn.disabled=true;
@@ -39,3 +47,4 @@ function onPublish(){
     var message=document.getElementById("chatSendMessageBox").value;
     command_publish(channel,message);
 }
+

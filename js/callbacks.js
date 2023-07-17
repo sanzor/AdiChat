@@ -79,3 +79,12 @@ function callback_get_subscriptions(data){
     var subscriptions=data.result;
     createChannelsContainer(subscriptions);
 }
+
+function callback_create_user(data){
+    
+    localStorage.user={
+        "id":data.id,
+        "name":data.name
+    };
+    console.log("Setting user with:"+localStorage.user);
+}

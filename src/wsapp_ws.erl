@@ -11,10 +11,13 @@ init(#{req :=Req})->
     {ok,UserMap}.
 
 websocket_init(State)->
-    #{<<"user">> :=UserName, <<"cookie">> :=Cookie}=State,
-    {ok,User}=wsapp_server:create_user(#{name =>UserName}),
-    io:format("New User: ~p , Cookie:~p~n",[UserName,Cookie]),
-    ok=wsapp_server:online(UserName,self()),
+    User=case maps:find(State) of
+            error -> wsapp_server:create_user(State);
+            {ok,_=#{<<"id">> := Id}} -> wsapp_server:get_user(Id)
+         end,
+    io:format("User is:~p",[User]),      
+    #{<<"id">> :=UserId}=User,
+    ok=wsapp_server:online(UserId,self()),
     {reply,ping,State#{<<"user">>=>User}}.
 
 websocket_info(send_ping,State)->
@@ -51,6 +54,29 @@ terminate(_,_,State)->
     wsapp_server:offline(User,self()),
     ok.
 
+handle_command(<<"create-topic">>,TopicData,_State)->
+    BaseReply=#{kind=>"command_result",command=> <<"create-topic">>},
+    Reply=case wsapp_server:create_topic(TopicData) of
+        {ok,Topic}->BaseReply#{result=>Topic};
+        {error,Error}->{error,Error}
+    end,
+    {ok,reply,Reply};
+
+handle_command(<<"get-user">>,TopicData,_State)->
+    BaseReply=#{kind=>"command_result",command=> <<"create-topic">>},
+    Reply=case wsapp_server:create_topic(TopicData) of
+        {ok,Topic}->BaseReply#{result=>Topic};
+        {error,Error}->{error,Error}
+    end,
+    {ok,reply,Reply};
+
+handle_command(<<"create-user">>,UserData,_State)->
+    BaseReply=#{kind=>"command_result",command=> <<"create-user">>},
+    Reply=case wsapp_server:create_user(UserData) of
+        {ok,Topic}->BaseReply#{result=>Topic};
+        {error,Error}->{error,Error}
+    end,
+    {ok,reply,Reply};
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicId},_State=#{<<"user">> := User})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>TopicId},

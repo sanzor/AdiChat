@@ -11,7 +11,7 @@ routes(_Environment) ->
       security => false,
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
-                 {"/ws/user/:user/cookie/:cookie",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
+                 {"/ws/user/:user",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
                  {"/create-user",{wsapp_main_controller,create_user},#{methods=>[post]}},
                  {"/delete-user",{wsapp_main_controller,delete_user},#{methods=>[delete]}},
                  {"/create-topic",{wsapp_main_controller,create_topic},#{methods=>[post]}},
