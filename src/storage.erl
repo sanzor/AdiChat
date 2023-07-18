@@ -2,6 +2,7 @@
 -export([
          to_map/3,
          create_user/1,
+         get_user/1,
          delete_user/1,
          create_topic/1,
          delete_topic/1,
@@ -34,6 +35,14 @@ create_connection()->
         timeout=>4000
     }),
     {ok,C}.
+    
+-spec get_user(UserId::integer())->{ok,User::map()} | {error,Error::any()}.
+get_user(UserId)->
+    Statement= <<"Select * FROM wsuser WHERE id=$1">>,
+    {ok,C}=create_connection(),
+    {ok,[Result]}=epgsql:equery(C,Statement,[UserId]),
+    {ok,Result}.
+
 
 -spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
 create_user(_UserData=#{<<"name">> :=UserName})->

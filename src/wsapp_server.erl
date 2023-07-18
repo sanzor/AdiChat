@@ -115,7 +115,7 @@ init(Args)->
 %% @end
 
 handle_call({get_user,UserId},_,State)->
-    case storage:create_user(UserId) of
+    case storage:get_user(UserId) of
         {ok,User} ->{reply,{ok,User},State};
         user_does_not_exist ->{reply,user_does_not_exist,State}
     end;

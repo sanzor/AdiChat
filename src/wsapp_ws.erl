@@ -11,14 +11,17 @@ init(#{req :=Req})->
     {ok,UserMap}.
 
 websocket_init(State)->
-    User=case maps:find(State) of
-            error -> wsapp_server:create_user(State);
-            {ok,_=#{<<"id">> := Id}} -> wsapp_server:get_user(Id)
+    ResultingUser=case maps:find(<<"id">>,State) of
+            error -> {ok,User}=wsapp_server:create_user(State),
+                               User;
+                     
+            {ok,_=#{<<"id">> := Id}} ->{ok,User}= wsapp_server:get_user(Id),
+                                        User
          end,
-    io:format("User is:~p",[User]),      
-    #{<<"id">> :=UserId}=User,
+    io:format("User is:~p",[ResultingUser]),      
+    #{<<"id">> :=UserId}=ResultingUser,
     ok=wsapp_server:online(UserId,self()),
-    {reply,ping,State#{<<"user">>=>User}}.
+    {reply,ping,State#{<<"user">>=>ResultingUser}}.
 
 websocket_info(send_ping,State)->
     {reply,ping,State};
