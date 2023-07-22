@@ -46,7 +46,7 @@ get_user(UserId)->
 
 -spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
 create_user(_UserData=#{<<"name">> :=UserName})->
-   
+   io:format("\nInside create_user storage\n:~p",[_UserData]),
     try
         Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNING *">>,
         {ok,C}=create_connection(),

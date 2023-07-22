@@ -10,21 +10,17 @@ init(#{req :=Req})->
     #{bindings :=UserMap}=Req,
     {ok,UserMap}.
 
-websocket_init(State)->
-    ResultingUser=case maps:find(<<"id">>,State) of
-            error -> {ok,User}=wsapp_server:create_user(State),
-                               User;
-                     
-            {ok,_=#{<<"id">> := Id}} ->{ok,User}= wsapp_server:get_user(Id),
-                                        User
-         end,
-    io:format("User is:~p",[ResultingUser]),      
-    #{<<"id">> :=UserId}=ResultingUser,
+websocket_init(State=#{<<"id">> :=Id})->
+     
+    {ok,User}= wsapp_server:get_user(Id),                         
+    io:format("User is:~p",[User]),      
+    #{<<"id">> :=UserId}=Id,
     ok=wsapp_server:online(UserId,self()),
-    {reply,ping,State#{<<"user">>=>ResultingUser}}.
+    {reply,ping,State#{<<"user">>=>User}}.
 
 websocket_info(send_ping,State)->
     {reply,ping,State};
+
 
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
@@ -77,7 +73,8 @@ handle_command(<<"create-user">>,UserData,_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-user">>},
     Reply=case wsapp_server:create_user(UserData) of
         {ok,Topic}->BaseReply#{result=>Topic};
-        {error,Error}->{error,Error}
+        {error,Error}->{error,Error};
+         already_exists->{error,user_already_exists}
     end,
     {ok,reply,Reply};
 

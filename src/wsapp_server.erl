@@ -120,13 +120,14 @@ handle_call({get_user,UserId},_,State)->
         user_does_not_exist ->{reply,user_does_not_exist,State}
     end;
 handle_call({create_user,UserData},_,State)->
-    
     case validator:validate_user_data(UserData) of
         {false,ValidationErrors} -> {error,{400,ValidationErrors}};
-         true -> io:format("\nserver:~p\n",[UserData]),
+        
+         true -> io:format("\n:~p\n",[UserData]),
                 case storage:create_user(UserData) of
                     {ok,User} -> {reply,{ok,User},State};
-                    {error,Error}->{reply,{error,Error},State}
+                    {error,Error}->{reply,{error,Error},State};
+                     _->{reply,already_exists,State}
                  end
     end;
 
