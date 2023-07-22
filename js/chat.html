@@ -25,9 +25,18 @@
                     <label id="subscribeLabel" class="subscribeLabel">Channel</label>
                     <button id="subscribeBtn" class="subscribeButton" type="button" onclick="subscribe()">Subscribe</button>
                 </div>
-                <div id="authPanel" class="buttonGroupPanel">
-                    <input id="usernameBox" type="text" value="adi">
-                    <label id="usernameLabel" class="subscribeLabel">Username</label>
+                <div id="authPanel" class="buttonGroupPanel form">
+                    <div class="formRow">
+                        <input  id="usernameBox" type="text" value="adi">
+                        <label id="usernameLabel" class="subscribeLabel">Username</label>
+                    </div>
+                    <div class="formRow">
+                        <input id="passwordBox" type="text" value="333">
+                        <label id="passwordLabel" class="subscribeLabel">Password</label>
+                    </div>
+                    <div class="formRow">
+                        <button id="loginBtn" onclick="resolveUser()">Login</button>
+                    </div>
                 </div>
             </div>
             <div id="mainPanel">

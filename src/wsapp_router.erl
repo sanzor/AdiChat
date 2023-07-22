@@ -12,7 +12,7 @@ routes(_Environment) ->
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
                  {"/ws/user/:user",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
-                 {"/create-user",{wsapp_main_controller,create_user},#{methods=>[post]}},
+                 {"/create-user",{wsapp_main_controller,create_user},#{methods=>[post,options]}},
                  {"/delete-user",{wsapp_main_controller,delete_user},#{methods=>[delete]}},
                  {"/create-topic",{wsapp_main_controller,create_topic},#{methods=>[post]}},
                  {"/delete-topic",{wsapp_main_controller,delete_topic},#{methods=>[delete]}},

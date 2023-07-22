@@ -22,7 +22,7 @@
          %% Priority is that the lowest number is executed first
          {plugins, [
           {pre_request, nova_request_plugin, #{ decode_json_body=>true,read_urlencoded_body=>true,parse_qs=>true}},
-          {pre_request, nova_cors_plugin, #{allow-origin=><<"*">>}}
+          {pre_request, nova_cors_plugin, #{allow_origins=><<"*">>}}
          ]}]},
   {wsapp,[{hosts,[]}]}
   %% Please change your app.src-file instead if you intend to add app-specific configurations

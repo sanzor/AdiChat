@@ -7,7 +7,7 @@ const urlBox=document.getElementById("urlBox");
 const currentChannel=document.getElementById("currentChannelNameLabel");
 const channelsContainer=document.getElementById("channelsContainer");
 const chatContainer=document.getElementById("messagesContainer");
-
+const baseUrl=document.getElementById("baseUrlBox");
  function  onConnect(){
     
     connect();
@@ -27,7 +27,7 @@ async function ResolveUser(){
         localStorage.user=user;
         return;
     }
-    getus
+   
 }
 async function createUserAsync(){
    
@@ -36,8 +36,11 @@ async function createUserAsync(){
     var username=usernameBox.value;
     var result=await postData(url, { name: username });
     console.log(result);
+    return result;
 }
+async function getUserAsync(){
 
+}
 async function postData(url = "", data = {}) {
     try {
         const response = await fetch(url, {

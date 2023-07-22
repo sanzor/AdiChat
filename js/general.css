@@ -101,3 +101,13 @@ body,
 .icon{
 
 }
+
+.formRow{
+    display:flex;
+    flex-direction: row;
+    
+}
+.form{
+    display:flex;
+    flex-direction: column;
+}
