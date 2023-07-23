@@ -3,6 +3,7 @@
          to_map/3,
          create_user/1,
          get_user/1,
+         get_user_by_email/1,
          delete_user/1,
          create_topic/1,
          delete_topic/1,
@@ -41,6 +42,12 @@ get_user(UserId)->
     Statement= <<"Select * FROM wsuser WHERE id=$1">>,
     {ok,C}=create_connection(),
     {ok,[Result]}=epgsql:equery(C,Statement,[UserId]),
+    {ok,Result}.
+
+get_user_by_email(Email)->
+    Statement= <<"Select * FROM wsuser WHERE email=$email">>,
+    {ok,C}=create_connection(),
+    {ok,[Result]}=epgsql:equery(C,Statement,[Email]),
     {ok,Result}.
 
 

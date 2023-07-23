@@ -12,6 +12,8 @@ routes(_Environment) ->
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
                  {"/ws/user/:user",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
+                 {"/get-user",{wsapp_main_controller,get_user},#{methods=>[get,options]}},
+                 {"/get-user-by-email",{wsapp_main_controller,get_user_by_email},#{methods=>[get,options]}},
                  {"/create-user",{wsapp_main_controller,create_user},#{methods=>[post,options]}},
                  {"/delete-user",{wsapp_main_controller,delete_user},#{methods=>[delete]}},
                  {"/create-topic",{wsapp_main_controller,create_topic},#{methods=>[post]}},

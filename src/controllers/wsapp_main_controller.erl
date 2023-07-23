@@ -2,6 +2,8 @@
 -export([
          index/1,
          create_user/1,
+         get_user/1,
+         get_user_by_email/1,
          delete_user/1,
          create_topic/1,
          delete_topic/1,
@@ -13,6 +15,12 @@
 index(_Req) ->
     {ok, [{message, "Hello world!"}]}.
 
+get_user(_Req=#{parsed_qs := #{<<"id">> := Id}})->
+    {ok,User}=wsapp_server:get_user(Id),
+    {json,200,#{<<"Content-Type">> => <<"application/json">>},User}.
+get_user_by_email(_Req=#{parsed_qs := #{<<"email">> :=Email , <<"password">> := _Password}})->
+    {ok,User}=wsapp_server:get_user_by_email(Email),
+    {json,200,#{<<"Content-Type">> => <<"application/json">>},User}.
 create_user(_Req=#{json := Json})->
     io:format("\nJson is: ~p\n",[Json]),
     case wsapp_server:create_user(Json) of
