@@ -1,5 +1,18 @@
+
+#loginModal{
+    display: block;
+    position: fixed;
+    background-color: rgba(0,0,0,0.2);
+    top:15%;
+    left:20%;
+    width: 50%;
+    height: 50%;
+}
+#registerPanel{
+    display:none;
+}
 #parentPanel {
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-items: start;
     height: inherit;

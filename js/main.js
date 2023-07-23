@@ -1,4 +1,5 @@
 
+import config from "./config";
 const connectBtn=document.getElementById("connectBtn");
 const disconnectBtn=document.getElementById("disconnectBtn");
 const subscribeBtn=document.getElementById("subscribeBtn");
@@ -31,7 +32,7 @@ async function ResolveUser(){
 }
 async function createUserAsync(){
    
-    var url="http://localhost:8080/create-user";
+    var url=`{config.baseHttpUrl}/create-user`;
     console.log(url);
     var username=usernameBox.value;
     var result=await postData(url, { name: username });
@@ -39,6 +40,8 @@ async function createUserAsync(){
     return result;
 }
 async function getUserAsync(){
+    var id=
+    var url=`{config.baseHttpUrl}/get-user?id=`;
 
 }
 async function postData(url = "", data = {}) {
