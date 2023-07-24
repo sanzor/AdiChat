@@ -1,34 +1,69 @@
 import config from "./config";
+
+
 const loginButton=document.getElementById("loginBtn");
 const registerButton=document.getElementById("registerBtn");
 const backToLoginBtn=document.getElementById("backToLoginBtn");
 const submitBtn=document.getElementById("submitBtn");
 
-const emailBox=document.getElementById("emailBox");
-const passwordBox=document.getElementById("passwordBox");
+const loginPanel=document.getElementById("loginPanel");
+const registerPanel=document.getElementById("registerPanel");
 
+const loginModal=document.getElementById("loginModal");
+const parentPanel=document.getElementById("parentPanel");
 
-const registerForm=document.getElementById("registerForm");
+const emailLoginBox=document.getElementById("emailLoginBox");
+const passwordLoginBox=document.getElementById("passwordLoginBox");
 
 loginButton.addEventListener("click",login);
 registerButton.addEventListener("click",register);
-submitBtn.addEventListener("click",submit);
+submitBtn.addEventListener("click",submitAsync);
 backToLoginBtn.addEventListener("click",backToLogin);
 
+//register
 
+
+const emailBox=document.getElementById("emailBox");
+const passwordBox=document.getElementById("passwordBox");
+const usernameBox=document.getElementById("usernameBox");
+const retypePasswordBox=document.getElementById("retypePasswordBox");
 
 async function login(){
-    const email=emailBox.value;
-    const password=passwordBox.value;
+    const email=emailLoginBox.value;
+    const password=passwordLoginBox.value;
     const url=`${config.baseHttpUrl}/get-user?email=${email}&password=${password}`;
     console.log(url);
     try{
         var user=await getUserByEmailAsync(url);
         localStorage.user=user;
+        console.log(`\nLogin succesfull for ${localStorage.user}\n`);
+        showMainPanel();
 
     }catch(error){
         console.log(error);
     }
+
+}
+
+function register(){
+   showRegisterPanel();
+}
+function getCreateUserData(){
+    let userData={
+        email:emailBox.value,
+        password:passwordBox.value,
+        retypePassword:retypePasswordBox.value,
+        username:usernameBox.value
+
+   }
+   return userData;
+}
+function validateCreateUserData(data){
+    if(data.password!=data.retypePassword){
+        console.log(error("Passwords do not match"));
+        return false;
+    }
+    return true;
 
 }
 
@@ -41,17 +76,17 @@ async function createUserAsync(){
     return result;
 }
 async function getUserByEmailAsync(){
-    var email=emailBox.value;
-    var password=passwordBox.value;
+    var email=emailLoginBox.value;
+    var password=passwordLoginBox.value;
     var url=`{config.baseHttpUrl}/get-user-by-email?email=${email}&password=${password}`;
-    var result=await getData(url);
+    var result=await getDataAsync(url);
     console.log(result);
     return result;
 
 }
 
-async function getData(url=""){
-    try {
+async function getDataAsync(url=""){
+   
         const response = await fetch(url, {
             method: "GET", // *GET, POST, PUT, DELETE, etc.
           //   mode: "no-cors", // no-cors, *cors, same-origin
@@ -63,9 +98,6 @@ async function getData(url=""){
           });
           console.log(response);
           return response.json(); 
-    }catch(error){
-        console.error(error);
-    }
 }
 async function postData(url = "", data = {}) {
     try {
@@ -88,18 +120,40 @@ async function postData(url = "", data = {}) {
         console.error(error);
     }
   }
-async function register(){
 
+
+async function submitAsync(){
+    var userData=getCreateUserData();
+    if(!validateCreateUserData(userData)){
+         console.log("Could not submit form. Bad arguments");
+         return;
+    }
+    try{
+     var user=await createUserAsync();
+     localStorage.user=user;
+    }catch(error){
+ 
+    }
 }
 
-async function submit(){
-
-}
-
-async function backToLogin(){
-
+ function backToLogin(){
+    showLoginPanel();
 }
 
 function showLoginPanel(){
-
+    registerPanel.style.display=none;
+    loginPanel.style.display=block;
+    
+}
+function showRegisterPanel(){
+    loginPanel.style.display=none;
+    registerPanel.style.display=block;
+}
+function showMainPanel(){
+    loginModal.style.display=none;
+    parentPanel.style.display=flex;
+}
+function showLoginModal(){
+    parentPanel.style.display=none;
+    loginModal.style.display=block;
 }
