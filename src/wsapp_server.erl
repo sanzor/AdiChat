@@ -34,12 +34,12 @@
 -spec get_user(UserId::integer())->{ok,User::map()} | {error,Error::any()} | user_does_not_exist.
 
 get_user(UserId)->
-    gen_serrver:call(?MODULE,{get_user,UserId}).
+    gen_server:call(?MODULE,{get_user,UserId}).
 
--spec get_user_by_email(Email::binary())->{ok,User::map()} | {error,Error::any()} | user_does_not_exist.
+-spec get_user_by_email(Email::binary())->{ok,User::map()} |  user_does_not_exist.
 
 get_user_by_email(Email)->
-    gen_serrver:call(?MODULE,{get_user,Email}).
+    gen_server:call(?MODULE,{get_user_by_email,Email}).
 
 -spec create_user(UserData::any())->{ok,User::any()} 
                         | {error,{400,ValidationErrors::list()}}
@@ -127,9 +127,9 @@ handle_call({get_user,UserId},_,State)->
     end;
 
 handle_call({get_user_by_email,Email},_,State)->
-    case storage:get_user(Email) of
+    case storage:get_user_by_email(Email) of
         {ok,User} ->{reply,{ok,User},State};
-        user_does_not_exist ->{reply,user_does_not_exist,State}
+         user_does_not_exist ->{reply,user_does_not_exist,State}
     end;
 handle_call({create_user,UserData},_,State)->
     case validator:validate_user_data(UserData) of

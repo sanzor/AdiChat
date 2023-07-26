@@ -1,4 +1,4 @@
-import config from "./config";
+import config from "./config.js";
 
 
 const loginButton=document.getElementById("loginBtn");
@@ -44,6 +44,12 @@ async function login(){
     }
 
 }
+function tryGetUser(){
+    if(localStorage.user==null){
+        return undefined;
+    }
+    return localStorage.user;
+}
 
 function register(){
    showRegisterPanel();
@@ -53,7 +59,7 @@ function getCreateUserData(){
         email:emailBox.value,
         password:passwordBox.value,
         retypePassword:retypePasswordBox.value,
-        username:usernameBox.value
+        name:usernameBox.value
 
    }
    return userData;
@@ -78,7 +84,7 @@ async function createUserAsync(){
 async function getUserByEmailAsync(){
     var email=emailLoginBox.value;
     var password=passwordLoginBox.value;
-    var url=`{config.baseHttpUrl}/get-user-by-email?email=${email}&password=${password}`;
+    var url=`${config.baseHttpUrl}/get-user-by-email?email=${email}&password=${password}`;
     var result=await getDataAsync(url);
     console.log(result);
     return result;
@@ -86,7 +92,7 @@ async function getUserByEmailAsync(){
 }
 
 async function getDataAsync(url=""){
-   
+        console.log(url);
         const response = await fetch(url, {
             method: "GET", // *GET, POST, PUT, DELETE, etc.
           //   mode: "no-cors", // no-cors, *cors, same-origin
@@ -94,7 +100,9 @@ async function getDataAsync(url=""){
             credentials: "same-origin", // include, *same-origin, omit
             redirect: "follow", // manual, *follow, error
             referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify(data), // body data type must match "Content-Type" header
+           
+
+
           });
           console.log(response);
           return response.json(); 
@@ -141,19 +149,19 @@ async function submitAsync(){
 }
 
 function showLoginPanel(){
-    registerPanel.style.display=none;
-    loginPanel.style.display=block;
+    registerPanel.style.display="none";
+    loginPanel.style.display="block";
     
 }
 function showRegisterPanel(){
-    loginPanel.style.display=none;
-    registerPanel.style.display=block;
+    loginPanel.style.display="none";
+    registerPanel.style.display="block";
 }
 function showMainPanel(){
-    loginModal.style.display=none;
-    parentPanel.style.display=flex;
+    loginModal.style.display="none";
+    parentPanel.style.display="flex";
 }
 function showLoginModal(){
-    parentPanel.style.display=none;
-    loginModal.style.display=block;
+    parentPanel.style.display="none";
+    loginModal.style.display="block";
 }

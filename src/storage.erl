@@ -44,20 +44,25 @@ get_user(UserId)->
     {ok,[Result]}=epgsql:equery(C,Statement,[UserId]),
     {ok,Result}.
 
+-spec get_user_by_email(UserId::integer())->{ok,User::map()} | user_does_not_exist.
 get_user_by_email(Email)->
-    Statement= <<"Select * FROM wsuser WHERE email=$email">>,
+    Statement= <<"Select * FROM wsuser WHERE email=$1">>,
     {ok,C}=create_connection(),
-    {ok,[Result]}=epgsql:equery(C,Statement,[Email]),
-    {ok,Result}.
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[Email]),
+    Value=case to_records(Columns, Values) of
+        [] ->user_does_not_exist;
+        Else->{ok,lists:nth(1, Else)}
+    end,
+    Value.
 
 
 -spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
-create_user(_UserData=#{<<"name">> :=UserName})->
-   io:format("\nInside create_user storage\n:~p",[_UserData]),
+create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">>:=Password})->
+   
     try
-        Statement= <<"INSERT INTO  wsuser(name) values ($1) RETURNING *">>,
+        Statement= <<"INSERT INTO  wsuser(email,password,name) values ($1,$2,$3) RETURNING *">>,
         {ok,C}=create_connection(),
-        {ok,_,Columns,[Values]}=epgsql:equery(C,Statement,[UserName]),
+        {ok,_,Columns,[Values]}=epgsql:equery(C,Statement,[Email,Password,Name]),
         Value=to_map(Columns, tuple_to_list(Values),#{}),
         {ok,Value}
     catch
@@ -207,6 +212,14 @@ normalize([],Acc) ->
     Acc;
 normalize([{Head}|Tail], Acc) when is_list([Head|Tail])->
     normalize(Tail,[Head|Acc]).
+
+
+to_records(Columns,[])->[];
+to_records(Columns,Values)->
+    to_records(Columns, Values,[]).
+to_records(Columns,[],Acc)->Acc;
+to_records(Columns,[CurrentRow|Rest],Acc)->
+    to_records(Columns,Rest, [to_map(Columns,tuple_to_list(CurrentRow),#{})|Acc]).
 
 to_map([],[],Acc)->Acc;
 to_map([Column|Columns],[Value|Values],Map)->
