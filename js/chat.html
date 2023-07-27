@@ -12,8 +12,8 @@
     <link rel="stylesheet" type="text/css" href="general.css" ></script>
     
     <body>
-        <div id="loginModal" class="buttonGroupPanel form">
-            <div id="loginPanel" class="buttonGroupPanel form">
+        <div id="loginModal">
+            <div id="loginPanel">
                 <div style="align-self: center;">Login</div>
                 <div class="formRow">
                     <input  id="emailLoginBox" type="text" value="adriansan_93@yahoo.com">
@@ -27,31 +27,38 @@
                     <button id="loginBtn">Login</button>
                     <button id="registerBtn">Register</button>
                 </div>
-            </div>
-            <div id="registerPanel">
-                    <div class="formRow">
-                        <input  id="emailBox" type="text" value="adriansan_93@yahoo.com">
-                        <label id="emailLabel" class="subscribeLabel">Email</label>
-                    </div>
-                    <div class="formRow">
-                        <input  id="usernameBox" type="text" value="Adrian">
-                        <label id="usernameLabel" class="subscribeLabel">Username</label>
-                    </div>
-                    <div class="formRow">
-                        <input id="passwordBox" type="text" value="333">
-                        <label id="passwordLabel" class="subscribeLabel">Password</label>
-                    </div>
-                    <div class="formRow">
-                        <input id="retypePasswordBox" type="text" value="333">
-                        <label id="retypePasswordLabel" class="subscribeLabel">Retype Password</label>
-                    </div>
-                    <div class="formRow">
-                        <button id="backToLoginBtn">Back to Login</button>
-                        <button id="submitBtn">Submit</button>
-                    </div>
+                <div  class="formRow">
+                    <p id="loginFailMessage"></p>
+                </div>
             </div>
         </div>
-      
+        <div id="registerModal">
+            <div id="registerPanel">
+                <div class="formRow">
+                    <input  id="emailBox" type="text" value="adriansan_93@yahoo.com">
+                    <label id="emailLabel" class="subscribeLabel">Email</label>
+                </div>
+                <div class="formRow">
+                    <input  id="usernameBox" type="text" value="Adrian">
+                    <label id="usernameLabel" class="subscribeLabel">Username</label>
+                </div>
+                <div class="formRow">
+                    <input id="passwordBox" type="text" value="333">
+                    <label id="passwordLabel" class="subscribeLabel">Password</label>
+                </div>
+                <div class="formRow">
+                    <input id="retypePasswordBox" type="text" value="333">
+                    <label id="retypePasswordLabel" class="subscribeLabel">Retype Password</label>
+                </div>
+                <div class="formRow">
+                    <button id="backToLoginBtn">Back to Login</button>
+                    <button id="submitBtn">Submit</button>
+                </div>
+                <div class="formRow">
+                    <p id="registerFailMessage"></p>
+                </div>
+        </div>
+        </div>
 
        </div>
         <div id="parentPanel" class="parent">
