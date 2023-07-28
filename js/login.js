@@ -22,42 +22,71 @@ loginButton.addEventListener("click",onLogin);
 registerButton.addEventListener("click",onRegister);
 submitBtn.addEventListener("click",onSubmit);
 backToLoginBtn.addEventListener("click",onBackToLogin);
+document.addEventListener("DOMContentLoaded",checkIfLoggedin);
 
 //register
-
-
 const emailBox=document.getElementById("emailBox");
 const passwordBox=document.getElementById("passwordBox");
 const usernameBox=document.getElementById("usernameBox");
 const retypePasswordBox=document.getElementById("retypePasswordBox");
 
+function checkIfLoggedin(){
+    if(localStorage.user.id==undefined || localStorage.user.id==null){
+        showLoginModal();
+        return;
+    }
+    console.log(localStorage.user.id);
+    showMainPanel();
+
+}
 async function onLogin(){
+    var loginResult=await loginAsync();
+    if(loginResult!=true){
+        showLoginErrorMessage(loginResult.message);
+        return;
+    }
+    console.log(`\nLogin succesfull for ${localStorage.user}\n`);
+    showMainPanel();
+
+}
+async function loginAsync(){
     const email=emailLoginBox.value;
     const password=passwordLoginBox.value;
     const url=`${config.baseHttpUrl}/get-user?email=${email}&password=${password}`;
-  
     try{
         var user=await getUserByEmailAsync(url);
         localStorage.user=user;
         console.log(`\nLogin succesfull for ${localStorage.user}\n`);
-        showMainPanel();
+        return true;
 
     }catch(error){
-        showLoginErrorMessage(error.message);
-        console.log(error);
+        return error;
     }
+}
+function onRegister(){
+    showRegisterModal();
+ }
 
+async function onSubmit(){
+    var userData=getCreateUserData();
+    var validateResult=validateCreateUserData(userData);
+    if(validateResult!=true){
+         
+         showSubmitFailMessage(`Invalid data having reason:${validateResult.message}`);
+         return;
+    }
+    try{
+     var user=await createUserAsync();
+     localStorage.user=user;
+    }catch(error){
+        showSubmitFailMessage();
+    }
 }
 
-function clearLoginErrorMessage(){
-    loginFailMessage.innerHTML=undefined;
-    loginFailMessage.style.display="none";
+ function onBackToLogin(){
+    showLoginModal();
 }
-function showLoginErrorMessage(message){
-    console.log("Inside show login error message");
-    loginFailMessage.innerHTML=`Could not login. Reason:${message}`;
-    loginFailMessage.style.display="block";
-}
+
 function tryGetUser(){
     if(localStorage.user==null){
         return undefined;
@@ -65,9 +94,7 @@ function tryGetUser(){
     return localStorage.user;
 }
 
-function onRegister(){
-   showRegisterModal();
-}
+
 function getCreateUserData(){
     let userData={
         email:emailBox.value,
@@ -89,7 +116,7 @@ function validateCreateUserData(data){
         
         return new Error("Passwords do not match");
     }
-    return true;
+    return data;
 
 }
 
@@ -150,29 +177,20 @@ async function postData(url = "", data = {}) {
   }
 
 
-async function onSubmit(){
-    var userData=getCreateUserData();
-    if(!validateCreateUserData(userData)){
-         console.log("Could not submit form. Bad arguments");
-         showRegisterFailMessage("Invalid data");
-         return;
-    }
-    try{
-     var user=await createUserAsync();
-     localStorage.user=user;
-    }catch(error){
-        show
-    }
+function clearLoginErrorMessage(){
+    loginFailMessage.innerHTML=undefined;
+    loginFailMessage.style.display="none";
 }
-
- function onBackToLogin(){
-    showLoginModal();
+function showLoginErrorMessage(message){
+    console.log("Inside show login error message");
+    loginFailMessage.innerHTML=`Could not login. Reason:${message}`;
+    loginFailMessage.style.display="block";
 }
-function cleanRegisterFailMessage(){
+function cleanSubmitFailMessage(){
     registerFailMessage.innerHTML=undefined;
     registerFailMessage.style.display="none";
 }
-function showRegisterFailMessage(message){
+function showSubmitFailMessage(message){
     registerFailMessage.value=message;
     registerFailMessage.style.display="block";
 }
@@ -184,7 +202,7 @@ function showLoginModal(){
     
 }
 function showRegisterModal(){
-    cleanRegisterFailMessage();
+    cleanSubmitFailMessage();
     parentPanel.style.display="none";
     loginModal.style.display="none";
     registerModal.style.display="block";
