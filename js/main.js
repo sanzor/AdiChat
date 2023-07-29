@@ -1,14 +1,25 @@
 
+import showLoginModal from "./login";
+
 const connectBtn=document.getElementById("connectBtn");
 const disconnectBtn=document.getElementById("disconnectBtn");
 const subscribeBtn=document.getElementById("subscribeBtn");
+const logoutBtn=document.getElementById("logoutBtn");
+
 const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
-const currentChannel=document.getElementById("currentChannelNameLabel");
-const channelsContainer=document.getElementById("channelsContainer");
-const chatContainer=document.getElementById("messagesContainer");
+
+const connectEvent=new CustomEvent("connect");
+
 const baseUrl=document.getElementById("baseUrlBox");
- function  onConnect(){
+
+
+connectBtn.addEventListener("click",onConnect);
+disconnectBtn.addEventListener("click",onDisconnect);
+subscribeBtn.addEventListener("click",onSubscribe);
+logoutBtn.addEventListener("click",onLogout);
+
+ function  onConnect(e){
     
     connect();
     urlBox.setAttribute("disabled",true);
@@ -16,25 +27,29 @@ const baseUrl=document.getElementById("baseUrlBox");
     connectBtn.disabled=true;
     subscribeBtn.disabled=false;
     subscribeBox.disabled=false;
-  
-   
-   
 }
 
+async function OnConnectEvent(){
 
-
-  
-
-
-
+}
 function onDisconnect(){
     command_disconnect();
     reset();
-    
 }
+
+function onSubscribe(){
+    command_subscribe(subscribeBox.value);
+}
+
+
+
+function onLogout(){
+    localStorage.removeItem("user"); 
+    showLoginModal();
+}
+
+
 function reset(){
-
-
 
     urlBox.disabled=false;
     connectBtn.disabled=false;
@@ -42,15 +57,5 @@ function reset(){
     subscribeBtn.disabled=true;
     subscribeBox.disabled=true;
 }
-function subscribe(){
-    command_subscribe(subscribeBox.value);
-}
 
-function onPublish(){
-    var channel=currentChannel.innerText;
-    var date=new Date().toDateString();
-    console.log("Channel publish:"+channel);
-    var message=document.getElementById("chatSendMessageBox").value;
-    command_publish(channel,message);
-}
 

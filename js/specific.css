@@ -16,7 +16,11 @@
     width: 50%;
     height: 25%;
 }
-
+#controlsModal{
+    display:none;
+    background-color: rgba(139, 139, 129, 0.842);
+    position: unset;
+}
 #registerModal{
     display:none;
     position:fixed;

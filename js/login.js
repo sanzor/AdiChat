@@ -1,20 +1,23 @@
 import config from "./config.js";
 
 
-const loginButton=document.getElementById("loginBtn");
-const registerButton=document.getElementById("registerBtn");
-const backToLoginBtn=document.getElementById("backToLoginBtn");
-const submitBtn=document.getElementById("submitBtn");
+import{
+    loginButton,
+    registerButton,
+    backToLoginBtn,
+    submitBtn,
+    registerModal,
+    registerFailMessage,
+    loginModal,
+    emailLoginBox,
+    passwordLoginBox,
+    loginFailMessage
+} from "./elements.js";
 
-const registerModal=document.getElementById("registerModal");
-const registerFailMessage=document.getElementById("registerFailMessage");
 
-const loginModal=document.getElementById("loginModal");
-const emailLoginBox=document.getElementById("emailLoginBox");
-const passwordLoginBox=document.getElementById("passwordLoginBox");
-const loginFailMessage=document.getElementById("loginFailMessage");
+import{emailBox,passwordBox,usernameBox,retypePasswordBox} from "./elements.js";
 
-const parentPanel=document.getElementById("parentPanel");
+import { subscribeToEvent,publishEvent} from "./eventBus.js";
 
 
 
@@ -22,13 +25,10 @@ loginButton.addEventListener("click",onLogin);
 registerButton.addEventListener("click",onRegister);
 submitBtn.addEventListener("click",onSubmit);
 backToLoginBtn.addEventListener("click",onBackToLogin);
-document.addEventListener("DOMContentLoaded",checkIfLoggedin);
+subscribeToEvent("DOMContentLoaded",checkIfLoggedin);
 
 //register
-const emailBox=document.getElementById("emailBox");
-const passwordBox=document.getElementById("passwordBox");
-const usernameBox=document.getElementById("usernameBox");
-const retypePasswordBox=document.getElementById("retypePasswordBox");
+
 
 function checkIfLoggedin(){
     if(localStorage.user.id==undefined || localStorage.user.id==null){
@@ -36,7 +36,7 @@ function checkIfLoggedin(){
         return;
     }
     console.log(localStorage.user.id);
-    showMainPanel();
+    publishEvent("connect",{});
 
 }
 async function onLogin(){
@@ -55,7 +55,7 @@ async function loginAsync(){
     const url=`${config.baseHttpUrl}/get-user?email=${email}&password=${password}`;
     try{
         var user=await getUserByEmailAsync(url);
-        localStorage.user=user;
+        localStorage.setItem("user",JSON.stringify(user));
         console.log(`\nLogin succesfull for ${localStorage.user}\n`);
         return true;
 
@@ -68,7 +68,9 @@ function onRegister(){
  }
 
 async function onSubmit(){
+    console.log("onSubmit");
     var userData=getCreateUserData();
+    console.log(userData);  
     var validateResult=validateCreateUserData(userData);
     if(validateResult!=true){
          
@@ -76,8 +78,9 @@ async function onSubmit(){
          return;
     }
     try{
+     console.log("Inside submit");
      var user=await createUserAsync();
-     localStorage.user=user;
+     localStorage.setItem("user",JSON.stringify(user));
     }catch(error){
         showSubmitFailMessage();
     }
@@ -120,11 +123,11 @@ function validateCreateUserData(data){
 
 }
 
-async function createUserAsync(){
+async function createUserAsync(userData){
     var url=`{config.baseHttpUrl}/create-user`;
     console.log(url);
-    var username=usernameBox.value;
-    var result=await postData(url, { name: username });
+    
+    var result=await postData(url,userData);
     console.log(result);
     return result;
 }

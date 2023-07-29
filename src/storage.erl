@@ -58,16 +58,16 @@ get_user_by_email(Email)->
 
 -spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
 create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">>:=Password})->
-   
-    try
         Statement= <<"INSERT INTO  wsuser(email,password,name) values ($1,$2,$3) RETURNING *">>,
         {ok,C}=create_connection(),
-        {ok,_,Columns,[Values]}=epgsql:equery(C,Statement,[Email,Password,Name]),
-        Value=to_map(Columns, tuple_to_list(Values),#{}),
-        {ok,Value}
-    catch
-        Error:Reason -> {error,{Error,Reason}}
-    end.
+        {ok,_,Columns,Values}=epgsql:equery(C,Statement,[Email,Password,Name]),
+        Value=case to_records(Columns, Values) of
+        [] ->user_does_not_exist;
+        Else->{ok,lists:nth(1, Else)}
+        end,
+        Value.
+
+   
 
      
 

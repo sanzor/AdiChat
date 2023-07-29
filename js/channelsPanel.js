@@ -1,3 +1,4 @@
+const channelsContainer=document.getElementById("channelsContainer");
 function resetSubscriptionTable(){
     var table=document.getElementById("channelsContainer");
     table.innerHTML='';
