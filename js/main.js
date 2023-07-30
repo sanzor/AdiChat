@@ -1,5 +1,5 @@
 
-import showLoginModal from "./login";
+import { publishEvent ,subscribeToEvent} from "./eventBus";
 
 const connectBtn=document.getElementById("connectBtn");
 const disconnectBtn=document.getElementById("disconnectBtn");
@@ -9,9 +9,7 @@ const logoutBtn=document.getElementById("logoutBtn");
 const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
 
-const connectEvent=new CustomEvent("connect");
 
-const baseUrl=document.getElementById("baseUrlBox");
 
 
 connectBtn.addEventListener("click",onConnect);
@@ -45,12 +43,11 @@ function onSubscribe(){
 
 function onLogout(){
     localStorage.removeItem("user"); 
-    showLoginModal();
+    publishEvent("showLoginModal",{});
 }
 
 
 function reset(){
-
     urlBox.disabled=false;
     connectBtn.disabled=false;
     disconnectBtn.disabled=true;

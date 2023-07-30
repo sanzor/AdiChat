@@ -1,13 +1,8 @@
 import config from "./config.js";
-
-
 import{
     loginButton,
     registerButton,
-    backToLoginBtn,
-    submitBtn,
     registerModal,
-    registerFailMessage,
     loginModal,
     emailLoginBox,
     passwordLoginBox,
@@ -15,18 +10,15 @@ import{
 } from "./elements.js";
 
 
-import{emailBox,passwordBox,usernameBox,retypePasswordBox} from "./elements.js";
-
 import { subscribeToEvent,publishEvent} from "./eventBus.js";
-
-
 
 loginButton.addEventListener("click",onLogin);
 registerButton.addEventListener("click",onRegister);
-submitBtn.addEventListener("click",onSubmit);
-backToLoginBtn.addEventListener("click",onBackToLogin);
-subscribeToEvent("DOMContentLoaded",checkIfLoggedin);
 
+
+subscribeToEvent("DOMContentLoaded",checkIfLoggedin);
+subscribeToEvent("showLoginModal",showLoginModal);
+const connectEvent=new CustomEvent("connect",{});
 //register
 
 
@@ -67,70 +59,10 @@ function onRegister(){
     showRegisterModal();
  }
 
-async function onSubmit(){
-    console.log("onSubmit");
-    var userData=getCreateUserData();
-    console.log(userData);  
-    var validateResult=validateCreateUserData(userData);
-    if(validateResult!=true){
-         
-         showSubmitFailMessage(`Invalid data having reason:${validateResult.message}`);
-         return;
-    }
-    try{
-     console.log("Inside submit");
-     var user=await createUserAsync();
-     localStorage.setItem("user",JSON.stringify(user));
-    }catch(error){
-        showSubmitFailMessage();
-    }
-}
-
- function onBackToLogin(){
-    showLoginModal();
-}
-
-function tryGetUser(){
-    if(localStorage.user==null){
-        return undefined;
-    }
-    return localStorage.user;
-}
 
 
-function getCreateUserData(){
-    let userData={
-        email:emailBox.value,
-        password:passwordBox.value,
-        retypePassword:retypePasswordBox.value,
-        name:usernameBox.value
 
-   }
-   return userData;
-}
-function validateCreateUserData(data){
-    if(data.username==undefined || data.username==null){
-        return new Error("Invalid username");
-    }
-    if(data.password==undefined || data.password==null){
-        return new Error("Invalid password");
-    }
-    if(data.password!=data.retypePassword){
-        
-        return new Error("Passwords do not match");
-    }
-    return data;
 
-}
-
-async function createUserAsync(userData){
-    var url=`{config.baseHttpUrl}/create-user`;
-    console.log(url);
-    
-    var result=await postData(url,userData);
-    console.log(result);
-    return result;
-}
 async function getUserByEmailAsync(){
     var email=emailLoginBox.value;
     var password=passwordLoginBox.value;
@@ -150,34 +82,11 @@ async function getDataAsync(url=""){
             credentials: "same-origin", // include, *same-origin, omit
             redirect: "follow", // manual, *follow, error
             referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-           
-
-
           });
           console.log(response);
           return response.json(); 
 }
-async function postData(url = "", data = {}) {
-    try {
-        const response = await fetch(url, {
-            method: "POST", // *GET, POST, PUT, DELETE, etc.
-          //   mode: "no-cors", // no-cors, *cors, same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            headers: {
-              "Content-Type": "application/json",
-              // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify(data), // body data type must match "Content-Type" header
-          });
-          console.log(response);
-          return response.json(); 
-    }catch(error){
-        console.error(error);
-    }
-  }
+
 
 
 function clearLoginErrorMessage(){
@@ -189,14 +98,8 @@ function showLoginErrorMessage(message){
     loginFailMessage.innerHTML=`Could not login. Reason:${message}`;
     loginFailMessage.style.display="block";
 }
-function cleanSubmitFailMessage(){
-    registerFailMessage.innerHTML=undefined;
-    registerFailMessage.style.display="none";
-}
-function showSubmitFailMessage(message){
-    registerFailMessage.value=message;
-    registerFailMessage.style.display="block";
-}
+
+
 function showLoginModal(){
     clearLoginErrorMessage();
     parentPanel.style.display="none";
