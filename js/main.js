@@ -10,6 +10,7 @@ const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
 
 
+subscribeToEvent("loadMainModal",onLoadMainModal);
 
 
 connectBtn.addEventListener("click",onConnect);
@@ -17,9 +18,24 @@ disconnectBtn.addEventListener("click",onDisconnect);
 subscribeBtn.addEventListener("click",onSubscribe);
 logoutBtn.addEventListener("click",onLogout);
 
+
+ function onLoadMainModal(e){
+    connect();
+    console.log(e);
+    showMainModal();
+}
  function  onConnect(e){
     
     connect();
+    showMainModal();
+}
+
+
+
+function showMainModal(){
+    registerModal.style.display="none";
+    loginModal.style.display="none";
+    parentPanel.style.display="flex";
     urlBox.setAttribute("disabled",true);
     disconnectBtn.disabled=false;
     connectBtn.disabled=true;
@@ -27,9 +43,6 @@ logoutBtn.addEventListener("click",onLogout);
     subscribeBox.disabled=false;
 }
 
-async function OnConnectEvent(){
-
-}
 function onDisconnect(){
     command_disconnect();
     reset();

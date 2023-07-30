@@ -17,14 +17,13 @@ registerButton.addEventListener("click",onRegister);
 
 
 subscribeToEvent("DOMContentLoaded",checkIfLoggedin);
-subscribeToEvent("showLoginModal",showLoginModal);
-const connectEvent=new CustomEvent("connect",{});
+subscribeToEvent("loadLoginModal",loadLoginModal);
 //register
 
 
 function checkIfLoggedin(){
     if(localStorage.user.id==undefined || localStorage.user.id==null){
-        showLoginModal();
+        loadLoginModal();
         return;
     }
     console.log(localStorage.user.id);
@@ -38,7 +37,7 @@ async function onLogin(){
         return;
     }
     console.log(`\nLogin succesfull for ${localStorage.user}\n`);
-    showMainPanel();
+    publishEvent("loadMainModal",{});
 
 }
 async function loginAsync(){
@@ -100,7 +99,7 @@ function showLoginErrorMessage(message){
 }
 
 
-function showLoginModal(){
+function loadLoginModal(){
     clearLoginErrorMessage();
     parentPanel.style.display="none";
     registerModal.style.display="none";
@@ -113,8 +112,4 @@ function showRegisterModal(){
     loginModal.style.display="none";
     registerModal.style.display="block";
 }
-function showMainPanel(){
-    registerModal.style.display="none";
-    loginModal.style.display="none";
-    parentPanel.style.display="flex";
-}
+
