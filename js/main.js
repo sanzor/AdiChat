@@ -1,6 +1,6 @@
 
 import {publishEvent ,subscribeToEvent} from "./bus.js";
-import { loadMainEvent } from "./events.js";
+
 
 const connectBtn=document.getElementById("connectBtn");
 const disconnectBtn=document.getElementById("disconnectBtn");
@@ -11,7 +11,10 @@ const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
 
 
-subscribeToEvent("loadMainModal",onLoadMainModal);
+subscribeToEvent("loadMain",onLoadMainModal);
+subscribeToEvent("loadLogin",()=>{
+    
+})
 
 
 connectBtn.addEventListener("click",onConnect);

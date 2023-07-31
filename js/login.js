@@ -11,7 +11,7 @@ import{
 
 
 import { subscribeToEvent,publishEvent} from "./bus.js";
-
+import { loadMainEvent } from "./events.js";
 loginButton.addEventListener("click",onLogin);
 registerButton.addEventListener("click",onRegister);
 
