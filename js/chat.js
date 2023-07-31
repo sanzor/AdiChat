@@ -1,7 +1,7 @@
 import { chatContainer,
     chatSendMessageBox,
     chatSendMessageButton,
-    currentChannel } from "./elements";
+    currentChannel } from "./elements.js";
 
 function onPublish(){
     var channel=currentChannel.innerText;

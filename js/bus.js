@@ -1,3 +1,6 @@
+
+
+
 const eventBus=new EventTarget();
 
 function publishEvent(eventName,eventData){
@@ -9,5 +12,4 @@ function subscribeToEvent(eventName,callback){
     eventBus.addEventListener(eventName,callback);
 }
 
-
-export{publishEvent,subscribeToEvent};
+export {publishEvent,subscribeToEvent};

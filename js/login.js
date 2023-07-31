@@ -10,7 +10,7 @@ import{
 } from "./elements.js";
 
 
-import { subscribeToEvent,publishEvent} from "./eventBus.js";
+import { subscribeToEvent,publishEvent} from "./bus.js";
 
 loginButton.addEventListener("click",onLogin);
 registerButton.addEventListener("click",onRegister);

@@ -1,5 +1,6 @@
 
-import { publishEvent ,subscribeToEvent} from "./eventBus";
+import {publishEvent ,subscribeToEvent} from "./bus.js";
+import { loadMainEvent } from "./events.js";
 
 const connectBtn=document.getElementById("connectBtn");
 const disconnectBtn=document.getElementById("disconnectBtn");
