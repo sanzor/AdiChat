@@ -11,24 +11,34 @@ import{
 
 
 import { subscribeToEvent,publishEvent} from "./bus.js";
-import { loadMainEvent } from "./events.js";
+import { hideElement,showElement } from "./utils.js";
 loginButton.addEventListener("click",onLogin);
 registerButton.addEventListener("click",onRegister);
 
 
-subscribeToEvent("DOMContentLoaded",checkIfLoggedin);
-subscribeToEvent("loadLoginModal",loadLoginModal);
+subscribeToEvent("DOMContentLoaded",onDomContentLoaded);
+subscribeToEvent("showLogin",onShowLogin);
+subscribeToEvent("hideLogin",onHideLogin);
 //register
 
 
-function checkIfLoggedin(){
+function onDomContentLoaded(){
     if(localStorage.user.id==undefined || localStorage.user.id==null){
-        loadLoginModal();
+        publishEvent("showLogin",{});
         return;
     }
     console.log(localStorage.user.id);
-    publishEvent("connect",{});
+    publishEvent("showMain",{});
 
+}
+
+
+
+function onShowLogin(ev){
+    showElement("loginModal");
+}
+function onHideLogin(ev){
+    hideElement("loginModal");
 }
 async function onLogin(){
     var loginResult=await loginAsync();
@@ -37,7 +47,8 @@ async function onLogin(){
         return;
     }
     console.log(`\nLogin succesfull for ${localStorage.user}\n`);
-    publishEvent("loadMainModal",{});
+    publishEvent("hideLogin",{});
+    publishEvent("showMain",{});
 
 }
 async function loginAsync(){
@@ -99,7 +110,7 @@ function showLoginErrorMessage(message){
 }
 
 
-function loadLoginModal(){
+function onShowLogin(){
     clearLoginErrorMessage();
     parentPanel.style.display="none";
     registerModal.style.display="none";

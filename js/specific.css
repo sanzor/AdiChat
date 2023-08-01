@@ -1,6 +1,6 @@
 
 #parentPanel {
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-items: start;
     height: inherit;

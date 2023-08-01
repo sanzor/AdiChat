@@ -1,5 +1,6 @@
 
 import {publishEvent ,subscribeToEvent} from "./bus.js";
+import { hideElement, showElement } from "./utils.js";
 
 
 const connectBtn=document.getElementById("connectBtn");
@@ -11,10 +12,9 @@ const subscribeBox=document.getElementById("subscribeBox");
 const urlBox=document.getElementById("urlBox");
 
 
-subscribeToEvent("loadMain",onLoadMainModal);
-subscribeToEvent("loadLogin",()=>{
-    
-})
+subscribeToEvent("showMain",onShowMain);
+subscribeToEvent("hideMain",onHideMain);
+subscribeToEvent("connect",{});
 
 
 connectBtn.addEventListener("click",onConnect);
@@ -23,18 +23,18 @@ subscribeBtn.addEventListener("click",onSubscribe);
 logoutBtn.addEventListener("click",onLogout);
 
 
- function onLoadMainModal(e){
-    connect();
-    console.log(e);
-    showMainModal();
+function onShowMain(e){
+    showElement("mainModal");
+    publishEvent("connect");
+}
+function onHideMain(e){
+    hideElement("mainModal");
 }
  function  onConnect(e){
     
     connect();
     showMainModal();
 }
-
-
 
 function showMainModal(){
     registerModal.style.display="none";
