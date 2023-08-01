@@ -1,6 +1,7 @@
 
 import {publishEvent ,subscribeToEvent} from "./bus.js";
-import { hideElement, showElement } from "./utils.js";
+import {hideElement, showElement } from "./utils.js";
+import {connect} from "./sock.js";
 
 
 const connectBtn=document.getElementById("connectBtn");
@@ -9,15 +10,14 @@ const subscribeBtn=document.getElementById("subscribeBtn");
 const logoutBtn=document.getElementById("logoutBtn");
 
 const subscribeBox=document.getElementById("subscribeBox");
-const urlBox=document.getElementById("urlBox");
 
 
 subscribeToEvent("showMain",onShowMain);
 subscribeToEvent("hideMain",onHideMain);
-subscribeToEvent("connect",{});
+subscribeToEvent("connect",onConnect);
 
 
-connectBtn.addEventListener("click",onConnect);
+connectBtn.addEventListener("click",btnConnect);
 disconnectBtn.addEventListener("click",onDisconnect);
 subscribeBtn.addEventListener("click",onSubscribe);
 logoutBtn.addEventListener("click",onLogout);
@@ -25,7 +25,7 @@ logoutBtn.addEventListener("click",onLogout);
 
 function onShowMain(e){
     showElement("mainModal");
-    publishEvent("connect");
+    publishEvent("connect",{});
 }
 function onHideMain(e){
     hideElement("mainModal");
@@ -36,20 +36,10 @@ function onHideMain(e){
     showMainModal();
 }
 
-function showMainModal(){
-    registerModal.style.display="none";
-    loginModal.style.display="none";
-    parentPanel.style.display="flex";
-    urlBox.setAttribute("disabled",true);
-    disconnectBtn.disabled=false;
-    connectBtn.disabled=true;
-    subscribeBtn.disabled=false;
-    subscribeBox.disabled=false;
-}
+
 
 function onDisconnect(){
     command_disconnect();
-    reset();
 }
 
 function onSubscribe(){
@@ -60,16 +50,10 @@ function onSubscribe(){
 
 function onLogout(){
     localStorage.removeItem("user"); 
-    publishEvent("showLoginModal",{});
+    publishEvent("hideMain",{});
+    publishEvent("showLogin",{});
 }
+function btnConnect(){}
 
-
-function reset(){
-    urlBox.disabled=false;
-    connectBtn.disabled=false;
-    disconnectBtn.disabled=true;
-    subscribeBtn.disabled=true;
-    subscribeBox.disabled=true;
-}
 
 

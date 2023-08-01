@@ -1,15 +1,6 @@
 import config from "./config.js";
-import{
-    loginButton,
-    registerButton,
-    registerModal,
-    loginModal,
-    emailLoginBox,
-    passwordLoginBox,
-    loginFailMessage
-} from "./elements.js";
-
-
+import{loginButton,registerButton,registerModal,loginModal,emailLoginBox,passwordLoginBox,loginFailMessage} 
+from "./elements.js";
 import { subscribeToEvent,publishEvent} from "./bus.js";
 import { hideElement,showElement } from "./utils.js";
 loginButton.addEventListener("click",onLogin);
@@ -19,8 +10,6 @@ registerButton.addEventListener("click",onRegister);
 subscribeToEvent("DOMContentLoaded",onDomContentLoaded);
 subscribeToEvent("showLogin",onShowLogin);
 subscribeToEvent("hideLogin",onHideLogin);
-//register
-
 
 function onDomContentLoaded(){
     if(localStorage.user.id==undefined || localStorage.user.id==null){
@@ -31,8 +20,6 @@ function onDomContentLoaded(){
     publishEvent("showMain",{});
 
 }
-
-
 
 function onShowLogin(ev){
     showElement("loginModal");
@@ -109,14 +96,6 @@ function showLoginErrorMessage(message){
     loginFailMessage.style.display="block";
 }
 
-
-function onShowLogin(){
-    clearLoginErrorMessage();
-    parentPanel.style.display="none";
-    registerModal.style.display="none";
-    loginModal.style.display="block";
-    
-}
 function showRegisterModal(){
     cleanSubmitFailMessage();
     parentPanel.style.display="none";

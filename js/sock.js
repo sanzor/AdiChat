@@ -1,4 +1,5 @@
 
+export{connect};
 var socket=null;
 
 function get_url(){
