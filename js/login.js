@@ -1,10 +1,10 @@
 import config from "./config.js";
-import{loginButton,registerButton,emailLoginBox,passwordLoginBox,loginFailMessage} 
+import{loginButton,emailLoginBox,passwordLoginBox,loginFailMessage, registerBtn} 
 from "./elements.js";
 import { subscribeToEvent,publishEvent} from "./bus.js";
 import { hideElement,showElement } from "./utils.js";
 loginButton.addEventListener("click",onLogin);
-registerButton.addEventListener("click",onRegister);
+registerBtn.addEventListener("click",onRegister);
 
 
 subscribeToEvent("DOMContentLoaded",onDomContentLoaded);
@@ -16,9 +16,10 @@ function onDomContentLoaded(){
         publishEvent("showLogin",{});
         return;
     }
+    
     console.log(localStorage.user.id);
     publishEvent("showMain",{});
-    
+
 }
 
 function onShowLogin(ev){
@@ -55,8 +56,8 @@ async function loginAsync(){
 function onRegister(){
     clearLoginErrorMessage();
     publishEvent("hideLogin",{});
-    console.log("sending register event");
     publishEvent("showRegister",{});
+    
  }
 
 

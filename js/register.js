@@ -16,8 +16,11 @@ submitBtn.addEventListener("click",onSubmit);
 backToLoginBtn.addEventListener("click",onBackToLogin);
 
 
-function onShowRegister(ev){
-    console.log("inside onshowregister");
+
+
+
+function onShowRegister(_){
+    console.log("called register");
     showElement("registerModal");
 }
 function onHideRegister(ev){

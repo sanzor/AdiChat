@@ -5,7 +5,7 @@ const eventBus=new EventTarget();
 
 function publishEvent(eventName,eventData){
     const customEvent=new CustomEvent(eventName,{ data:eventData});
-    eventBus.dispatchEvent(customEvent);
+    return eventBus.dispatchEvent(customEvent);
 }
 
 function subscribeToEvent(eventName,callback){

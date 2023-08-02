@@ -19,3 +19,4 @@ ws1/
 ws2/
 private/
 /resources/rebar.lock
+rebar3.crashdump

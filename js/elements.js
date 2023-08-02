@@ -12,7 +12,7 @@ const currentChannel=document.getElementById("currentChannelNameLabel");
 
 export{
     loginButton,
-    registerButton,
+    registerBtn,
     backToLoginBtn,
     submitBtn,
     registerModal,
@@ -24,7 +24,7 @@ export{
 };
 
 const loginButton=document.getElementById("loginBtn");
-const registerButton=document.getElementById("registerBtn");
+const registerBtn=document.getElementById("registerBtn");
 const backToLoginBtn=document.getElementById("backToLoginBtn");
 const submitBtn=document.getElementById("submitBtn");
 
