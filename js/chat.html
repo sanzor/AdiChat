@@ -64,40 +64,36 @@
         </div>
 
        </div>
-       <div id="controlsModal">
+       
+       <div id="mainModal">
+        <div id="controlsModal">
             <button id="logoutBtn">Logout</button>
        </div>
-       <div id="mainModal">
-       
-            <div id="parentPanel" class="parent">
-            
-                <div id="buttonGroupsPanel" class="buttonGroupsPanel">
-                    <div id="connectButtonsPanel" >
+        <div id="parentPanel" class="parent">
+            <div id="buttonGroupsPanel" class="buttonGroupsPanel">
+                <div id="connectButtonsPanel" >
                         <label id="urlLabel"> Url</label>
                         <input id="urlBox" class="urlBox" type="text" value="ws://localhost:8080/ws/user/adi"></input>
                         <button id="connectBtn" type="button">Connect</button>
                         <button id="disconnectBtn" class="disconnectButton" type="button" value="Disconnect">
                             Disconnect
                         </button>
-                    </div>
-                    <div id="subscribeButtonPanel" class="panel">
+                </div>
+                <div id="subscribeButtonPanel" class="panel">
                         <input  id="subscribeBox" type="text" value="">
                         <label id="subscribeLabel" class="subscribeLabel">Channel</label>
                         <button id="subscribeBtn" class="subscribeButton" type="button">Subscribe</button>
-                    </div>
-                   
-                </div>
-                <div id="mainPanel">
-                    <div id="channelsPanel" class="channelsPanel">
-                        <label id="channelsLabel">Channels</label>
+                </div> 
+            </div>
+            <div id="mainPanel">
+                <div id="channelsPanel" class="channelsPanel">
+                    <label id="channelsLabel">Channels</label>
                         <div id="channelsAreaPanel">
                             <div id="channelsContainer">
-                                
-                            </div>
                         </div>
-                        
-                    </div>
-                    <div id="chatPanel" class="chatPanel">
+                        </div>
+                </div>
+                <div id="chatPanel" class="chatPanel">
                             <div class="currentChannelNamePanel" id="currentChannelNamePanel">
                                 <label id="currentChannelNameLabel" class="currentChannelNameLabel" >Channel 1</label>
                             </div>
@@ -147,18 +143,14 @@
                                 
                               
                            </div>
-                    </div>
-                   
-                    <div id="chatSendMessagePanel" class="chatSendMessagePanel">
-                        <button class="button sendPanelButton" id="attachItemsBtn">+</button>
-                        <input class="chatSendMessageBox" id="chatSendMessageBox" ></input>
-                        <button id="chatSendMessageButton" class="button" type="button">Send</button>
                 </div>
+                <div id="chatSendMessagePanel" class="chatSendMessagePanel">
+                    <button class="button sendPanelButton" id="attachItemsBtn">+</button>
+                    <input class="chatSendMessageBox" id="chatSendMessageBox" ></input>
+                    <button id="chatSendMessageButton" class="button" type="button">Send</button>
                 </div>
+            </div>
        </div>
-       
-        </div>
-       
     </body>
    
 </html>

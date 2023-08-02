@@ -1,16 +1,29 @@
 
 import config from "./config.js";
 import{emailBox,passwordBox,usernameBox,retypePasswordBox} from "./elements.js";
+import {publishEvent,subscribeToEvent } from "./bus.js";
 
 import{
     backToLoginBtn,
     submitBtn,
     registerFailMessage,
 } from "./elements.js";
+import { hideElement, showElement } from "./utils.js";
 
+subscribeToEvent("showRegister",onShowRegister);
+subscribeToEvent("hideRegister",onHideRegister);
 submitBtn.addEventListener("click",onSubmit);
 backToLoginBtn.addEventListener("click",onBackToLogin);
 
+
+function onShowRegister(ev){
+    console.log("inside onshowregister");
+    showElement("registerModal");
+}
+function onHideRegister(ev){
+    cleanSubmitFailMessage();
+    hideElement("registerModal");
+}
 function cleanSubmitFailMessage(){
     registerFailMessage.innerHTML=undefined;
     registerFailMessage.style.display="none";
@@ -22,7 +35,7 @@ function showSubmitFailMessage(message){
 }
 
 function onBackToLogin(){
-    showLoginModal();
+    publishEvent("showLogin",{});
 }
 async function onSubmit(){
     console.log("onSubmit");
@@ -38,6 +51,8 @@ async function onSubmit(){
      console.log("Inside submit");
      var user=await createUserAsync(userData);
      localStorage.setItem("user",JSON.stringify(user));
+     publishEvent("hideRegister",{});
+     publishEvent("showMain",{});
     }catch(error){
         showSubmitFailMessage();
     }

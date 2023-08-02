@@ -30,7 +30,8 @@ function onShowMain(e){
 function onHideMain(e){
     hideElement("mainModal");
 }
- function  onConnect(e){
+
+function  onConnect(e){
     
     connect();
     showMainModal();

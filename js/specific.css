@@ -1,4 +1,7 @@
 
+#mainModal{
+    height: 100%;
+}
 #parentPanel {
     display: flex;
     flex-direction: column;
@@ -17,8 +20,7 @@
     height: 25%;
 }
 #controlsModal{
-    display:none;
-    background-color: rgba(139, 139, 129, 0.842);
+    display:flex;
     position: unset;
 }
 #registerModal{
