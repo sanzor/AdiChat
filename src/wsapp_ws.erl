@@ -7,7 +7,9 @@
 
 -define(HEARTBEAT,1500).
 init(#{req :=Req})->
+    
     #{bindings :=UserMap}=Req,
+    io:format("~p",[UserMap]),
     {ok,UserMap}.
 
 websocket_init(State=#{<<"id">> :=Id})->
@@ -42,7 +44,7 @@ websocket_handle({text, Message},State)->
             {ok,noreply} -> {ok,State};
             {ok,reply,Reply} ->
                 io:format("\n~p\n",[Reply]),
-                {reply,{text,thoas:encode(Reply)},State}
+                {reply,{text,thoas:encode(Reply)},State}       
     end;
 
 websocket_handle(pong, State)->
@@ -73,8 +75,7 @@ handle_command(<<"create-user">>,UserData,_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-user">>},
     Reply=case wsapp_server:create_user(UserData) of
         {ok,Topic}->BaseReply#{result=>Topic};
-        {error,Error}->{error,Error};
-         already_exists->{error,user_already_exists}
+         already_exists->BaseReply#{result=>error,reason=>user_already_exists}
     end,
     {ok,reply,Reply};
 

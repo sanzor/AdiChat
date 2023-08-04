@@ -1,20 +1,16 @@
+import { publishEvent } from "./bus.js";
 
 export{connect};
 var socket=null;
 
 function get_url(){
-    if(localStorage.data==undefined){
-        return urlBox.value;
-    }
-    var url= ('${urlBox.value}/id/${localStorage.user.id}').toString();
+    var user=JSON.parse(localStorage.user);
+    var url= `${urlBox.value}/id/${user.id}`;
     console.log("Url:"+url);
     return url;
 }
  function connect (){
-    
-    
     var url=get_url();
-    console.log(url.toString());
     console.log("\nAttempting connect to:"+url+"\n");
     
     socket=new WebSocket(url);
@@ -36,7 +32,7 @@ function get_url(){
     }
     socket.onclose=function(e){
         console.log(`Socket closed with code: ${e.code} , reason: ${e.reason}`);
-        reset();
+        publishEvent("socketClosed",{});
        
     }
 }

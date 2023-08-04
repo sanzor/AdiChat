@@ -1,4 +1,13 @@
+import { subscribeToEvent } from "./bus.js";
 const channelsContainer=document.getElementById("channelsContainer");
+
+
+subscribeToEvent("updateChannels",onUpdateChannels);
+
+
+function onUpdateChannels(subscriptions){
+    createChannelsContainer(subscriptions);
+}
 function resetSubscriptionTable(){
     var table=document.getElementById("channelsContainer");
     table.innerHTML='';

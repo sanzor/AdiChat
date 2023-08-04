@@ -60,15 +60,20 @@ get_user_by_email(Email)->
 create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">>:=Password})->
         Statement= <<"INSERT INTO  wsuser(email,password,name) values ($1,$2,$3) RETURNING *">>,
         {ok,C}=create_connection(),
-        {ok,_,Columns,Values}=epgsql:equery(C,Statement,[Email,Password,Name]),
-        Value=case to_records(Columns, Values) of
-        [] ->user_does_not_exist;
-        Else->{ok,lists:nth(1, Else)}
-        end,
-        Value.
+        Result=case epgsql:equery(C,Statement,[Email,Password,Name]) of
+                   
+                    {error,{error,error,<<"23505">>,unique_violation,_,_}}->already_exists;
+                    {ok,_,Columns,Values}->
+                                  Value=case to_records(Columns, Values) of
+                                  [] ->user_does_not_exist;
+                                  Else->{ok,lists:nth(1, Else)}
+                                  end,
+                                  Value
+                    end,
+        Result.
 
    
-
+       
      
 
 
@@ -143,9 +148,9 @@ get_subscriptions_for_topic(TopicId)->
 get_user_subscriptions(UserId)-> 
     Statement= <<"SELECT topic FROM  user_topic WHERE user_id = $1">>,
     {ok,C}=create_connection(),
-    {ok,_,Result}=epgsql:equery(C,Statement,[UserId]),
-    io:format("\n query ok\n"),
-    {ok,normalize(Result)}.
+    {ok,_,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
+    Value=to_records(Columns, Values),
+    {ok,Value}.
     
 -spec check_if_subscribed(Topic::number(),User::number())->{ok,boolean()}|{error,Error::term()}.
 check_if_subscribed(TopicId,UserId)->

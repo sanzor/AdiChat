@@ -1,3 +1,5 @@
+import { publishEvent } from "./bus.js  ";
+
 function handle_callback_message(data){
     if(data.kind=="chat"){
         handle_chat_message(data);
@@ -52,14 +54,15 @@ function handle_user_event(data){
 }
 
 function handle_user_event_subscribe(data){
-    createChannelsContainer(data.subscriptions);
+    publishEvent("updateChannels",data.subscriptions);
+   
 }
 function handle_user_event_unsubscribe(data){
-    createChannelsContainer(data.subscriptions);
+    publishEvent("updateChannels",data.subscriptions);
 }
 function callback_subscribe(data){
     if(data.result=="ok"){
-        createChannelsContainer(data.subscriptions);
+        publishEvent("updateChannels",data.subscriptions);
     }
     if(data.result="already_subscribed"){
         console.log("\nAlready subscribed to topic:",data.topic,"\n");
@@ -67,9 +70,7 @@ function callback_subscribe(data){
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
-        // channel=data.topic;
-        // removeSubscriptionRow(channel);
-        createChannelsContainer(data.subscriptions);
+        publishEvent("updateChannels",data.subscriptions);
     }
 }
 function callback_get_messages(data){
@@ -77,7 +78,7 @@ function callback_get_messages(data){
 }
 function callback_get_subscriptions(data){
     var subscriptions=data.result;
-    createChannelsContainer(subscriptions);
+    publishEvent("updateChannels",data.subscriptions);
 }
 
 function callback_create_user(data){

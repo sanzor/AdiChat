@@ -29,35 +29,40 @@ function onHideRegister(ev){
 }
 function cleanSubmitFailMessage(){
     registerFailMessage.innerHTML=undefined;
-    registerFailMessage.style.display="none";
 }
 
 function showSubmitFailMessage(message){
-    registerFailMessage.value=message;
-    registerFailMessage.style.display="block";
+    registerFailMessage.innerHTML=message;
+    showElement("registerFailMessage");
 }
 
 function onBackToLogin(){
+    publishEvent("hideRegister",{});
     publishEvent("showLogin",{});
 }
 async function onSubmit(){
     console.log("onSubmit");
     var userData=getCreateUserData();
-    console.log(userData);  
+    console.log(`User data for creating:${userData}`);  
     var validateResult=validateCreateUserData(userData);
-    if(validateResult!=true){
+    if(!validateResult){
          
          showSubmitFailMessage(`Invalid data having reason:${validateResult.message}`);
          return;
     }
     try{
-     console.log("Inside submit");
-     var user=await createUserAsync(userData);
-     localStorage.setItem("user",JSON.stringify(user));
+    
+     var userResult=await createUserAsync(userData);
+     if(userResult.result=="error"){
+       handleUserCreateError(userResult);
+       return;
+     }
+     console.log(`User created:${userResult}`);
+     localStorage.setItem("user",JSON.stringify(userResult));
      publishEvent("hideRegister",{});
      publishEvent("showMain",{});
     }catch(error){
-        showSubmitFailMessage();
+        showSubmitFailMessage(error);
     }
 }
 
@@ -72,7 +77,8 @@ function getCreateUserData(){
    return userData;
 }
 function validateCreateUserData(data){
-    if(data.username==undefined || data.username==null){
+    console.log(data);
+    if(data.name==undefined || data.name==null){
         return new Error("Invalid username");
     }
     if(data.password==undefined || data.password==null){
@@ -94,6 +100,12 @@ async function createUserAsync(userData){
     console.log(result);
     return result;
 }
+function handleUserCreateError(userResult){
+    console.log(`Inside handling user error ${userResult}`);
+    registerFailMessage.innerHTML=userResult.reason;
+    return;
+}
+
 async function postData(url = "", data = {}) {
     try {
         const response = await fetch(url, {
@@ -110,6 +122,9 @@ async function postData(url = "", data = {}) {
             body: JSON.stringify(data), // body data type must match "Content-Type" header
           });
           console.log(response);
+          if(response.status==409){
+            return {result:"error",reason:"user_already_exists"};
+          }
           return response.json(); 
     }catch(error){
         console.error(error);

@@ -28,6 +28,7 @@ create_user(_Req=#{json := Json})->
     io:format("\nJson is: ~p\n",[Json]),
     case wsapp_server:create_user(Json) of
         {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
+        {error,user_already_exists}->{status,409};
         {error,{bad_request,ValidationErrors}}->
             {json,400,#{<<"Content-Type">>=> <<"application/json">>},ValidationErrors};
         {error,Error}->

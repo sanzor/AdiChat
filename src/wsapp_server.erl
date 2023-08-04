@@ -137,6 +137,7 @@ handle_call({create_user,UserData},_,State)->
         
          true -> io:format("\n:~p\n",[UserData]),
                 case storage:create_user(UserData) of
+                     already_exists ->{reply,{error,user_already_exists},State};
                     {ok,User} -> {reply,{ok,User},State};
                     {error,Error}->{reply,{error,Error},State};
                      _->{reply,already_exists,State}

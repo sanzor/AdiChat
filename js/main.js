@@ -15,7 +15,7 @@ const subscribeBox=document.getElementById("subscribeBox");
 subscribeToEvent("showMain",onShowMain);
 subscribeToEvent("hideMain",onHideMain);
 subscribeToEvent("connect",onConnect);
-
+subscribeToEvent("socketEvent",onSocketEvent);
 
 connectBtn.addEventListener("click",btnConnect);
 disconnectBtn.addEventListener("click",onDisconnect);
@@ -32,12 +32,12 @@ function onHideMain(e){
 }
 
 function  onConnect(e){
-    
     connect();
-    showMainModal();
 }
 
-
+function onSocketEvent(){
+    
+}
 
 function onDisconnect(){
     command_disconnect();
@@ -50,6 +50,7 @@ function onSubscribe(){
 
 
 function onLogout(){
+    console.log("On logout");
     localStorage.removeItem("user"); 
     publishEvent("hideMain",{});
     publishEvent("showLogin",{});

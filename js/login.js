@@ -45,8 +45,8 @@ async function loginAsync(){
     const url=`${config.baseHttpUrl}/get-user?email=${email}&password=${password}`;
     try{
         var user=await getUserByEmailAsync(url);
+        console.log(user);
         localStorage.setItem("user",JSON.stringify(user));
-        console.log(`\nLogin succesfull for ${localStorage.user}\n`);
         return true;
 
     }catch(error){

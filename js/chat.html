@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
-    <script src="./callbacks.js"></script>
+    <script type="module" src="./callbacks.js"></script>
     <script type="module" src="./sock.js"></script>
-    <!-- <script type="module" src="./elements.js"></script> -->
-    <!-- <script type="module" src="./bus.js"></script>   -->
+    <script type="module" src="./elements.js"></script>
+    <script type="module" src="./bus.js"></script>  
     <script type="module" src="./main.js"></script> 
-    <script src="./channelsPanel.js"></script>
+    <script type="module" src="./channelsPanel.js"></script>
     <script type="module" src="./config.js"></script>
     <script type="module" src="./login.js"></script>
     <script type="module" src="./chat.js"></script>
+    <script type="module" src="./register.js"></script>
     
    
     <link rel="stylesheet" type="text/css" href="specific.css" ></script>
@@ -66,11 +67,13 @@
        </div>
        
        <div id="mainModal">
-        <div id="controlsModal">
-            <button id="logoutBtn">Logout</button>
-       </div>
+      
         <div id="parentPanel" class="parent">
+            
             <div id="buttonGroupsPanel" class="buttonGroupsPanel">
+                <div id="controlsModal">
+                    <button id="logoutBtn">Logout</button>
+               </div>
                 <div id="connectButtonsPanel" >
                         <label id="urlLabel"> Url</label>
                         <input id="urlBox" class="urlBox" type="text" value="ws://localhost:8080/ws/user/adi"></input>

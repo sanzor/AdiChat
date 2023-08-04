@@ -11,7 +11,7 @@ routes(_Environment) ->
       security => false,
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
-                 {"/ws/user/:user",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
+                 {"/ws/user/:user/id/:id",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
                  {"/get-user",{wsapp_main_controller,get_user},#{methods=>[get,options]}},
                  {"/get-user-by-email",{wsapp_main_controller,get_user_by_email},#{methods=>[get,options]}},
                  {"/create-user",{wsapp_main_controller,create_user},#{methods=>[post,options]}},
