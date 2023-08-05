@@ -15,6 +15,8 @@ CREATE TABLE topic (
     created_at TIMESTAMPTZ
 );
 
+
+
 -- Create an index on the name column for faster searches
 CREATE INDEX idx_topics_name ON topic (name);
 

@@ -41,8 +41,12 @@ create_connection()->
 get_user(UserId)->
     Statement= <<"Select * FROM wsuser WHERE id=$1">>,
     {ok,C}=create_connection(),
-    {ok,[Result]}=epgsql:equery(C,Statement,[UserId]),
-    {ok,Result}.
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
+    Value=case to_records(Columns, Values) of
+        [] ->user_does_not_exist;
+        Else->{ok,lists:nth(1, Else)}
+    end,
+    Value.
 
 -spec get_user_by_email(UserId::integer())->{ok,User::map()} | user_does_not_exist.
 get_user_by_email(Email)->
@@ -92,16 +96,22 @@ delete_user(UserId)->
 
 
 -spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
-create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName , <<"user_id">> := UserId})->
-    try
+create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
+    
         Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
         {ok,C}=create_connection(),
-        {ok,_,Columns,[Values]}=epgsql:equery(C,Statement,[TopicName,UserId]),
-         Value=to_map(Columns, tuple_to_list(Values),#{}),
-        {ok,Value}
-    catch
-        Error:Reason -> {error,{Error,Reason}}
-    end.
+        Result=case epgsql:equery(C,Statement,[TopicName,UserId]) of
+                   
+                    {error,{error,error,<<"23505">>,unique_violation,_,_}}->already_exists;
+                    {ok,_,Columns,Values}->
+                                  Value=case to_records(Columns, Values) of
+                                  [] ->user_does_not_exist;
+                                  Else->{ok,lists:nth(1, Else)}
+                                  end,
+                                  Value
+                    end,
+        Result.
+   
    
 
 
@@ -120,7 +130,7 @@ end.
 
 -spec subscribe(TopicId::integer(),UserId::integer())-> ok | {error,Error::any()}.
 subscribe(TopicId,UserId)->
-    Statement= <<"INSERT INTO  user_topic(topic,user_id) values ($1,$2)">>,
+    Statement= <<"INSERT INTO  user_topic(topic_id,user_id) values ($1,$2)">>,
     {ok,C}=create_connection(),
     {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId]),
      ok.                 
@@ -141,16 +151,15 @@ unsubscribe(TopicId,UserId)->
 get_subscriptions_for_topic(TopicId)->
     Statement= <<"SELECT user_id FROM  user_topic WHERE topic_id = $1">>,
     {ok,C}=create_connection(),
-    {ok,_,Result}=epgsql:equery(C,Statement,[TopicId]),
-    {ok,normalize(Result)}.
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId]),
+    {ok,to_records(Columns, Values)}.
 
 -spec get_user_subscriptions(UserId::number())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(UserId)-> 
-    Statement= <<"SELECT topic FROM  user_topic WHERE user_id = $1">>,
+    Statement= <<"SELECT * FROM  user_topic WHERE user_id = $1">>,
     {ok,C}=create_connection(),
-    {ok,_,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
-    Value=to_records(Columns, Values),
-    {ok,Value}.
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
+     {ok,to_records(Columns, Values)}.
     
 -spec check_if_subscribed(Topic::number(),User::number())->{ok,boolean()}|{error,Error::term()}.
 check_if_subscribed(TopicId,UserId)->
@@ -176,9 +185,8 @@ does_topic_exist(TopicId)->
 get_messages(TopicId,StartIndex,Count)->
     Statement= <<"SELECT * FROM message WHERE topic = $1 AND index >= $2 ORDER BY index ASC LIMIT $3">>,
     {ok,C}=create_connection(),
-    {ok,_,Result}=epgsql:equery(C,Statement,[TopicId,StartIndex,Count]),
-    io:format("\n query ok\n"),
-    {ok,normalize(Result)}.
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId,StartIndex,Count]),
+    {ok,to_records(Columns, Values)}.
 
 -spec write_chat_message(Message::any())->ok | {error,Error::any()}.
 write_chat_message(_Message=#{ 
@@ -201,7 +209,7 @@ write_chat_messages(Messages)->
     epgsql:transaction_start(C),
     {ok,Stmt}=epgsql:prepare(C,"insert_statement",Statement),
     ok=write_messages(C,Stmt, Messages),
-     ok.   
+    ok.   
 
 write_messages(_Connection,_Stmt,[])->ok;
 write_messages(Connection,Stmt,[Message|Rest])->
@@ -210,19 +218,12 @@ write_messages(Connection,Stmt,[Message|Rest])->
     epgsql:execute(Connection,Stmt,[TopicId,UserId,Content,CreatedAt,Timezone]),
     write_messages(Connection, Stmt, Rest).
 
-normalize(List)->
-    normalize(List,[]).
--spec normalize(List::list(),Acc::list())->list().
-normalize([],Acc) ->
-    Acc;
-normalize([{Head}|Tail], Acc) when is_list([Head|Tail])->
-    normalize(Tail,[Head|Acc]).
 
 
-to_records(Columns,[])->[];
+to_records(_,[])->[];
 to_records(Columns,Values)->
     to_records(Columns, Values,[]).
-to_records(Columns,[],Acc)->Acc;
+to_records(_,[],Acc)->Acc;
 to_records(Columns,[CurrentRow|Rest],Acc)->
     to_records(Columns,Rest, [to_map(Columns,tuple_to_list(CurrentRow),#{})|Acc]).
 

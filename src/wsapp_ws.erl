@@ -7,16 +7,15 @@
 
 -define(HEARTBEAT,1500).
 init(#{req :=Req})->
-    
-    #{bindings :=UserMap}=Req,
-    io:format("~p",[UserMap]),
-    {ok,UserMap}.
+    #{bindings := #{<<"id">> := Id}}=Req,
+    io:format("\nSetting up session with UserId:~p\n",[binary_to_integer(Id)]),
+    {ok,#{<<"id">> => binary_to_integer(Id)}}.
 
 websocket_init(State=#{<<"id">> :=Id})->
      
     {ok,User}= wsapp_server:get_user(Id),                         
     io:format("User is:~p",[User]),      
-    #{<<"id">> :=UserId}=Id,
+    #{<<"id">> :=UserId}=User,
     ok=wsapp_server:online(UserId,self()),
     {reply,ping,State#{<<"user">>=>User}}.
 
@@ -51,8 +50,8 @@ websocket_handle(pong, State)->
     erlang:send_after(?HEARTBEAT, self(), send_ping),
     {ok,State}.
 terminate(_,_,State)->
-    #{<<"user">> := User}=State,
-    wsapp_server:offline(User,self()),
+    #{<<"id">> := Id}=State,
+    wsapp_server:offline(Id,self()),
     ok.
 
 handle_command(<<"create-topic">>,TopicData,_State)->
@@ -79,16 +78,16 @@ handle_command(<<"create-user">>,UserData,_State)->
     end,
     {ok,reply,Reply};
 
-handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicId},_State=#{<<"user">> := User})->
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicId},_State=#{<<"id">> := UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>TopicId},
-    Reply=case wsapp_server:subscribe(User, TopicId) of
+    Reply=case wsapp_server:subscribe(UserId, TopicId) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
         {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,    
     {ok,reply,Reply};
-handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=User})->
+handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"id">>:=UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>Topic},
-    Reply=case wsapp_server:unsubscribe(User,Topic) of
+    Reply=case wsapp_server:unsubscribe(UserId,Topic) of
         not_joined -> BaseReply#{result=><<"not_joined">>};
         {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,
@@ -97,8 +96,8 @@ handle_command(<<"unsubscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"user">>:=U
   
 handle_command(<<"publish">>,Decode,_State)->
     #{<<"topic">> := TopicId}=Decode,
-    #{<<"user">>:= #{ id:=Id}}=_State,
-    Json=json:encode(Decode#{<<"user_id">>=>Id},[maps,binary]),
+    #{<<"id">>:= UserId}=_State,
+    Json=json:encode(Decode#{<<"user_id">>=>UserId},[maps,binary]),
     ok=wsapp_server:publish(TopicId, Json),
     {ok,noreply};
 
@@ -106,9 +105,9 @@ handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
     {ok,Messages}=wsapp_server:get_messages(Topic),
     {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages, kind=><<"command_result">>}};
 
-handle_command(<<"get_subscriptions">>,_,_State=#{<<"user">>:=User})->
+handle_command(<<"get_subscriptions">>,_,_State=#{<<"id">>:=UserId})->
     Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},
-    case wsapp_server:get_subscriptions(User) of
+    case wsapp_server:get_subscriptions(UserId) of
         {ok,no_subscriptions}->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};
         {ok,Result}->{ok,reply,Reply#{result =>Result}};  
         {error,Reason}->{error,Reason}
