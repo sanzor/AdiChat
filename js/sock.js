@@ -1,6 +1,9 @@
-import { publishEvent } from "./bus.js";
-
+import { publishEvent, subscribeToEvent } from "./bus.js";
+import { handle_callback_message } from "./callbacks.js";
 export{connect};
+
+subscribeToEvent("socket_command",onSendCommand);
+
 var socket=null;
 
 function get_url(){
@@ -36,7 +39,16 @@ function get_url(){
        
     }
 }
-
+function onSendCommand(ev){
+    console.log(`\nSending [${ev.detail.kind}] command : ${ev.detail} to socket\n`);
+    switch(ev.detail.kind){
+        case "subscribe": command_subscribe(ev.detail.topic);
+        case "unsubscribe" : command_unsubscribe(ev.detail.topic);
+        case "get_subscriptions": command_get_subscriptions();
+        case "publish" :command_publish(ev.detail.topic,ev.detail.message);
+        case "disconnect":command_disconnect();
+    }
+}
 function command_subscribe(topic){
     var message={
         "command":"subscribe",
@@ -64,7 +76,7 @@ function command_get_subscriptions(){
     socket.send(JSON.stringify(message));
     
 }
-function command_disconnect(url){
+function command_disconnect(){
     socket.close();
     resetSubscriptionTable();
 }

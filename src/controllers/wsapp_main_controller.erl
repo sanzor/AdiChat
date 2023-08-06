@@ -83,4 +83,3 @@ get_subscriptions(Req=#{bindings := #{<<"user">> := User}})->
     end.
 
 
-

@@ -1,4 +1,5 @@
 import { publishEvent } from "./bus.js  ";
+export {handle_callback_message};
 
 function handle_callback_message(data){
     if(data.kind=="chat"){
@@ -38,7 +39,8 @@ function handle_command_result(data){
         callback_unsubscribe(data);
     }
     if(data.command=="get_subscriptions"){
-        callback_get_subscriptions(data);
+
+        publishEvent("updateChannels",data.result);
     }
     if(data.command=="get_messages"){
         callback_get_messages(data);
@@ -54,10 +56,12 @@ function handle_user_event(data){
 }
 
 function handle_user_event_subscribe(data){
+    console.log("Publishing update channels");
     publishEvent("updateChannels",data.subscriptions);
    
 }
 function handle_user_event_unsubscribe(data){
+    console.log("Publishing update channels");
     publishEvent("updateChannels",data.subscriptions);
 }
 function callback_subscribe(data){
@@ -76,10 +80,7 @@ function callback_unsubscribe(data){
 function callback_get_messages(data){
     console.log(data.messages);
 }
-function callback_get_subscriptions(data){
-    var subscriptions=data.result;
-    publishEvent("updateChannels",data.subscriptions);
-}
+
 
 function callback_create_user(data){
     

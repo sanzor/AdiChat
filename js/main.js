@@ -44,7 +44,7 @@ function onDisconnect(){
 }
 
 function onSubscribe(){
-    command_subscribe(subscribeBox.value);
+    publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
 }
 
 

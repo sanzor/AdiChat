@@ -1,18 +1,20 @@
-import { subscribeToEvent } from "./bus.js";
+import { publishEvent, subscribeToEvent } from "./bus.js";
 const channelsContainer=document.getElementById("channelsContainer");
 
 
 subscribeToEvent("updateChannels",onUpdateChannels);
 
 
-function onUpdateChannels(subscriptions){
-    createChannelsContainer(subscriptions);
+function onUpdateChannels(ev){
+    console.log("Received update channels");
+    createChannelsContainer(ev.detail);
 }
 function resetSubscriptionTable(){
     var table=document.getElementById("channelsContainer");
     table.innerHTML='';
 }
 function createChannelsContainer(subscriptions){
+    console.log(subscriptions);
     var table=document.getElementById("channelsContainer");
     table.innerHTML='';
     var headerRow=document.createElement("tr");
@@ -26,11 +28,13 @@ function createChannelsContainer(subscriptions){
         return;
     }
     subscriptions.forEach(element => {
-       createChannelContainer(element);
+        createChannelContainer(element);
     });
+   
 }
 
 function createChannelContainer(channelName){
+    console.log("inside channel container");
     var container=document.getElementById("channelsContainer");
     var channelContainer=document.createElement("span");
     channelContainer.setAttribute("class","channelRow");
@@ -49,7 +53,7 @@ function createUnsubscribeChannelButton(channelName){
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
     console.log(channelName);
-    unsubscribeBtn.onclick=function(){command_unsubscribe(channelName);};
+    unsubscribeBtn.onclick=function(){publishEvent("socket_command",{"kind":"unsubscribe","topic":channelName});};
     return unsubscribeBtn;
 }
 function createChannelButton(channelName){

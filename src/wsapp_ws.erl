@@ -78,9 +78,9 @@ handle_command(<<"create-user">>,UserData,_State)->
     end,
     {ok,reply,Reply};
 
-handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicId},_State=#{<<"id">> := UserId})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>TopicId},
-    Reply=case wsapp_server:subscribe(UserId, TopicId) of
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"id">> := UserId})->
+    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
+    Reply=case wsapp_server:subscribe(UserId, Topic) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
         {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,    

@@ -6,6 +6,7 @@
          get_user_by_email/1,
          delete_user/1,
          create_topic/1,
+         create_and_or_subscribe/2,
          delete_topic/1,
          does_topic_exist/1,
          subscribe/2,
@@ -94,6 +95,10 @@ delete_user(UserId)->
     end.
 
 
+-spec create_and_or_subscribe(UserId::integer(),Topic::binary())->ok.
+
+create_and_or_subscribe(UserId,Topic)->
+    undefined.
 
 -spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
 create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
@@ -156,7 +161,7 @@ get_subscriptions_for_topic(TopicId)->
 
 -spec get_user_subscriptions(UserId::number())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(UserId)-> 
-    Statement= <<"SELECT * FROM  user_topic WHERE user_id = $1">>,
+    Statement= <<"SELECT topic.id,topic.name FROM  user_topic INNER JOIN topic on user_topic.topic_id=topic.id WHERE user_topic.user_id = $1">>,
     {ok,C}=create_connection(),
     {ok,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
      {ok,to_records(Columns, Values)}.

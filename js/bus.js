@@ -4,7 +4,7 @@
 const eventBus=new EventTarget();
 
 function publishEvent(eventName,eventData){
-    const customEvent=new CustomEvent(eventName,{ data:eventData});
+    const customEvent=new CustomEvent(eventName,{ "detail":eventData});
     return eventBus.dispatchEvent(customEvent);
 }
 
