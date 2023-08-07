@@ -6,7 +6,8 @@
          get_user_by_email/1,
          delete_user/1,
          create_topic/1,
-         create_and_or_subscribe/2,
+         get_topic_by_name/1,
+         get_topic/1,
          delete_topic/1,
          does_topic_exist/1,
          subscribe/2,
@@ -95,11 +96,27 @@ delete_user(UserId)->
     end.
 
 
--spec create_and_or_subscribe(UserId::integer(),Topic::binary())->ok.
+-spec get_topic_by_name(TopicName::binary())->{ok,Topic::map()} | topic_does_not_exist | {error,Error::any()}.
+get_topic_by_name(TopicName)->
+    Statement= <<"Select * FROM topic WHERE name=$1">>,
+    {ok,C}=create_connection(),
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicName]),
+    Value=case to_records(Columns, Values) of
+        [] ->topic_does_not_exist;
+        Else->{ok,lists:nth(1, Else)}
+    end,
+    Value.
 
-create_and_or_subscribe(UserId,Topic)->
-    undefined.
-
+-spec get_topic(TopicId::integer())->{ok,Topic::map()} | topic_does_not_exist | {error,Error::any()}.
+get_topic(TopicId)->
+    Statement= <<"Select * FROM topic WHERE id=$1">>,
+    {ok,C}=create_connection(),
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId]),
+    Value=case to_records(Columns, Values) of
+        [] ->topic_does_not_exist;
+        Else->{ok,lists:nth(1, Else)}
+    end,
+    Value.
 -spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
 create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
     

@@ -178,8 +178,13 @@ handle_call({get_subscriptions,UserId},_,State)->
     {reply,{ok,Subscriptions},State};
  
 
-
-handle_call({subscribe,{UserId,TopicId}},{From,_},State)->
+handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
+    #{<<"id">> := TopicId}= case storage:get_topic_by_name(TopicName) of
+                                topic_does_not_exist -> 
+                                    {ok,Topic}=storage:create_topic(#{<<"user_id">> => UserId , <<"name">> => TopicName}),
+                                    Topic;
+                                {ok,Topic} -> Topic
+                            end,
     Reply=case storage:check_if_subscribed(TopicId, UserId) of
         {ok,true} -> already_subscribed;
         {ok,false} ->ok=storage:subscribe(TopicId, UserId),
@@ -190,15 +195,7 @@ handle_call({subscribe,{UserId,TopicId}},{From,_},State)->
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
                 {ok,Subscriptions}
     end,
-    {reply,Reply,State};
-
-handle_call({subscribe_unsafe,{UserId,Topic}},{From,_},_State)->
-    {ok,#{<<"topic_id">> := TopicId}}=storage:create_and_or_subscribe(UserId,Topic),
-    {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
-    UserEvent=#{user_event_kind => <<"subscribe">>,topic => TopicId, subscriptions=>Subscriptions},
-    [send(Socket,{user_event,UserId,UserEvent})|| 
-    Socket<-pg:get_members(?F(UserId)), Socket =/=From],
-    {ok,Subscriptions};
+    {reply,Reply,_State};
    
 
 handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
