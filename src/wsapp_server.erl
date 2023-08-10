@@ -97,9 +97,6 @@ offline(UserId,Socket)->
 subscribe(UserId,TopicId)->
     gen_server:call(?MODULE, {subscribe,{UserId,TopicId}}).
 
--spec subscribe_unsafe(UserId::integer(),Topic::binary())->OkResult::map() | already_subscribed | {error,Error::term()}.
-subscribe_unsafe(UserId,Topic)->
-    gen_server:call(?MODULE,{subscribe,{UserId,Topic}}).
 
 -spec unsubscribe(UserId::integer(),TopicId::integer())->OkResult::map()| not_joined | {error,Error::term()}.
 unsubscribe(UserId,TopicId)->

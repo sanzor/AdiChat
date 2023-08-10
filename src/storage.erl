@@ -107,7 +107,7 @@ get_topic_by_name(TopicName)->
     end,
     Value.
 
--spec get_topic(TopicId::integer())->{ok,Topic::map()} | topic_does_not_exist | {error,Error::any()}.
+-spec get_topic(TopicId::integer())->{ok,Topic::map()} | topic_does_not_exist | {error,Error::any()}.   
 get_topic(TopicId)->
     Statement= <<"Select * FROM topic WHERE id=$1">>,
     {ok,C}=create_connection(),

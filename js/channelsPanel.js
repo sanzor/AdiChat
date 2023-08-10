@@ -33,37 +33,44 @@ function createChannelsContainer(subscriptions){
    
 }
 
-function createChannelContainer(channelName){
+function createChannelContainer(channel){
     console.log("inside channel container");
     var container=document.getElementById("channelsContainer");
     var channelContainer=document.createElement("span");
     channelContainer.setAttribute("class","channelRow");
-    var unsubscribeBtn=createUnsubscribeChannelButton(channelName);
-    var openChatButton=createChannelButton(channelName);
+    var unsubscribeBtn=createUnsubscribeChannelButton(channel);
+    var openChatButton=createDisplayChannelChatButton(channel);
+   
+    
     channelContainer.appendChild(unsubscribeBtn);
     channelContainer.appendChild(openChatButton);
     container.appendChild(channelContainer);
 }
 
 
-
-function createUnsubscribeChannelButton(channelName){
+function createIdElement(Id){
+    var p=document.createElement("p");
+    p.innerHTML=Id;
+    p.setAttribute("display","none");
+    return p;
+}
+function createUnsubscribeChannelButton(channel){
     var unsubscribeBtn=document.createElement("button");
-    unsubscribeBtn.id=channelName+'_unsubscribe_btn';
+    unsubscribeBtn.id=channel.id+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
-    console.log(channelName);
-    unsubscribeBtn.onclick=function(){publishEvent("socket_command",{"kind":"unsubscribe","topic":channelName});};
+    
+    unsubscribeBtn.onclick=function(){publishEvent("socket_command",{"kind":"unsubscribe","topicId":channel.id});};
     return unsubscribeBtn;
 }
-function createChannelButton(channelName){
+function createDisplayChannelChatButton(channel){
     var channelButton=document.createElement("button");
-    channelButton.id=channelName;
-    channelButton.setAttribute('content',channelName);
+    channelButton.id=channel.id;
+    channelButton.setAttribute('content',channel.name);
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
-    channelButton.textContent=channelName;
-    channelButton.onclick=function(args){openChannelChat(channelName)};
+    channelButton.textContent=channel.name;
+    channelButton.onclick=function(args){ publishEvent("openChannelChat",channel)};
     return channelButton;
 }
 function removeSubscriptionRow(){

@@ -3,9 +3,15 @@ import { handle_callback_message } from "./callbacks.js";
 export{connect};
 
 subscribeToEvent("socket_command",onSendCommand);
-
+window.addEventListener("beforeunload",onUnload);
 var socket=null;
 
+function onUnload(){
+    if(socket){
+        console.log("closing websocket...");
+        socket.close();
+    }
+}
 function get_url(){
     var user=JSON.parse(localStorage.user);
     var url= `${urlBox.value}/id/${user.id}`;
@@ -39,29 +45,35 @@ function get_url(){
        
     }
 }
+
+function onDomContentLoaded(){
+
+}
 function onSendCommand(ev){
     console.log(`\nSending [${ev.detail.kind}] command : ${ev.detail} to socket\n`);
     switch(ev.detail.kind){
-        case "subscribe": command_subscribe(ev.detail.topic);
-        case "unsubscribe" : command_unsubscribe(ev.detail.topic);
-        case "get_subscriptions": command_get_subscriptions();
-        case "publish" :command_publish(ev.detail.topic,ev.detail.message);
-        case "disconnect":command_disconnect();
+        case "subscribe": command_subscribe(ev.detail.topic);break;
+        case "unsubscribe" : command_unsubscribe(ev.detail.topicId);break;
+        case "get_subscriptions": command_get_subscriptions();break;
+        case "publish" :command_publish(ev.detail.topic,ev.detail.message);break;
+        case "disconnect":command_disconnect();break;
     }
 }
 function command_subscribe(topic){
+    console.log(topic);
     var message={
         "command":"subscribe",
         "topic":topic
-    }
+    };
     console.log("\nSending:" + JSON.stringify(message));
+    console.log(socket);
     socket.send(JSON.stringify(message))
 }
- function command_unsubscribe(topic){
-    console.log(topic);
+ function command_unsubscribe(topicId){
+    console.log(topicId);
     var message={
         "command":"unsubscribe",
-        "topic":topic
+        "topicId":topicId
     }
      console.log("\nSending:" + JSON.stringify(message));
      socket.send(JSON.stringify(message));

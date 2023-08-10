@@ -1,8 +1,15 @@
+import { subscribeToEvent } from "./bus.js";
 import { chatContainer,
     chatSendMessageBox,
     chatSendMessageButton,
     currentChannel } from "./elements.js";
+import { showElement } from "./utils.js";
 
+subscribeToEvent("displayChannelChat",onDisplayChannelChat);
+
+function onDisplayChannelChat(ev){
+    showElement("chatModal");
+}
 function onPublish(){
     var channel=currentChannel.innerText;
     var date=new Date().toDateString();
