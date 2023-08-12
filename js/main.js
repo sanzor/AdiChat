@@ -51,11 +51,14 @@ function onSubscribe(){
 
 function onLogout(){
     console.log("On logout");
+    publishEvent("close_socket",{});
     localStorage.removeItem("user"); 
     publishEvent("hideMain",{});
     publishEvent("showLogin",{});
 }
-function btnConnect(){}
+function btnConnect(){
+    
+}
 
 
 

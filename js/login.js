@@ -8,25 +8,55 @@ registerBtn.addEventListener("click",onRegister);
 
 
 subscribeToEvent("DOMContentLoaded",onDomContentLoaded);
+window.onload=async function(){
+    console.log("onload");
+    await startLoginFlow();
+}
 subscribeToEvent("showLogin",onShowLogin);
 subscribeToEvent("hideLogin",onHideLogin);
 
-function onDomContentLoaded(){
-    if(localStorage.user.id==undefined || localStorage.user.id==null){
+async function onDomContentLoaded(){
+    console.log("ondomcontentloaded");
+    await startLoginFlow();
+   
+
+}
+async function startLoginFlow(){
+    console.log("start login flow");
+    var userRaw=localStorage.getItem("user");
+    
+    if(!userRaw){
         publishEvent("showLogin",{});
         return;
     }
-    
-    console.log(localStorage.user.id);
-    publishEvent("showMain",{});
-
+    var userResult=JSON.parse(userRaw);
+   
+    await tryLoginAsync(userResult);
 }
-
 function onShowLogin(ev){
     showElement("loginModal");
 }
 function onHideLogin(ev){
     hideElement("loginModal");
+}
+
+async function tryLoginAsync(User){
+    console.log("try login");
+    try {
+        console.log(User.id);
+        var userResult=await getUserByIdAsync(User.id);
+        if(userResult){
+            publishEvent("showMain",{});
+            return;
+        }
+        
+        console.log("Could not log in with the user ");
+        publishEvent("showLogin",{});
+    } catch (error) {
+        console.log("Error at try login");
+        publishEvent("showLogin",{});
+    }
+   
 }
 async function onLogin(){
     var loginResult=await loginAsync();
@@ -62,7 +92,11 @@ function onRegister(){
 
 
 
-
+async function getUserByIdAsync(Id){
+    var url=`${config.baseHttpUrl}/get-user?id=${Id}`;
+    var result=await getDataAsync(url);
+    return result;
+}
 
 async function getUserByEmailAsync(){
     var email=emailLoginBox.value;

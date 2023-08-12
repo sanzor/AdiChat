@@ -70,29 +70,27 @@
       
         <div id="parentPanel" class="parent">
             
-            <div id="buttonGroupsPanel" class="buttonGroupsPanel">
-                <div id="controlsModal">
-                    <button id="logoutBtn">Logout</button>
-               </div>
-                <div id="connectButtonsPanel" >
-                        <label id="urlLabel"> Url</label>
-                        <input id="urlBox" class="urlBox" type="text" value="ws://localhost:8080/ws"></input>
-                        <button id="connectBtn" type="button">Connect</button>
-                        <button id="disconnectBtn" class="disconnectButton" type="button" value="Disconnect">
-                            Disconnect
-                        </button>
-                </div>
-                <div id="subscribeButtonPanel" class="panel">
-                        <input  id="subscribeBox" type="text" value="">
-                        <label id="subscribeLabel" class="subscribeLabel">Channel</label>
-                        <button id="subscribeBtn" class="subscribeButton" type="button">Subscribe</button>
-                </div> 
-            </div>
+          
             <div id="mainPanel">
+                <div id="buttonGroupsPanel" class="buttonGroupsPanel">
+                    <button id="logoutBtn">Logout</button>
+                    <div id="connectButtonsPanel" >
+                            
+                            <button id="connectBtn" type="button">Connect</button>
+                            <button id="disconnectBtn" class="disconnectButton" type="button" value="Disconnect">
+                                Disconnect
+                            </button>
+                    </div>
+                    <div id="subscribeButtonPanel" class="panel">
+                            <input  id="subscribeBox" type="text" value="">
+                            <label id="subscribeLabel" class="subscribeLabel">Channel</label>
+                            <button id="subscribeBtn" class="subscribeButton" type="button">Subscribe</button>
+                    </div> 
+                </div>
                 <div id="channelsPanel" class="channelsPanel">
                     <label id="channelsLabel">Channels</label>
                         <div id="channelsAreaPanel">
-                            <div id="channelsContainer">
+                            <div id="channelsContainer" class="chatScroll">
                         </div>
                         </div>
                 </div>

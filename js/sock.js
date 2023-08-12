@@ -1,20 +1,25 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import { handle_callback_message } from "./callbacks.js";
+import config from "./config.js";
 export{connect};
 
+subscribeToEvent("close_socket",onCloseSocketCommand);
 subscribeToEvent("socket_command",onSendCommand);
 window.addEventListener("beforeunload",onUnload);
 var socket=null;
 
-function onUnload(){
+function onCloseSocketCommand(){
     if(socket){
-        console.log("closing websocket...");
+        console.log("closing websocket");
         socket.close();
     }
 }
+function onUnload(){
+    publishEvent("close_socket",{});
+}
 function get_url(){
     var user=JSON.parse(localStorage.user);
-    var url= `${urlBox.value}/id/${user.id}`;
+    var url= `${config.baseWsUrl}/ws/id/${user.id}`;
     console.log("Url:"+url);
     return url;
 }
@@ -89,7 +94,7 @@ function command_get_subscriptions(){
     
 }
 function command_disconnect(){
-    socket.close();
+    publishEvent("close_socket",{});
     resetSubscriptionTable();
 }
 

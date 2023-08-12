@@ -82,9 +82,9 @@ button{
 
 .buttonGroupPanel{
     border-style: ridge;
-    border-color: #34773d;
-    
+    border-color: #34773d; 
 }
+
 html,
 body,
 #wrapper{

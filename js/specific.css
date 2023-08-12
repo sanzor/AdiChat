@@ -1,6 +1,7 @@
 
 #mainModal{
     height: 100%;
+    display:none;
 }
 #parentPanel {
     display: flex;
@@ -54,6 +55,8 @@
     justify-items: flex-start;
     border-spacing: 2px;
     align-items: stretch; 
+    grid-column-start:1;
+    grid-row-end:2
 }
 #buttonGroupsPanel > *{
     margin:1%   

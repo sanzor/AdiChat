@@ -15,9 +15,11 @@
 index(_Req) ->
     {ok, [{message, "Hello world!"}]}.
 
-get_user(_Req=#{parsed_qs := #{<<"id">> := Id}})->
-    {ok,User}=wsapp_server:get_user(Id),
-    {json,200,#{<<"Content-Type">> => <<"application/json">>},User}.
+get_user(_Req=#{parsed_qs := #{<<"id">> := Id}})-> 
+case wsapp_server:get_user(binary_to_integer(Id)) of
+    {ok,User} ->{json,200,#{<<"Content-Type">> => <<"application/json">>},User};
+    user_does_not_exist ->{status,404}
+end.
 get_user_by_email(_Req=#{parsed_qs := #{<<"email">> :=Email , <<"password">> := _Password}})->
     case wsapp_server:get_user_by_email(Email) of
             {ok,User} ->{json,200,#{<<"Content-Type">> => <<"application/json">>},User};
