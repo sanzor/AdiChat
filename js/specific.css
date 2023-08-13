@@ -49,20 +49,12 @@
 #parent > * {
     margin-bottom: 1%;
 }
-#buttonGroupsPanel{
-    display: flex;
-    flex-direction: row;
-    justify-items: flex-start;
-    border-spacing: 2px;
-    align-items: stretch; 
-    grid-column-start:1;
-    grid-row-end:2
-}
-#buttonGroupsPanel > *{
-    margin:1%   
-}
+
 
 #subscribeButtonPanel{
+    grid-column-start:2;
+    grid-column-end: 3;
+    grid-row-end:2;
     display: grid;
     padding:0.5%;
     row-gap:5px;
@@ -92,6 +84,8 @@
 
 
 #connectButtonsPanel{
+    grid-column-end: 2;
+    grid-row-end:2;
     display: grid;
     row-gap: 5px;
     column-gap: 5px;
@@ -122,8 +116,8 @@
     height:85%;
     display: grid;
     gap: 1rem;
-    grid-template-rows: 5% 4fr 1% 3fr 2fr 1fr;
-    grid-template-columns: 3fr 8fr 1fr;
+    grid-template-rows: 10% 4fr  3fr 2fr 1fr 1fr;
+    grid-template-columns: 3fr 6fr 2fr 1fr;
     align-items: stretch;
     border-radius: 1%;
     border-color: rgb(44, 97, 57);
@@ -165,6 +159,10 @@
   
 }
 #chatPanel{
+    grid-row-start:2;
+    grid-row-end:5;
+    grid-column-start:2;
+    grid-column-end:4;
     margin-left: 0.7%;
     margin-top:0.5%;
     margin-bottom: 0.7%;
@@ -172,8 +170,7 @@
     flex-direction: row;
     justify-items: flex-start;
     align-items: inherit;
-    grid-row-start:2;
-    grid-row-end:5;
+   
     border-style: double;
     border-color: rgb(22, 41, 77);
     background-color: beige;
@@ -246,6 +243,7 @@
     grid-row-start:5;
     grid-row-end:6;
     grid-column-start: 2;
+    grid-column-end:3;
     flex-direction: row;
 }
 #chatSendMessageBox{
