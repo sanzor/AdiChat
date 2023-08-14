@@ -113,3 +113,9 @@ body,
     display:flex;
     flex-direction: column;
 }
+
+.newMessagesBox{
+    display: block;
+    align-self: center;
+    padding:1%;
+}

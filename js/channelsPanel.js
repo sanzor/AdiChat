@@ -40,8 +40,8 @@ function createChannelContainer(channel){
     channelContainer.setAttribute("class","channelRow");
     var unsubscribeBtn=createUnsubscribeChannelButton(channel);
     var openChatButton=createDisplayChannelChatButton(channel);
-   
-    
+    var newMessagesBox=createNewMessagesBox(channel);
+    channelContainer.appendChild(newMessagesBox);
     channelContainer.appendChild(unsubscribeBtn);
     channelContainer.appendChild(openChatButton);
     container.appendChild(channelContainer);
@@ -70,8 +70,14 @@ function createDisplayChannelChatButton(channel){
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
     channelButton.textContent=channel.name;
-    channelButton.onclick=function(args){ publishEvent("openChannelChat",channel)};
+    channelButton.onclick=function(args){ publishEvent("displayChannelChat",channel)};
     return channelButton;
+}
+function createNewMessagesBox(channel){
+    var newMessagesBox=document.createElement("p");
+    newMessagesBox.setAttribute("class","newMessagesBox");
+    newMessagesBox.innerHTML="0";
+    return newMessagesBox;
 }
 function removeSubscriptionRow(){
     var table=document.getElementById('channelsContainer');
