@@ -20,7 +20,8 @@
          offline/2,
          subscribe/2,
          unsubscribe/2,
-         get_messages/3,
+         get_oldest_messages/3,
+         get_newest_messages/2,
          get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
@@ -71,9 +72,14 @@ delete_topic(TopicId)->
 
 
 
--spec get_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
-get_messages(TopicId,StartIndex,Count)->
+-spec get_oldest_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
+get_oldest_messages(TopicId,StartIndex,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,StartIndex,Count}}).
+
+
+-spec get_newest_messages(TopidId::number(),Count::integer())->{ok,Messages::list()} | error .
+get_newest_messages(TopicId,Count)->
+    gen_server:call(?MODULE,{get_messages,{TopicId,Count}}).
 
 -spec get_subscriptions(UserId::integer())->{ok,Channels::list()}  | {error,Reason::any()}.
 get_subscriptions(UserId)->
@@ -166,8 +172,12 @@ handle_call({delete_topic,TopicId},_,State)->
         {error,Error}->{reply,{error,Error},State}
             
     end;
-handle_call({get_messages,{TopicId,StartIndex,Count}},_,State)->
-    {ok,Messages}=storage:get_messages(TopicId, StartIndex, Count),
+handle_call({get_oldest_messages,{TopicId,StartIndex,Count}},_,State)->
+    {ok,Messages}=storage:get_oldest_messages(TopicId, StartIndex, Count),
+    {reply,{ok,Messages},State};
+
+handle_call({get_newest_messages,{TopicId,Count}},_,State)->
+    {ok,Messages}=storage:get_newest_messages(TopicId, Count),
     {reply,{ok,Messages},State};
 
 handle_call({get_subscriptions,UserId},_,State)->

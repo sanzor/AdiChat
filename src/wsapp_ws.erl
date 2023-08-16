@@ -101,10 +101,16 @@ handle_command(<<"publish">>,Decode,_State)->
     ok=wsapp_server:publish(TopicId, Json),
     {ok,noreply};
 
-handle_command(<<"get_messages">>,#{<<"topic">> := Topic},_State)->
-    {ok,Messages}=wsapp_server:get_messages(Topic),
-    {ok,reply,#{<<"topic">>=>Topic, <<"messages">>=>Messages, kind=><<"command_result">>}};
+handle_command(<<"get_oldest_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
+    io:format("~p",[Req]),
+    {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
+    {ok,reply,#{<<"topic">>=>TopicId, <<"messages">>=>Messages, kind=><<"command_result">>}};
 
+handle_command(<<"get_newest_messages">>,Req=#{<<"topicId">> := TopicId, <<"count">> := Count},_State)->
+    io:format("~p",[Req]),
+    {ok,Messages}=wsapp_server:get_newest_messages(TopicId,Count),
+    {ok,reply,#{<<"topic">>=>TopicId, <<"messages">>=>Messages, kind=><<"command_result">>}};
+    
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"id">>:=UserId})->
     Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},
     case wsapp_server:get_subscriptions(UserId) of

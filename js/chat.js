@@ -5,6 +5,7 @@ import { chatContainer,
     currentChannel } from "./elements.js";
 import { showElement } from "./utils.js";
 
+const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 function onDisplayChannelChat(ev){
@@ -12,12 +13,34 @@ function onDisplayChannelChat(ev){
     if(currentChannel.id!=ev.detail.id){
         currentChannel.innerText=ev.detail.name;
         resetChat();
-        publishEvent("socket_command",{"kind":"get-messages","topic":currentChannel.id});
+        var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
+        publishEvent("socket_command",event_payload);
     }
    
 }
 function onGetMessagesResult(ev){
-    var messages=ev.detail.messages;
+   
+}
+
+function get_oldest_messages(id,startIndex,count){
+    var message={
+        kind:"get-oldest-channel-messages",
+        id:id,
+        count:count,
+        startIndex:startIndex
+    };
+    
+    return message;
+}
+
+function get_newest_messages(id,count){
+    var message={
+        kind:"get-newest-channel-messages",
+        id:id,
+        count:count,
+    };
+    
+    return message;
 }
 function onPublish(){
     var channel=currentChannel.innerText;

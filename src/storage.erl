@@ -15,7 +15,8 @@
          check_if_subscribed/2,
          get_subscriptions_for_topic/1,
          get_user_subscriptions/1,
-         get_messages/3,
+         get_oldest_messages/3,
+         get_newest_messages/2,
          write_chat_message/1,
          write_chat_messages/1]).
 -define(DB_SERVER_KEY,pg2).
@@ -202,12 +203,19 @@ does_topic_exist(TopicId)->
 
 
 
--spec get_messages(TopicId::integer(),StartIndex::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
+-spec get_oldest_messages(TopicId::integer(),StartIndex::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
 
-get_messages(TopicId,StartIndex,Count)->
-    Statement= <<"SELECT * FROM message WHERE topic = $1 AND index >= $2 ORDER BY index ASC LIMIT $3">>,
+get_oldest_messages(TopicId,StartIndex,Count)->
+    Statement="SELECT * FROM message WHERE topic_id = $1 AND id < $2 ORDER BY id DESC LIMIT $3;",
     {ok,C}=create_connection(),
     {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId,StartIndex,Count]),
+    {ok,to_records(Columns, Values)}.
+
+-spec get_newest_messages(TopicId::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
+get_newest_messages(TopicId,Count)->
+    Statement="SELECT * FROM message WHERE topic_id = $1 ORDER BY id DESC LIMIT $2;",
+    {ok,C}=create_connection(),
+    {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId,Count]),
     {ok,to_records(Columns, Values)}.
 
 -spec write_chat_message(Message::any())->ok | {error,Error::any()}.
