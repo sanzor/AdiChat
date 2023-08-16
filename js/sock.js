@@ -1,5 +1,5 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
-import { handle_callback_message } from "./callbacks.js";
+import { handle_callback_message } from "./sockReceive.js";
 import config from "./config.js";
 export{connect};
 
@@ -41,7 +41,7 @@ function get_url(){
         var message=JSON.parse(ev.data);
         console.log("\nReceived: ");
         console.log(message);
-        handle_callback_message(message);
+        publishEvent("socketReceive",message);
 
     }
     socket.onclose=function(e){
@@ -62,6 +62,7 @@ function onSendCommand(ev){
         case "get_subscriptions": command_get_subscriptions();break;
         case "publish" :command_publish(ev.detail.topic,ev.detail.message);break;
         case "disconnect":command_disconnect();break;
+        case  "get-channel-messages": command_get_channel_messages(ev.detail);break
     }
 }
 function command_subscribe(topic){
@@ -109,6 +110,16 @@ function command_publish(topic,message){
     socket.send(JSON.stringify(toSend));
 }
 
- 
+function command_get_channel_messages(data){
+    
+    var message={
+        "topicId":data.id,
+        "startIndex":data.startIndex,
+        "count":data.count,
+        
+    }
+    console.log(message);
+    socket.send(JSON.stringify(message));
+}
 
 

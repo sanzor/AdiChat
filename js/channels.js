@@ -64,6 +64,7 @@ function createUnsubscribeChannelButton(channel){
     return unsubscribeBtn;
 }
 function createDisplayChannelChatButton(channel){
+    console.log(channel);
     var channelButton=document.createElement("button");
     channelButton.id=channel.id;
     channelButton.setAttribute('content',channel.name);

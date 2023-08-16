@@ -1,7 +1,9 @@
+import { subscribeToEvent } from "./bus";
 import { publishEvent } from "./bus.js  ";
-export {handle_callback_message};
 
-function handle_callback_message(data){
+subscribeToEvent("socketReceive",onSocketReceive);
+function onSocketReceive(ev){
+    var data=ev.detail;
     if(data.kind=="chat"){
         handle_chat_message(data);
     }

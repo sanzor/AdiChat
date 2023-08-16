@@ -1,4 +1,4 @@
-import { subscribeToEvent } from "./bus.js";
+import { publishEvent, subscribeToEvent } from "./bus.js";
 import { chatContainer,
     chatSendMessageBox,
     chatSendMessageButton,
@@ -6,9 +6,18 @@ import { chatContainer,
 import { showElement } from "./utils.js";
 
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
-
+subscribeToEvent("get_messages_result",onGetMessagesResult);
 function onDisplayChannelChat(ev){
-    showElement("chatModal");
+    console.log(ev.detail);
+    if(currentChannel.id!=ev.detail.id){
+        currentChannel.innerText=ev.detail.name;
+        resetChat();
+        publishEvent("socket_command",{"kind":"get-messages","topic":currentChannel.id});
+    }
+   
+}
+function onGetMessagesResult(ev){
+    var messages=ev.detail.messages;
 }
 function onPublish(){
     var channel=currentChannel.innerText;
