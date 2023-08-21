@@ -78,9 +78,9 @@ handle_command(<<"create-user">>,UserData,_State)->
     end,
     {ok,reply,Reply};
 
-handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"id">> := UserId})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
-    Reply=case wsapp_server:subscribe(UserId, Topic) of
+handle_command(<<"subscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">> := UserId})->
+    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>TopicId},
+    Reply=case wsapp_server:subscribe(UserId, TopicId) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
         {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,    
@@ -101,7 +101,7 @@ handle_command(<<"publish">>,Decode,_State)->
     ok=wsapp_server:publish(TopicId, Json),
     {ok,noreply};
 
-handle_command(<<"get_oldest_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
+handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
     {ok,reply,#{<<"topic">>=>TopicId, <<"messages">>=>Messages, kind=><<"command_result">>}};

@@ -20,7 +20,7 @@
          offline/2,
          subscribe/2,
          unsubscribe/2,
-         get_oldest_messages/3,
+         get_older_messages/3,
          get_newest_messages/2,
          get_subscriptions/1]).
 
@@ -72,8 +72,8 @@ delete_topic(TopicId)->
 
 
 
--spec get_oldest_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
-get_oldest_messages(TopicId,StartIndex,Count)->
+-spec get_older_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
+get_older_messages(TopicId,StartIndex,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,StartIndex,Count}}).
 
 
@@ -117,7 +117,6 @@ start_link()->
 %-------------callbacks---------------------------------------%
 
 init(Args)->
-    
     process_flag(trap_exit,true),
     self() ! start,
     {ok,#state{}}.
@@ -172,7 +171,7 @@ handle_call({delete_topic,TopicId},_,State)->
         {error,Error}->{reply,{error,Error},State}
             
     end;
-handle_call({get_oldest_messages,{TopicId,StartIndex,Count}},_,State)->
+handle_call({get_older_messages,{TopicId,StartIndex,Count}},_,State)->
     {ok,Messages}=storage:get_oldest_messages(TopicId, StartIndex, Count),
     {reply,{ok,Messages},State};
 

@@ -21,6 +21,7 @@ export{
     emailLoginBox,
     passwordLoginBox,
     loginFailMessage,
+    channelsContainer
 };
 
 const loginButton=document.getElementById("loginBtn");
@@ -44,3 +45,5 @@ const usernameBox=document.getElementById("usernameBox");
 const retypePasswordBox=document.getElementById("retypePasswordBox");
 
 const parentPanel=document.getElementById("parentPanel");
+
+const channelsContainer=document.getElementById("channelsContainer");

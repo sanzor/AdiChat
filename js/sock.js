@@ -54,14 +54,19 @@ function onDomContentLoaded(){
 
 }
 function onSendCommand(ev){
-    console.log(`\nSending [${ev.detail.kind}] command : ${ev.detail} to socket\n`);
-    switch(ev.detail.kind){
-        case "subscribe": command_subscribe(ev.detail.topic);break;
-        case "unsubscribe" : command_unsubscribe(ev.detail.topicId);break;
+    var data=ev.detail;
+    console.log(`\nSending [${data.kind}] command : ${data} to socket\n`);
+    switch(data.kind){
+        case "subscribe": command_subscribe(data.topic);break;
+        case "unsubscribe" : command_unsubscribe(data.topicId);break;
         case "get_subscriptions": command_get_subscriptions();break;
-        case "publish" :command_publish(ev.detail.topic,ev.detail.message);break;
+        case "publish" :command_publish(data.topic,data.message);break;
         case "disconnect":command_disconnect();break;
-        case  "get-channel-messages": command_get_channel_messages(ev.detail);break
+        case  "get_newest_messages": command_get_newest_messages(data.topicId,data.count);break;
+        case  "get_older_messages": command_get_older_messages(
+            data.topicId,
+            data.startIndex,
+            data.count);break;
     }
 }
 function command_subscribe(topic){
@@ -109,16 +114,26 @@ function command_publish(topic,message){
     socket.send(JSON.stringify(toSend));
 }
 
-function command_get_channel_messages(data){
+function command_get_newest_messages(topicId,count){
     
     var message={
-        "topicId":data.id,
-        "startIndex":data.startIndex,
-        "count":data.count,
+        "command":"get_newest_messages",
+        "topicId":topicId,
+        "count":count,
         
     }
     console.log(message);
     socket.send(JSON.stringify(message));
 }
-
+function command_get_older_messages(topicId,startIndex,count){
+    var message={
+        "command":"get_older_messages",
+        "topicId":topicId,
+        "startIndex":startIndex,
+        "count":count,
+        
+    }
+    console.log(message);
+    socket.send(JSON.stringify(message));
+}
 

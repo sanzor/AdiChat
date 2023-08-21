@@ -1,7 +1,6 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
-const channelsContainer=document.getElementById("channelsContainer");
 
-
+import{channelsContainer} from "./elements.js";
 subscribeToEvent("updateChannels",onUpdateChannels);
 
 

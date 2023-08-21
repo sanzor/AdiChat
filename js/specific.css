@@ -236,7 +236,12 @@
     background-color: rgba(139, 139, 129, 0.842);
 }
 
-
+#loadOlderMessagesBtn{
+    width: inherit;
+    display:none ;
+    background-color: rgba(139, 139, 129, 0.842);
+    border-color:rgba(139, 139, 129, 0.842); ;
+}
 #chatSendMessagePanel{
     justify-content: flex-start;
     display: flex;
