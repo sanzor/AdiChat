@@ -8,6 +8,7 @@ import { showElement } from "./utils.js";
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
+
 function onDisplayChannelChat(ev){
     console.log(ev.detail);
     if(currentChannel.id!=ev.detail.id){
