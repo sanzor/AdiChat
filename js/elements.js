@@ -46,7 +46,8 @@ export{channelsContainer};
 
 const channelsContainer=document.getElementById("channelsContainer");
 
-export{loadOlderMessagesBtn};
+export{loadOlderMessagesBtn,chatSendMessageBtn};
 
 const loadOlderMessagesBtn=document.getElementById("loadOlderMessagesBtn");
+const chatSendMessageBtn=document.getElementById("chatSendMessageBtn");
 

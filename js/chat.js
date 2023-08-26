@@ -1,7 +1,7 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import { chatContainer,
     chatSendMessageBox,
-    chatSendMessageButton,
+    chatSendMessageBtn,
     currentChannel,
     loadOlderMessagesBtn } from "./elements.js";
 import { showElement } from "./utils.js";
@@ -10,7 +10,7 @@ const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
-chatSendMessageButton.addEventListener("click",onSendMessage);
+chatSendMessageBtn.addEventListener("click",onSendMessage);
 
 function onSendMessage(){
     var message={
