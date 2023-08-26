@@ -100,8 +100,8 @@ offline(UserId,Socket)->
     gen_server:call(?MODULE, {offline,{UserId,Socket}}).
 
 -spec subscribe(UserId::integer(),TopicId::integer() )->OkResult::map() | already_subscribed | {error,Error::term()}.
-subscribe(UserId,TopicId)->
-    gen_server:call(?MODULE, {subscribe,{UserId,TopicId}}).
+subscribe(UserId,TopicName)->
+    gen_server:call(?MODULE, {subscribe,{UserId,TopicName}}).
 
 
 -spec unsubscribe(UserId::integer(),TopicId::integer())->OkResult::map()| not_joined | {error,Error::term()}.
@@ -239,9 +239,8 @@ handle_cast({publish,{TopicId,Message}},State)->
     {ok,Subscribers}=storage:get_subscriptions_for_topic(TopicId),
     io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [TopicId,Subscribers]),
-    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
+    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers],
     {noreply,State}.
-
 
 %% @doc 
 %% Handling info messages

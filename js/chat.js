@@ -2,12 +2,24 @@ import { publishEvent, subscribeToEvent } from "./bus.js";
 import { chatContainer,
     chatSendMessageBox,
     chatSendMessageButton,
-    currentChannel } from "./elements.js";
+    currentChannel,
+    loadOlderMessagesBtn } from "./elements.js";
 import { showElement } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
+loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
+chatSendMessageButton.addEventListener("click",onSendMessage);
+
+function onSendMessage(){
+    var message={
+        "kind":"publish",
+        "topicId":currentChannel.id,
+        "content":chatSendMessageBox.value,
+    };
+    publishEvent("socket_command",message);
+}
 
 function onDisplayChannelChat(ev){
     console.log(ev.detail);
@@ -19,14 +31,20 @@ function onDisplayChannelChat(ev){
     }
    
 }
+
+function onLoadOlderMessages(){
+    var count=Array.length(chatMessageContainer.children);
+    var eventPayload=get_older_messages(currentChannel.id,count,CHANNEL_MESSAGES_COUNT);
+    publishEvent("socket_command",eventPayload);
+}
 function onGetMessagesResult(ev){
    
 }
 
-function get_oldest_messages(id,startIndex,count){
+function get_older_messages(id,startIndex,count){
     var message={
         kind:"get-oldest-channel-messages",
-        id:id,
+        topicId:id,
         count:count,
         startIndex:startIndex
     };

@@ -20,9 +20,7 @@ export{
     loginModal,
     emailLoginBox,
     passwordLoginBox,
-    loginFailMessage,
-    channelsContainer
-};
+    loginFailMessage};
 
 const loginButton=document.getElementById("loginBtn");
 const registerBtn=document.getElementById("registerBtn");
@@ -44,6 +42,11 @@ const passwordBox=document.getElementById("passwordBox");
 const usernameBox=document.getElementById("usernameBox");
 const retypePasswordBox=document.getElementById("retypePasswordBox");
 
-const parentPanel=document.getElementById("parentPanel");
+export{channelsContainer};
 
 const channelsContainer=document.getElementById("channelsContainer");
+
+export{loadOlderMessagesBtn};
+
+const loadOlderMessagesBtn=document.getElementById("loadOlderMessagesBtn");
+

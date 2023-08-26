@@ -238,7 +238,7 @@
 
 #loadOlderMessagesBtn{
     width: inherit;
-    display:none ;
+    display:block ;
     background-color: rgba(139, 139, 129, 0.842);
     border-color:rgba(139, 139, 129, 0.842); ;
 }

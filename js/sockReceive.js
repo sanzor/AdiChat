@@ -44,8 +44,11 @@ function handle_command_result(data){
 
         publishEvent("updateChannels",data.result);
     }
-    if(data.command=="get_messages"){
-        callback_get_messages(data);
+    if(data.command=="get_newest_messages"){
+        callback_get_newest_messages(data);
+    }
+    if(data.command=="get_older_messages"){
+        callback_get_older_messages(data);
     }
 }
 function handle_user_event(data){
@@ -79,8 +82,12 @@ function callback_unsubscribe(data){
         publishEvent("updateChannels",data.subscriptions);
     }
 }
-function callback_get_messages(data){
+function callback_get_newest_messages(data){
+    publishEvent("getNewestMessages",data.result)
     console.log(data.messages);
+}
+function callback_get_older_messages(data){
+    publishEvent("getOlderMessages",data.result);
 }
 
 

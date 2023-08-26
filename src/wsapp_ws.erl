@@ -30,16 +30,15 @@ websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     
 websocket_info(Message,State)->
     io:format("\nWeird: ~p\ntrace",[Message]),
-    {ok,NewMessage}=thoas:decode(Message),
-    Reply=NewMessage#{ kind=><<"chat">>},
+    Reply=Message#{ kind=><<"chat">>},
     {reply,{text,thoas:encode(Reply)},State}.
 
 websocket_handle({text, Message},State)->
     io:format("\nInput :~p\n",[Message]),
-    Decode=json:decode(Message,[maps]),
-    io:format("\nReceived :~p\n",[Decode]),
-    #{<<"command">>:= Command}=Decode,
-    case handle_command(Command,Decode,State) of
+    Json=json:decode(Message,[maps]),
+    io:format("\nReceived :~p\n",[Json]),
+    #{<<"command">>:= Command}=Json,
+    case handle_command(Command,Json,State) of
             {ok,noreply} -> {ok,State};
             {ok,reply,Reply} ->
                 io:format("\n~p\n",[Reply]),
@@ -78,9 +77,9 @@ handle_command(<<"create-user">>,UserData,_State)->
     end,
     {ok,reply,Reply};
 
-handle_command(<<"subscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">> := UserId})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>TopicId},
-    Reply=case wsapp_server:subscribe(UserId, TopicId) of
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"id">> := UserId})->
+    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
+    Reply=case wsapp_server:subscribe(UserId, Topic) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
         {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
     end,    
@@ -94,22 +93,29 @@ handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:
    
     {ok,reply,Reply};
   
-handle_command(<<"publish">>,Decode,_State)->
-    #{<<"topic">> := TopicId}=Decode,
+handle_command(<<"publish">>,Json,_State)->
+    #{<<"topicId">> := TopicId, <<"content">> := Content}=Json,
     #{<<"id">>:= UserId}=_State,
-    Json=json:encode(Decode#{<<"user_id">>=>UserId},[maps,binary]),
-    ok=wsapp_server:publish(TopicId, Json),
+    DateTime=calendar:now_to_universal_time(),
+    Message=#{
+         <<"user_id">>=>UserId,
+         <<"topic_id">>=>TopicId,
+         <<"content">> => Content,
+         <<"created_at">> =>DateTime
+        },
+   
+    ok=wsapp_server:publish(TopicId,Message),
     {ok,noreply};
 
 handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
-    {ok,reply,#{<<"topic">>=>TopicId, <<"messages">>=>Messages, kind=><<"command_result">>}};
+    {ok,reply,#{<<"topic">>=>TopicId, <<"result">>=>Messages, kind=><<"command_result">>}};
 
 handle_command(<<"get_newest_messages">>,Req=#{<<"topicId">> := TopicId, <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_newest_messages(TopicId,Count),
-    {ok,reply,#{<<"topic">>=>TopicId, <<"messages">>=>Messages, kind=><<"command_result">>}};
+    {ok,reply,#{<<"topic">>=>TopicId, <<"result">>=>Messages, kind=><<"command_result">>}};
     
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"id">>:=UserId})->
     Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},
@@ -132,3 +138,4 @@ system_data()->
     BinPid=list_to_binary(pid_to_list(self())),
     NodePid=atom_to_binary(node()),
     #{node=>NodePid,pid=>BinPid}.
+
