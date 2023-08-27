@@ -13,9 +13,11 @@ loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
 function onSendMessage(){
+    console.log(currentChannel.id);
+    console.log(chatSendMessageBox.value);
     var message={
         "kind":"publish",
-        "topicId":currentChannel.id,
+        "topicId":currentChannel.innerText,
         "content":chatSendMessageBox.value,
     };
     publishEvent("socket_command",message);

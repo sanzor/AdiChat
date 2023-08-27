@@ -7,7 +7,12 @@ subscribeToEvent("updateChannels",onUpdateChannels);
 function onUpdateChannels(ev){
     console.log("Received update channels");
     createChannelsContainer(ev.detail);
+    if(ev.detail.length==0){
+        return;
+    }
+    publishEvent("displayChannelChat",ev.detail[0])
 }
+
 function resetSubscriptionTable(){
     var table=document.getElementById("channelsContainer");
     table.innerHTML='';

@@ -94,9 +94,11 @@ handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Json,_State)->
+    io:format("Command publish: ~p",[Json]),
     #{<<"topicId">> := TopicId, <<"content">> := Content}=Json,
     #{<<"id">>:= UserId}=_State,
-    DateTime=calendar:now_to_universal_time(),
+    
+    DateTime=calendar:local_time_to_universal_time(),
     Message=#{
          <<"user_id">>=>UserId,
          <<"topic_id">>=>TopicId,

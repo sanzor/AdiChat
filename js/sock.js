@@ -60,7 +60,7 @@ function onSendCommand(ev){
         case "subscribe": command_subscribe(data.topic);break;
         case "unsubscribe" : command_unsubscribe(data.topicId);break;
         case "get_subscriptions": command_get_subscriptions();break;
-        case "publish" :command_publish(data.topic,data.message);break;
+        case "publish" :command_publish(data.topicId,data.content);break;
         case "disconnect":command_disconnect();break;
         case  "get_newest_messages": command_get_newest_messages(data.topicId,data.count);break;
         case  "get_older_messages": command_get_older_messages(
@@ -106,8 +106,8 @@ function command_disconnect(){
 function command_publish(topic,message){
     var toSend={
         "command":"publish",
-        "topic":topic,
-        "message":message
+        "topicId":topic,
+        "content":message
     };
     console.log("topic:"+topic);
     console.log("\nSending:" + JSON.stringify(toSend));
