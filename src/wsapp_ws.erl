@@ -98,7 +98,7 @@ handle_command(<<"publish">>,Json,_State)->
     #{<<"topicId">> := TopicId, <<"content">> := Content}=Json,
     #{<<"id">>:= UserId}=_State,
     
-    DateTime=calendar:local_time_to_universal_time(),
+    DateTime=calendar:universal_time(),
     Message=#{
          <<"user_id">>=>UserId,
          <<"topic_id">>=>TopicId,

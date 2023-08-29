@@ -225,11 +225,11 @@ write_chat_message(_Message=#{
                    <<"content">>:=Content,
                    <<"createdAt">>:=CreatedAt,
                    <<"timezone">> :=Timezone})->
-    
+    Date=calendar:datetime_to_gregorian_seconds(Timezone),
     Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) 
                 values ($1,$2,$3,$4,$5)">>,
     {ok,C}=create_connection(),
-    {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]),
+    {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Date]),
      ok.   
 
 -spec write_chat_messages(Messages::list())->{ok,Inserted::integer()} | {error,Error::any()}.
