@@ -13,19 +13,21 @@ loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
 function onSendMessage(){
-    console.log(currentChannel.id);
-    console.log(chatSendMessageBox.value);
-    var message={
+    var channelId=parseInt(currentChannel.getAttribute("channelId"));
+    
+    console.log("Channel publish:"+channelId);
+    var message=document.getElementById("chatSendMessageBox").value;
+    publishEvent("socket_command",{
         "kind":"publish",
-        "topicId":currentChannel.innerText,
-        "content":chatSendMessageBox.value,
-    };
-    publishEvent("socket_command",message);
+        "topicId":channelId,
+        "content":message
+    })
 }
 
 function onDisplayChannelChat(ev){
     console.log(ev.detail);
     if(currentChannel.id!=ev.detail.id){
+        currentChannel.setAttribute("channelId",ev.detail.id);
         currentChannel.innerText=ev.detail.name;
         resetChat();
         var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
@@ -63,31 +65,8 @@ function get_newest_messages(id,count){
     
     return message;
 }
-function onPublish(){
-    var channel=currentChannel.innerText;
-    var date=new Date().toDateString();
-    console.log("Channel publish:"+channel);
-    var message=document.getElementById("chatSendMessageBox").value;
-    command_publish(channel,message);
-}
 
-function openChannelChat(channelName){
-    console.log("inside channel chat");
-    console.log("Channel:"+currentChannel.value);
-    if(currentChannel.innerText!=channelName){
-        console.log("end1");
-        currentChannel.innerText=channelName;
-        resetChat();
-        //sent event to fetch chat messages from another channel
-        //acel event face pull la mesaje si apoi apel la functiile de chat si anume reset inner text si set cu cele noi
-    }
-    console.log("end");
-}
 
-function updateChatOnMessage(data){
-    var messageContainer=createChatMessageContainer(data);
-    chatContainer.appendChild(messageContainer);
-}
 
 function createChatMessageContainer(data){
     var user=data.user;

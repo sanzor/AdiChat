@@ -101,9 +101,10 @@ handle_command(<<"publish">>,Json,_State)->
     DateTime=calendar:universal_time(),
     Message=#{
          <<"user_id">>=>UserId,
-         <<"topic_id">>=>TopicId,
+         <<"topic_id">>=> TopicId,
          <<"content">> => Content,
-         <<"created_at">> =>DateTime
+         <<"created_at">> =>DateTime,
+         <<"timezone">>=><<"utc+2">>
         },
    
     ok=wsapp_server:publish(TopicId,Message),
