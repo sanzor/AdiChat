@@ -21,7 +21,6 @@ function onNewChatMessage(data){
    
 }
 function handle_chat_message(data){
-    var topic=data.topic;
     publishEvent("new_message",data.detail);
     
     
@@ -34,6 +33,7 @@ function handle_command_result(data){
         callback_unsubscribe(data);
     }
     if(data.command=="get_subscriptions"){
+        console.log("publishing subs");
 
         publishEvent("updateChannels",data.result);
     }

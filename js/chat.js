@@ -1,5 +1,5 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
-import { chatContainer,
+import { channelsContainer, chatContainer,
     chatSendMessageBox,
     chatSendMessageBtn,
     currentChannel,
@@ -7,9 +7,11 @@ import { chatContainer,
 import { showElement } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
+subscribeToEvent("new_chat_message",onNewMessage);
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 subscribeToEvent("resetChat",onResetChat);
+
 loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
@@ -23,18 +25,56 @@ function onSendMessage(){
         "content":message
     })
 }
+function onNewMessage(ev){
+    console.log("Inside on new message");
+    appendMessageToChat(ev.detail);
+}
 
+function appendMessageToChat(message){
+    var messageElement=createChatMessageContainer(message);
+    chatContainer.appendChild(messageElement);
+}
 function onDisplayChannelChat(ev){
     console.log(ev.detail);
-    var currentChannelId=parseInt(localStorage.getItem("currentChannelId"));
-    if(currentChannelId!=ev.detail.id){
-        localStorage.setItem("currentChannelId",ev.detail.id);
-        currentChannel.innerText=ev.detail.name;
-        resetChat();
-        var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
-        publishEvent("socket_command",event_payload);
+   
+   setChat();
+    
+   
+}
+function setChat(){
+    var channelValue=localStorage.getItem("currentChannel");
+    try{
+        var channel=JSON.parse(channelValue);
+        if(!channelValue || channel.id==undefined){
+            setChatWithDefaultChannel();
+            return;
+        }
+        
+        setChatWithChannel(channel);
+    }catch{
+
     }
    
+}
+function setChatWithChannel(channel){
+    localStorage.setItem("currentChannel",channel);
+    currentChannel.innerText=channel.name;
+    resetChat();
+    var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
+    publishEvent("socket_command",event_payload);
+    
+}
+function setChatWithDefaultChannel(){
+    //to make this with event and async , not leak channel logic
+    if(channelsContainer.children.length==0){
+        console.log("No channels present");
+        //implement default view of chat
+        return;
+    }
+    var defaultChannel=channelsContainer.children[0];
+    var channel=JSON.parse(defaultChannel.getAttribute("channel"));
+    setChatWithChannel(channel);
+
 }
 function onResetChat(ev){
     localStorage.removeItem("currentChannelId");
