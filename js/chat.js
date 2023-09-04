@@ -9,12 +9,12 @@ import { showElement } from "./utils.js";
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("displayChannelChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
+subscribeToEvent("resetChat",onResetChat);
 loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
 function onSendMessage(){
-    var channelId=parseInt(currentChannel.getAttribute("channelId"));
-    
+    var channelId=parseInt(localStorage.getItem("channelId"));
     console.log("Channel publish:"+channelId);
     var message=document.getElementById("chatSendMessageBox").value;
     publishEvent("socket_command",{
@@ -26,14 +26,20 @@ function onSendMessage(){
 
 function onDisplayChannelChat(ev){
     console.log(ev.detail);
-    if(currentChannel.id!=ev.detail.id){
-        currentChannel.setAttribute("channelId",ev.detail.id);
+    var currentChannelId=parseInt(localStorage.getItem("currentChannelId"));
+    if(currentChannelId!=ev.detail.id){
+        localStorage.setItem("currentChannelId",ev.detail.id);
         currentChannel.innerText=ev.detail.name;
         resetChat();
         var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
         publishEvent("socket_command",event_payload);
     }
    
+}
+function onResetChat(ev){
+    localStorage.removeItem("currentChannelId");
+    chatContainer.innerHTML=null;
+    currentChannel.innerText=null;
 }
 
 function onLoadOlderMessages(){

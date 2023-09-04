@@ -227,7 +227,7 @@ write_chat_message(Message)->
         <<"created_at">>:=CreatedAt,
         <<"timezone">> :=Timezone}=Message,
     
-    Statement= <<"INSERT INTO  message(topic_id,user_id,content,created_at,timezone) 
+    Statement= <<"INSERT INTO  message(topic_id,user_id,message,created_at,timezone) 
                 values ($1,$2,$3,$4,$5)">>,
     {ok,C}=create_connection(),
     {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]),

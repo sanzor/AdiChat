@@ -2,8 +2,11 @@ import { publishEvent, subscribeToEvent } from "./bus.js";
 
 import{channelsContainer} from "./elements.js";
 subscribeToEvent("updateChannels",onUpdateChannels);
+subscribeToEvent("new_message",onNewMessage);
 
-
+function onNewMessage(ev){
+    var channels=
+}
 function onUpdateChannels(ev){
     console.log("Received update channels");
     createChannelsContainer(ev.detail);
@@ -42,6 +45,7 @@ function createChannelContainer(channel){
     var container=document.getElementById("channelsContainer");
     var channelContainer=document.createElement("span");
     channelContainer.setAttribute("class","channelRow");
+    channelContainer.setAttribute("channelId",channel.id);
     var unsubscribeBtn=createUnsubscribeChannelButton(channel);
     var openChatButton=createDisplayChannelChatButton(channel);
     var newMessagesBox=createNewMessagesBox(channel);

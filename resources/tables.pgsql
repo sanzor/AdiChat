@@ -34,6 +34,7 @@ CREATE TABLE message (
     id SERIAL PRIMARY KEY,
     topic_id INTEGER REFERENCES topic(id),
     user_id INTEGER REFERENCES wsuser(id),
+    message VARCHAR(255),
     created_at TIMESTAMPTZ,
     timezone VARCHAR(255)
 );
