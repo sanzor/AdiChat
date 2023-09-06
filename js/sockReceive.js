@@ -34,7 +34,7 @@ function handle_command_result(data){
     }
     if(data.command=="get_subscriptions"){
         console.log("publishing subs");
-
+        
         publishEvent("updateChannels",data.result);
     }
     if(data.command=="get_newest_messages"){
@@ -55,16 +55,16 @@ function handle_user_event(data){
 
 function handle_user_event_subscribe(data){
     console.log("Publishing update channels");
-    publishEvent("updateChannels",data.subscriptions);
+    publishEvent("subscribe_result_u",data.subscriptions);
    
 }
 function handle_user_event_unsubscribe(data){
     console.log("Publishing update channels");
-    publishEvent("updateChannels",data.subscriptions);
+    publishEvent("unsubscribe_result_u",data.subscriptions);
 }
 function callback_subscribe(data){
     if(data.result=="ok"){
-        publishEvent("updateChannels",data.subscriptions);
+        publishEvent("subscribe_result",data.subscriptions);
     }
     if(data.result="already_subscribed"){
         console.log("\nAlready subscribed to topic:",data.topic,"\n");
@@ -72,7 +72,7 @@ function callback_subscribe(data){
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
-        publishEvent("updateChannels",data.subscriptions);
+        publishEvent("unsubscribe_result",data.subscriptions);
         publishEvent("resetChat",{});
     }
 }

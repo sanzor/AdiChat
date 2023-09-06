@@ -1,21 +1,57 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 
 import{channelsContainer} from "./elements.js";
-subscribeToEvent("updateChannels",onUpdateChannels);
+
+subscribeToEvent("subscribe_result",onSubscribeResult);
+subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
+subscribeToEvent("subscribe_result_u",onSubscribeResultU);
+subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
+
 subscribeToEvent("new_channel_message",onNewMessage);
 
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
-function onUpdateChannels(ev){
+
+function setChannels(){
     console.log("Inside update channels:");
     console.log(ev.detail);
-    updateChannelsContainer(ev.detail);
+    localStorage.setItem("channels",JSON.stringify(ev.detail));
+    var channels=JSON.parse(localStorage.getItem("channels"));
+    updateChannelsContainer(channels);
+}
+function onSubscribeResult(ev){
+    var channels=setChannels(ev.detail);
     
-    if(ev.detail.length==0){
+    if(channels.length==0){
         return;
     }
-    publishEvent("displayChannelChat",ev.detail[0])
+    publishEvent("setChat",channels[0]);
+}
+
+function onSubscribeResultU(ev){
+    var channels=setChannels(ev.detail);
+    
+    if(channels.length==0){
+        return;
+    }
+    publishEvent("setChat",channels[0]);
+}
+
+function onUnSubscribeResult(ev){
+    var channels=setChannels(ev.detail);
+    if(channels.length==0){
+        return;
+    }
+    publishEvent("setChat",channels.slice(-1));
+}
+
+function onUnSubscribeResultU(ev){
+    var channels=setChannels(ev.detail);
+    if(channels.length==0){
+        return;
+    }
+    publishEvent("setChat",channels.slice(-1));
 }
 
 function resetChannelsContainer(){
@@ -76,7 +112,7 @@ function createUnsubscribeChannelButton(channel){
     return unsubscribeBtn;
 }
 function createDisplayChannelChatButton(channel){
-    console.log(channel);
+   
     var channelButton=document.createElement("button");
     channelButton.id=channel.id;
     channelButton.setAttribute('content',channel.name);
@@ -96,6 +132,7 @@ function removeSubscriptionRow(){
     var table=document.getElementById('channelsContainer');
     var row=document.getElementById(channel+'channel_row');
     table.removeChild(row);
+    
 }
 
 function updateChannelsOnMessage(data){

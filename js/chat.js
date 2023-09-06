@@ -8,7 +8,7 @@ import { showElement } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("new_chat_message",onNewMessage);
-subscribeToEvent("displayChannelChat",onDisplayChannelChat);
+subscribeToEvent("setChat",onDisplayChannelChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 subscribeToEvent("resetChat",onResetChat);
 
