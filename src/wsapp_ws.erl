@@ -27,7 +27,7 @@ websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
     {reply,{text,thoas:encode(Reply)},State};
 
-    
+
 websocket_info(Message,State)->
     io:format("\nWeird: ~p\ntrace",[Message]),
     Reply=Message#{ kind=><<"chat">>},

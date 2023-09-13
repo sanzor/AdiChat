@@ -196,7 +196,7 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
         {ok,false} ->ok=storage:subscribe(TopicId, UserId),
                 {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
                 UserEvent=#{user_event_kind => <<"subscribe">>,
-                topic => TopicId, subscriptions=>Subscriptions},
+                topicId => TopicId, subscriptions=>Subscriptions},
                 [send(Socket,{user_event,UserId,UserEvent})|| 
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
                 {ok,Subscriptions}
@@ -207,7 +207,7 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
 handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
     Reply=case storage:unsubscribe(TopicId, UserId) of 
                 ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
-                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => TopicId, subscriptions=>Subscriptions},
+                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topicId => TopicId, subscriptions=>Subscriptions},
                         [send(Socket,{user_event,UserId,UserEvent})
                             || Socket<-pg:get_members(?F(UserId)), Socket =/= From],
                         {ok,Subscriptions};

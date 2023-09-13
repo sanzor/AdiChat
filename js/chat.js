@@ -8,7 +8,7 @@ import { showElement } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("new_chat_message",onNewMessage);
-subscribeToEvent("setChat",onDisplayChannelChat);
+subscribeToEvent("setChat",onSetChatWindow);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 subscribeToEvent("resetChat",onResetChat);
 
@@ -34,30 +34,16 @@ function appendMessageToChat(message){
     var messageElement=createChatMessageContainer(message);
     chatContainer.appendChild(messageElement);
 }
-function onDisplayChannelChat(ev){
+function onSetChatWindow(ev){
     console.log(ev.detail);
-   
-   setChat();
+    console.log(ev.detail.name);
+    setChatWithChannel(ev.detail);
     
    
 }
-function setChat(){
-    var channelValue=localStorage.getItem("currentChannel");
-    try{
-        var channel=JSON.parse(channelValue);
-        if(!channelValue || channel.id==undefined){
-            setChatWithDefaultChannel();
-            return;
-        }
-        
-        setChatWithChannel(channel);
-    }catch{
 
-    }
-   
-}
 function setChatWithChannel(channel){
-    localStorage.setItem("currentChannel",channel);
+    console.log(channel.name);
     currentChannel.innerText=channel.name;
     resetChat();
     var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
@@ -76,7 +62,7 @@ function setChatWithDefaultChannel(){
     setChatWithChannel(channel);
 
 }
-function onResetChat(ev){
+function onResetChat(_){
     localStorage.removeItem("currentChannelId");
     chatContainer.innerHTML=null;
     currentChannel.innerText=null;

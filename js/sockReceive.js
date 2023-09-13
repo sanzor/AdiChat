@@ -35,7 +35,7 @@ function handle_command_result(data){
     if(data.command=="get_subscriptions"){
         console.log("publishing subs");
         
-        publishEvent("updateChannels",data.result);
+        publishEvent("refresh_channels",data.result);
     }
     if(data.command=="get_newest_messages"){
         callback_get_newest_messages(data);
@@ -55,12 +55,12 @@ function handle_user_event(data){
 
 function handle_user_event_subscribe(data){
     console.log("Publishing update channels");
-    publishEvent("subscribe_result_u",data.subscriptions);
+    publishEvent("subscribe_result_u",data);
    
 }
 function handle_user_event_unsubscribe(data){
     console.log("Publishing update channels");
-    publishEvent("unsubscribe_result_u",data.subscriptions);
+    publishEvent("unsubscribe_result_u",data);
 }
 function callback_subscribe(data){
     if(data.result=="ok"){

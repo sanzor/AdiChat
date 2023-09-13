@@ -6,49 +6,66 @@ subscribeToEvent("subscribe_result",onSubscribeResult);
 subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
 subscribeToEvent("subscribe_result_u",onSubscribeResultU);
 subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
-
+subscribeToEvent("refresh_channels",onRefreshChannels);
 subscribeToEvent("new_channel_message",onNewMessage);
 
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
 
-function setChannels(){
-    console.log("Inside update channels:");
-    console.log(ev.detail);
-    localStorage.setItem("channels",JSON.stringify(ev.detail));
-    var channels=JSON.parse(localStorage.getItem("channels"));
+function setChannels(channels){
+    localStorage.setItem("channels",JSON.stringify(channels));
     updateChannelsContainer(channels);
+    return channels;
 }
-function onSubscribeResult(ev){
+
+function onRefreshChannels(ev){
     var channels=setChannels(ev.detail);
     
     if(channels.length==0){
         return;
     }
     publishEvent("setChat",channels[0]);
+}
+function onSubscribeResult(ev){
+    var channels=setChannels(ev.detail.subscriptions);
+    var target=channels.filter(x=>x.id==ev.topicId)[0];
+    console.log(target);
+    localStorage.setItem("currentChannel",JSON.stringify(target));
+    if(channels.length==0){
+        return;
+    }
+    
+    publishEvent("setChat",target);
 }
 
 function onSubscribeResultU(ev){
-    var channels=setChannels(ev.detail);
-    
+    var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
+        publishEvent("setChat",channels[0]);
         return;
     }
-    publishEvent("setChat",channels[0]);
+    
 }
 
 function onUnSubscribeResult(ev){
-    var channels=setChannels(ev.detail);
+    var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
+        publishEvent("resetChat",{});
         return;
     }
-    publishEvent("setChat",channels.slice(-1));
+    var currentChannel=JSON.parse(localStorage.getItem("currentChannel"));
+    if(ev.detail.topicId==currentChannel.id){
+        publishEvent("setChat",channels[0]);
+        return;
+    }
+    
 }
 
 function onUnSubscribeResultU(ev){
-    var channels=setChannels(ev.detail);
+    var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
+        publishEvent("resetChat",{});
         return;
     }
     publishEvent("setChat",channels.slice(-1));
@@ -59,7 +76,7 @@ function resetChannelsContainer(){
     channelsContainer.innerHTML='';
 }
 function updateChannelsContainer(subscriptions){
-    console.log(subscriptions);
+    console.log("inside update channels");
     resetChannelsContainer();
     var headerRow=document.createElement("tr");
     var h1=document.createElement("th");
@@ -119,7 +136,7 @@ function createDisplayChannelChatButton(channel){
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
     channelButton.textContent=channel.name;
-    channelButton.onclick=function(args){ publishEvent("displayChannelChat",channel)};
+    channelButton.onclick=function(args){ publishEvent("setChat",channel)};
     return channelButton;
 }
 function createNewMessagesBox(channel){
