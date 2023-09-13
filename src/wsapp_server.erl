@@ -194,23 +194,22 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
     Reply=case storage:check_if_subscribed(TopicId, UserId) of
         {ok,true} -> already_subscribed;
         {ok,false} ->ok=storage:subscribe(TopicId, UserId),
-                {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
-                UserEvent=#{user_event_kind => <<"subscribe">>,
-                topicId => TopicId, subscriptions=>Subscriptions},
+               
+                UserEvent=#{user_event_kind => <<"subscribe">>,topicId => TopicId},
                 [send(Socket,{user_event,UserId,UserEvent})|| 
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
-                {ok,Subscriptions}
+                {ok,TopicId}
     end,
     {reply,Reply,_State};
    
 
 handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
     Reply=case storage:unsubscribe(TopicId, UserId) of 
-                ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
-                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topicId => TopicId, subscriptions=>Subscriptions},
+                ok ->   
+                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topicId => TopicId},
                         [send(Socket,{user_event,UserId,UserEvent})
                             || Socket<-pg:get_members(?F(UserId)), Socket =/= From],
-                        {ok,Subscriptions};
+                        {ok,{unsubscribed,TopicId}};
                 not_joined->#{result=> <<"not joined">>}
           end,
     {reply,Reply,State};      

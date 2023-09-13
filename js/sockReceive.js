@@ -64,7 +64,7 @@ function handle_user_event_unsubscribe(data){
 }
 function callback_subscribe(data){
     if(data.result=="ok"){
-        publishEvent("subscribe_result",data.subscriptions);
+        publishEvent("subscribe_result",data);
     }
     if(data.result="already_subscribed"){
         console.log("\nAlready subscribed to topic:",data.topic,"\n");
@@ -72,7 +72,7 @@ function callback_subscribe(data){
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
-        publishEvent("unsubscribe_result",data.subscriptions);
+        publishEvent("unsubscribe_result",data);
         publishEvent("resetChat",{});
     }
 }

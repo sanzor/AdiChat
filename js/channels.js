@@ -1,6 +1,7 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 
 import{channelsContainer} from "./elements.js";
+import { getDataAsync, postData } from "./utils.js";
 
 subscribeToEvent("subscribe_result",onSubscribeResult);
 subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
@@ -12,7 +13,11 @@ subscribeToEvent("new_channel_message",onNewMessage);
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
-
+async function getSubscriptionsAsync(){
+    var userRaw=localStorage.getItem("user");
+    var url=`${config.baseHttpUrl}/get-topics?userid=${userRaw.id}`;
+    return await getDataAsync(url);
+}
 function setChannels(channels){
     localStorage.setItem("channels",JSON.stringify(channels));
     updateChannelsContainer(channels);
@@ -27,7 +32,8 @@ function onRefreshChannels(ev){
     }
     publishEvent("setChat",channels[0]);
 }
-function onSubscribeResult(ev){
+async function onSubscribeResult(ev){
+   
     var channels=setChannels(ev.detail.subscriptions);
     var target=channels.filter(x=>x.id==ev.topicId)[0];
     console.log(target);
@@ -76,7 +82,7 @@ function resetChannelsContainer(){
     channelsContainer.innerHTML='';
 }
 function updateChannelsContainer(subscriptions){
-    console.log("inside update channels");
+    console.log(subscriptions);
     resetChannelsContainer();
     var headerRow=document.createElement("tr");
     var h1=document.createElement("th");

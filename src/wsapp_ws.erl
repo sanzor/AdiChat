@@ -78,17 +78,18 @@ handle_command(<<"create-user">>,UserData,_State)->
     {ok,reply,Reply};
 
 handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"id">> := UserId})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>,  topic=>Topic},
+    BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>},
     Reply=case wsapp_server:subscribe(UserId, Topic) of
         already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
-        {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
+        {ok,TopicId} -> BaseReply#{result=><<"ok">>,
+            <<"topicId">>=>TopicId}
     end,    
     {ok,reply,Reply};
 handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:=UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>TopicId},
     Reply=case wsapp_server:unsubscribe(UserId,TopicId) of
         not_joined -> BaseReply#{result=><<"not_joined">>};
-        {ok,Subscriptions} -> BaseReply#{result=><<"ok">>,subscriptions=>Subscriptions}
+        {ok,{unsubscribed,TopicId}} -> BaseReply#{result=><<"ok">>,<<"topicId">>=>TopicId}
     end,
    
     {ok,reply,Reply};

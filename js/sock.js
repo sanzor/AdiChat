@@ -1,9 +1,9 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import config from "./config.js";
-export{connect};
+export{connect,send_command};
 
 subscribeToEvent("close_socket",onCloseSocketCommand);
-subscribeToEvent("socket_command",onSendCommand);
+subscribeToEvent("socket_command",onAsyncCommand);
 window.addEventListener("beforeunload",onUnload);
 var socket=null;
 
@@ -21,6 +21,9 @@ function get_url(){
     var url= `${config.baseWsUrl}/ws/id/${user.id}`;
     console.log("Url:"+url);
     return url;
+}
+function send(){
+
 }
  function connect (){
     var url=get_url();
@@ -53,8 +56,13 @@ function get_url(){
 function onDomContentLoaded(){
 
 }
-function onSendCommand(ev){
+
+
+function onAsyncCommand(ev){
     var data=ev.detail;
+    onCommand(data);
+}
+function onCommand(data){
     console.log(`\nSending [${data.kind}] command : ${data} to socket\n`);
     switch(data.kind){
         case "subscribe": command_subscribe(data.topic);break;
