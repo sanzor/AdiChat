@@ -19,7 +19,7 @@ subscribeToEvent("socketEvent",onSocketEvent);
 
 connectBtn.addEventListener("click",btnConnect);
 disconnectBtn.addEventListener("click",onDisconnect);
-subscribeBtn.addEventListener("click",onSubscribe);
+
 logoutBtn.addEventListener("click",onLogout);
 
 
@@ -43,9 +43,7 @@ function onDisconnect(){
     command_disconnect();
 }
 
-function onSubscribe(){
-    publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
-}
+
 
 
 

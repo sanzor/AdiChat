@@ -11,5 +11,7 @@ function publishEvent(eventName,eventData){
 function subscribeToEvent(eventName,callback){
     eventBus.addEventListener(eventName,callback);
 }
-
-export {publishEvent,subscribeToEvent};
+function unsubscribeFromEvent(eventName,callback){
+    eventBus.removeEventListener(eventName,callback);
+}
+export {publishEvent,subscribeToEvent,unsubscribeFromEvent};

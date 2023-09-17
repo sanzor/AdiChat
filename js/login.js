@@ -1,4 +1,5 @@
 import config from "./config.js";
+import { getDataAsync } from "./utils.js";
 import{loginButton,emailLoginBox,passwordLoginBox,loginFailMessage, registerBtn} 
 from "./elements.js";
 import { subscribeToEvent,publishEvent} from "./bus.js";

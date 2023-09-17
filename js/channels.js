@@ -1,7 +1,7 @@
-import { publishEvent, subscribeToEvent } from "./bus.js";
-
+import { publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
+import config from "./config.js";
 import{channelsContainer} from "./elements.js";
-import { getDataAsync, postData } from "./utils.js";
+import { getDataAsync, postDataAsync } from "./utils.js";
 
 subscribeToEvent("subscribe_result",onSubscribeResult);
 subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
@@ -10,14 +10,49 @@ subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
 subscribeToEvent("refresh_channels",onRefreshChannels);
 subscribeToEvent("new_channel_message",onNewMessage);
 
+
+subscribeBtn.addEventListener("click",onSubscribe);
+
+async function onSubscribe(){
+    function refreshAfterSubscribe(ev,resolve,reject){
+        try{
+            resolve(ev.detail.subscriptions);
+        }catch(err){
+            reject(e)
+        }
+        
+       
+    }
+    function onSubscribeResult(ev,resolve,reject){
+        if(ev.detail.result!="ok"){
+            if(ev.topic.result=="already_subscribed"){
+                console.log("already_subscribed");
+                resolve("already_subscribed");
+                return;
+            }
+            reject(ev.detail.result);
+        }
+        resolve(ev.detail.result);
+    }
+    var subscribeResult =await new Promise((resolve,reject)=>{
+        subscribeToEvent("subscribe_result",(ev)=>onSubscribeResult(ev,resolve,reject));
+        publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
+        unsubscribeFromEvent("subscribe_result",(ev)=>onSubscribeResult(ev,resolve,reject));
+    });
+    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
+        subscribeToEvent("refresh_channels",(ev)=>refreshAfterSubscribe(ev,resolve,reject));
+        publishEvent("refresh_channels",)
+    };
+   
+    
+}
+
+
+
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
-async function getSubscriptionsAsync(){
-    var userRaw=localStorage.getItem("user");
-    var url=`${config.baseHttpUrl}/get-topics?userid=${userRaw.id}`;
-    return await getDataAsync(url);
-}
+
 function setChannels(channels){
     localStorage.setItem("channels",JSON.stringify(channels));
     updateChannelsContainer(channels);
@@ -32,18 +67,7 @@ function onRefreshChannels(ev){
     }
     publishEvent("setChat",channels[0]);
 }
-async function onSubscribeResult(ev){
-   
-    var channels=setChannels(ev.detail.subscriptions);
-    var target=channels.filter(x=>x.id==ev.topicId)[0];
-    console.log(target);
-    localStorage.setItem("currentChannel",JSON.stringify(target));
-    if(channels.length==0){
-        return;
-    }
-    
-    publishEvent("setChat",target);
-}
+
 
 function onSubscribeResultU(ev){
     var channels=setChannels(ev.detail.subscriptions);

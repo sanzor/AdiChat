@@ -64,9 +64,9 @@ publish(_Req=#{json := #{ <<"topic">> := Topic , <<"sender">> := _Sender , <<"me
     ok=wsapp_server:publish(Topic,Message),
     {status,200}.
 
-subscribe(_Req=#{parsed_qs := #{ <<"user">> :=User, <<"topic">> := Topic}})->
-    ok=wsapp_server:subscribe(User,Topic),
-    {status,200}.
+subscribe(_Req=#{parsed_qs := #{ <<"userId">> :=UserId, <<"topic">> := Topic}})->
+    {ok,TopicId}=wsapp_server:subscribe(UserId,Topic),
+    {json,200,#{},#{<<"topicId">> => TopicId , <<"userId">> => UserId}}.
 
 unsubscribe(_Req=#{parsed_qs := #{ <<"user">> :=User, <<"topic">> := Topic}})->
     ok=wsapp_server:unsubscribe(User,Topic),

@@ -2,7 +2,7 @@
 import config from "./config.js";
 import{emailBox,passwordBox,usernameBox,retypePasswordBox} from "./elements.js";
 import {publishEvent,subscribeToEvent } from "./bus.js";
-import { postData } from "./utils.js";
+import { postDataAsync } from "./utils.js";
 
 import{
     backToLoginBtn,
@@ -97,7 +97,7 @@ async function createUserAsync(userData){
     var url=`${config.baseHttpUrl}/create-user`;
     console.log(url);
     
-    var result=await postData(url,userData);
+    var result=await postDataAsync(url,userData);
     console.log(result);
     return result;
 }

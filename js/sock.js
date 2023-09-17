@@ -1,6 +1,6 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import config from "./config.js";
-export{connect,send_command};
+export{connect};
 
 subscribeToEvent("close_socket",onCloseSocketCommand);
 subscribeToEvent("socket_command",onAsyncCommand);

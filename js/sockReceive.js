@@ -63,12 +63,9 @@ function handle_user_event_unsubscribe(data){
     publishEvent("unsubscribe_result_u",data);
 }
 function callback_subscribe(data){
-    if(data.result=="ok"){
+    
         publishEvent("subscribe_result",data);
-    }
-    if(data.result="already_subscribed"){
-        console.log("\nAlready subscribed to topic:",data.topic,"\n");
-    }
+   
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
