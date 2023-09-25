@@ -85,7 +85,7 @@ function callback_get_messages(data){
 
 
 function callback_create_user(data){
-    
+    console.log("yey");
     localStorage.user={
         "id":data.id,
         "name":data.name
