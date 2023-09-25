@@ -21,6 +21,7 @@ function onNewChatMessage(data){
    
 }
 function handle_chat_message(data){
+    console.log('sm');
     publishEvent("new_message",data.detail);
     
     
