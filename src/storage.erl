@@ -19,7 +19,7 @@
          get_newest_messages/2,
          write_chat_message/1,
          write_chat_messages/1]).
--define(DB_SERVER_KEY,pg2).
+-define(DB_SERVER_KEY,pg3).
 
 
 
@@ -219,14 +219,15 @@ get_newest_messages(TopicId,Count)->
     {ok,to_records(Columns, Values)}.
 
 -spec write_chat_message(Message::any())->ok | {error,Error::any()}.
-write_chat_message(_Message=#{ 
-                   <<"topic">>:=TopicId,
-                   <<"user_id">> :=UserId,
-                   <<"content">>:=Content,
-                   <<"createdAt">>:=CreatedAt,
-                   <<"timezone">> :=Timezone})->
+write_chat_message(Message)->
+   #{ 
+        <<"topic_id">>:=TopicId,
+        <<"user_id">> :=UserId,
+        <<"content">>:=Content,
+        <<"created_at">>:=CreatedAt,
+        <<"timezone">> :=Timezone}=Message,
     
-    Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) 
+    Statement= <<"INSERT INTO  message(topic_id,user_id,message,created_at,timezone) 
                 values ($1,$2,$3,$4,$5)">>,
     {ok,C}=create_connection(),
     {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]),

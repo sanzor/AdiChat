@@ -20,7 +20,7 @@
          offline/2,
          subscribe/2,
          unsubscribe/2,
-         get_oldest_messages/3,
+         get_older_messages/3,
          get_newest_messages/2,
          get_subscriptions/1]).
 
@@ -72,8 +72,8 @@ delete_topic(TopicId)->
 
 
 
--spec get_oldest_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
-get_oldest_messages(TopicId,StartIndex,Count)->
+-spec get_older_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
+get_older_messages(TopicId,StartIndex,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,StartIndex,Count}}).
 
 
@@ -100,8 +100,8 @@ offline(UserId,Socket)->
     gen_server:call(?MODULE, {offline,{UserId,Socket}}).
 
 -spec subscribe(UserId::integer(),TopicId::integer() )->OkResult::map() | already_subscribed | {error,Error::term()}.
-subscribe(UserId,TopicId)->
-    gen_server:call(?MODULE, {subscribe,{UserId,TopicId}}).
+subscribe(UserId,TopicName)->
+    gen_server:call(?MODULE, {subscribe,{UserId,TopicName}}).
 
 
 -spec unsubscribe(UserId::integer(),TopicId::integer())->OkResult::map()| not_joined | {error,Error::term()}.
@@ -117,7 +117,6 @@ start_link()->
 %-------------callbacks---------------------------------------%
 
 init(Args)->
-    
     process_flag(trap_exit,true),
     self() ! start,
     {ok,#state{}}.
@@ -172,7 +171,7 @@ handle_call({delete_topic,TopicId},_,State)->
         {error,Error}->{reply,{error,Error},State}
             
     end;
-handle_call({get_oldest_messages,{TopicId,StartIndex,Count}},_,State)->
+handle_call({get_older_messages,{TopicId,StartIndex,Count}},_,State)->
     {ok,Messages}=storage:get_oldest_messages(TopicId, StartIndex, Count),
     {reply,{ok,Messages},State};
 
@@ -186,7 +185,7 @@ handle_call({get_subscriptions,UserId},_,State)->
  
 
 handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
-    #{<<"id">> := TopicId}= case storage:get_topic_by_name(TopicName) of
+    Topic=#{<<"id">> := TopicId}= case storage:get_topic_by_name(TopicName) of
                                 topic_does_not_exist -> 
                                     {ok,Topic}=storage:create_topic(#{<<"user_id">> => UserId , <<"name">> => TopicName}),
                                     Topic;
@@ -195,23 +194,21 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
     Reply=case storage:check_if_subscribed(TopicId, UserId) of
         {ok,true} -> already_subscribed;
         {ok,false} ->ok=storage:subscribe(TopicId, UserId),
-                {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
-                UserEvent=#{user_event_kind => <<"subscribe">>,
-                topic => TopicId, subscriptions=>Subscriptions},
+                UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic},
                 [send(Socket,{user_event,UserId,UserEvent})|| 
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
-                {ok,Subscriptions}
+                {ok,Topic}
     end,
     {reply,Reply,_State};
    
 
 handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
     Reply=case storage:unsubscribe(TopicId, UserId) of 
-                ok ->   {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
-                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topic => TopicId, subscriptions=>Subscriptions},
+                ok ->   
+                        UserEvent=#{user_event_kind => <<"unsubscribe">>,topicId => TopicId},
                         [send(Socket,{user_event,UserId,UserEvent})
                             || Socket<-pg:get_members(?F(UserId)), Socket =/= From],
-                        {ok,Subscriptions};
+                        {ok,{unsubscribed,TopicId}};
                 not_joined->#{result=> <<"not joined">>}
           end,
     {reply,Reply,State};      
@@ -240,9 +237,8 @@ handle_cast({publish,{TopicId,Message}},State)->
     {ok,Subscribers}=storage:get_subscriptions_for_topic(TopicId),
     io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [TopicId,Subscribers]),
-    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers ],
+    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers],
     {noreply,State}.
-
 
 %% @doc 
 %% Handling info messages

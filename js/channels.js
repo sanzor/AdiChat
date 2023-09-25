@@ -1,50 +1,145 @@
-import { publishEvent, subscribeToEvent } from "./bus.js";
-const channelsContainer=document.getElementById("channelsContainer");
+import { publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
+import config from "./config.js";
+import{channelsContainer} from "./elements.js";
+import { getDataAsync, postDataAsync } from "./utils.js";
+
+subscribeToEvent("subscribe_result",onSubscribeResult);
+subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
+subscribeToEvent("subscribe_result_u",onSubscribeResultU);
+subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
+subscribeToEvent("refresh_channels",onRefreshChannels);
+subscribeToEvent("new_channel_message",onNewMessage);
 
 
-subscribeToEvent("updateChannels",onUpdateChannels);
+subscribeBtn.addEventListener("click",onSubscribe);
 
-
-function onUpdateChannels(ev){
-    console.log("Received update channels");
-    createChannelsContainer(ev.detail);
+async function onSubscribe(){
+    function refreshAfterSubscribe(ev,resolve,reject){
+        try{
+            resolve(ev.detail.subscriptions);
+        }catch(err){
+            reject(e)
+        }
+        
+       
+    }
+    function onSubscribeResult(ev,resolve,reject){
+        if(ev.detail.result!="ok"){
+            if(ev.topic.result=="already_subscribed"){
+                console.log("already_subscribed");
+                resolve("already_subscribed");
+                return;
+            }
+            reject(ev.detail.result);
+        }
+        resolve(ev.detail.result);
+    }
+    var subscribeResult =await new Promise((resolve,reject)=>{
+        subscribeToEvent("subscribe_result",(ev)=>onSubscribeResult(ev,resolve,reject));
+        publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
+        unsubscribeFromEvent("subscribe_result",(ev)=>onSubscribeResult(ev,resolve,reject));
+    });
+    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
+        subscribeToEvent("refresh_channels",(ev)=>refreshAfterSubscribe(ev,resolve,reject));
+        publishEvent("refresh_channels",)
+    };
+   
+    
 }
-function resetSubscriptionTable(){
-    var table=document.getElementById("channelsContainer");
-    table.innerHTML='';
+
+
+
+function onNewMessage(ev){
+   // channelsContainer.children.forEach(elem=>)
 }
-function createChannelsContainer(subscriptions){
+
+function setChannels(channels){
+    localStorage.setItem("channels",JSON.stringify(channels));
+    updateChannelsContainer(channels);
+    return channels;
+}
+
+function onRefreshChannels(ev){
+    var channels=setChannels(ev.detail);
+    
+    if(channels.length==0){
+        return;
+    }
+    publishEvent("setChat",channels[0]);
+}
+
+
+function onSubscribeResultU(ev){
+    var channels=setChannels(ev.detail.subscriptions);
+    if(channels.length==0){
+        publishEvent("setChat",channels[0]);
+        return;
+    }
+    
+}
+
+function onUnSubscribeResult(ev){
+    var channels=setChannels(ev.detail.subscriptions);
+    if(channels.length==0){
+        publishEvent("resetChat",{});
+        return;
+    }
+    var currentChannel=JSON.parse(localStorage.getItem("currentChannel"));
+    if(ev.detail.topicId==currentChannel.id){
+        publishEvent("setChat",channels[0]);
+        return;
+    }
+    
+}
+
+function onUnSubscribeResultU(ev){
+    var channels=setChannels(ev.detail.subscriptions);
+    if(channels.length==0){
+        publishEvent("resetChat",{});
+        return;
+    }
+    publishEvent("setChat",channels.slice(-1));
+}
+
+function resetChannelsContainer(){
+    var channelsContainer=document.getElementById("channelsContainer");
+    channelsContainer.innerHTML='';
+}
+function updateChannelsContainer(subscriptions){
     console.log(subscriptions);
-    var table=document.getElementById("channelsContainer");
-    table.innerHTML='';
+    resetChannelsContainer();
     var headerRow=document.createElement("tr");
     var h1=document.createElement("th");
     var h2=document.createElement("th");
-    h1.innerText="Channel";
-    h2.innerText="-";
     headerRow.appendChild(h1);
     headerRow.appendChild(h2);
     if(subscriptions==='no_subscriptions'){
-        return;
+        return parentContainer;
     }
-    subscriptions.forEach(element => {
-        createChannelContainer(element);
-    });
+    var channels=createChannels(subscriptions);
+    channels.forEach(element=>{
+        channelsContainer.appendChild(element);
+    })
+    return channelsContainer;
    
 }
-
+function createChannels(subscriptions){
+    console.log(subscriptions);
+    var channels=subscriptions.map(createChannelContainer);
+    return channels;
+}
 function createChannelContainer(channel){
-    console.log("inside channel container");
-    var container=document.getElementById("channelsContainer");
     var channelContainer=document.createElement("span");
+    channelContainer.setAttribute("channelId",channel.id);
     channelContainer.setAttribute("class","channelRow");
+    channelContainer.setAttribute("channelData",channel);
     var unsubscribeBtn=createUnsubscribeChannelButton(channel);
     var openChatButton=createDisplayChannelChatButton(channel);
     var newMessagesBox=createNewMessagesBox(channel);
     channelContainer.appendChild(newMessagesBox);
     channelContainer.appendChild(unsubscribeBtn);
     channelContainer.appendChild(openChatButton);
-    container.appendChild(channelContainer);
+    return channelContainer;
 }
 
 
@@ -64,14 +159,14 @@ function createUnsubscribeChannelButton(channel){
     return unsubscribeBtn;
 }
 function createDisplayChannelChatButton(channel){
-    console.log(channel);
+   
     var channelButton=document.createElement("button");
     channelButton.id=channel.id;
     channelButton.setAttribute('content',channel.name);
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
     channelButton.textContent=channel.name;
-    channelButton.onclick=function(args){ publishEvent("displayChannelChat",channel)};
+    channelButton.onclick=function(args){ publishEvent("setChat",channel)};
     return channelButton;
 }
 function createNewMessagesBox(channel){
@@ -84,6 +179,7 @@ function removeSubscriptionRow(){
     var table=document.getElementById('channelsContainer');
     var row=document.getElementById(channel+'channel_row');
     table.removeChild(row);
+    
 }
 
 function updateChannelsOnMessage(data){

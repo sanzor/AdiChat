@@ -1,4 +1,5 @@
 import config from "./config.js";
+import { getDataAsync } from "./utils.js";
 import{loginButton,emailLoginBox,passwordLoginBox,loginFailMessage, registerBtn} 
 from "./elements.js";
 import { subscribeToEvent,publishEvent} from "./bus.js";
@@ -108,19 +109,7 @@ async function getUserByEmailAsync(){
 
 }
 
-async function getDataAsync(url=""){
-        console.log(url);
-        const response = await fetch(url, {
-            method: "GET", // *GET, POST, PUT, DELETE, etc.
-          //   mode: "no-cors", // no-cors, *cors, same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-          });
-          console.log(response);
-          return response.json(); 
-}
+
 
 
 

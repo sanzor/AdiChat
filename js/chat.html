@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
+
     <script type="module" src="./sockReceive.js"></script>
     <script type="module" src="./sock.js"></script>
+    <script type="module" src="./message.js"></script>
     <script type="module" src="./elements.js"></script>
     <script type="module" src="./bus.js"></script>  
     <script type="module" src="./main.js"></script> 
@@ -10,11 +12,8 @@
     <script type="module" src="./login.js"></script>
     <script type="module" src="./chat.js"></script>
     <script type="module" src="./register.js"></script>
-    
-   
     <link rel="stylesheet" type="text/css" href="specific.css" ></script>
     <link rel="stylesheet" type="text/css" href="general.css" ></script>
-    
     <body>
         <div id="loginModal">
             <div id="loginPanel">
@@ -63,14 +62,9 @@
                 </div>
         </div>
         </div>
-
-       </div>
-       
        <div id="mainModal">
       
         <div id="parentPanel" class="parent">
-            
-          
             <div id="mainPanel">
                 
                     <button id="logoutBtn">Logout</button>
@@ -99,56 +93,18 @@
                                 <label id="currentChannelNameLabel" class="currentChannelNameLabel" >Channel 1</label>
                             </div>
                            <div id="messagesContainer" class="chatScroll">
+                                <button id="loadOlderMessagesBtn"> Load older messages</button>
                                 <div class="chatMessageContainer">
                                     <img class="icon" class="chatMessageIcon"/>
                                     <div class="chatMessageMeta"> 12:32 GMT +2 </div>
                                     <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
                                 </div>
-                                    
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:32 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:32 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:32 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:33 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:33 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:34 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                                <div class="chatMessageContainer">
-                                    <img class="icon" class="chatMessageIcon"/>
-                                    <div class="chatMessageMeta"> 12:32 GMT +2 </div>
-                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                </div>
-                             
-                                
-                              
                            </div>
                 </div>
                 <div id="chatSendMessagePanel" class="chatSendMessagePanel">
                     <button class="button" id="attachItemsBtn">+</button>
                     <input class="chatSendMessageBox" id="chatSendMessageBox" ></input>
-                    <button id="chatSendMessageButton" class="button" type="button">Send</button>
+                    <button id="chatSendMessageBtn" class="button" type="button">Send</button>
                 </div>
             </div>
        </div>

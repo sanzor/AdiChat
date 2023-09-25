@@ -19,7 +19,7 @@ routes(_Environment) ->
                  {"/create-topic",{wsapp_main_controller,create_topic},#{methods=>[post]}},
                  {"/delete-topic",{wsapp_main_controller,delete_topic},#{methods=>[delete]}},
                  {"/publish",{wsapp_main_controller,publish},#{ methods =>[post]}},
-                 {"/subscribe",{wsapp_main_controller,subscribe},#{ methods =>[post]}},
+                 {"/subscribe",{wsapp_main_controller,subscribe},#{ methods =>[post,options]}},
                  {"/unsubscribe",{wsapp_main_controller,unsubscribe},#{ methods =>[post]}},
                  {"/get_messages/topic/:topic",{wsapp_main_controller,get_messages},#{methods=>[get]}},
                  {"/get_subscriptions/user/:user",{wsapp_main_controller,get_subscriptions},#{methods=>[get]}},

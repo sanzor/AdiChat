@@ -21,16 +21,8 @@ function onNewChatMessage(data){
    
 }
 function handle_chat_message(data){
-    var topic=data.topic;
+    publishEvent("new_message",data.detail);
     
-    if(topic==currentChannel.innerText){
-        console.log("\nUpdating chat on message\n");
-        updateChatOnMessage(data);
-    
-    }else{
-        console.log("\nUpdating channels on message\n");
-        updateChannelsOnMessage(data);
-    }
     
 }
 function handle_command_result(data){
@@ -41,11 +33,15 @@ function handle_command_result(data){
         callback_unsubscribe(data);
     }
     if(data.command=="get_subscriptions"){
-
-        publishEvent("updateChannels",data.result);
+        console.log("publishing subs");
+        
+        publishEvent("refresh_channels",data.result);
     }
-    if(data.command=="get_messages"){
-        callback_get_messages(data);
+    if(data.command=="get_newest_messages"){
+        callback_get_newest_messages(data);
+    }
+    if(data.command=="get_older_messages"){
+        callback_get_older_messages(data);
     }
 }
 function handle_user_event(data){
@@ -59,36 +55,30 @@ function handle_user_event(data){
 
 function handle_user_event_subscribe(data){
     console.log("Publishing update channels");
-    publishEvent("updateChannels",data.subscriptions);
+    publishEvent("subscribe_result_u",data);
    
 }
 function handle_user_event_unsubscribe(data){
     console.log("Publishing update channels");
-    publishEvent("updateChannels",data.subscriptions);
+    publishEvent("unsubscribe_result_u",data);
 }
 function callback_subscribe(data){
-    if(data.result=="ok"){
-        publishEvent("updateChannels",data.subscriptions);
-    }
-    if(data.result="already_subscribed"){
-        console.log("\nAlready subscribed to topic:",data.topic,"\n");
-    }
+    
+        publishEvent("subscribe_result",data);
+   
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
-        publishEvent("updateChannels",data.subscriptions);
+        publishEvent("unsubscribe_result",data);
+        publishEvent("resetChat",{});
     }
 }
-function callback_get_messages(data){
+function callback_get_newest_messages(data){
+    publishEvent("getNewestMessages",data.result)
     console.log(data.messages);
 }
-
-
-function callback_create_user(data){
-    console.log("yey");
-    localStorage.user={
-        "id":data.id,
-        "name":data.name
-    };
-    console.log("Setting user with:"+localStorage.user);
+function callback_get_older_messages(data){
+    publishEvent("getOlderMessages",data.result);
 }
+
+
