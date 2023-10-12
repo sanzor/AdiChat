@@ -20,10 +20,8 @@ async function onSubscribe(){
         }catch(err){
             reject(e)
         }
-        
-       
     }
-    function onSubscribeResult(ev,resolve,reject){
+    function onSubscribeResultLocal(ev,resolve,reject){
         if(ev.detail.result!="ok"){
             if(ev.topic.result=="already_subscribed"){
                 console.log("already_subscribed");
@@ -35,14 +33,23 @@ async function onSubscribe(){
         resolve(ev.detail.result);
     }
     var subscribeResult =await new Promise((resolve,reject)=>{
-        subscribeToEvent("subscribe_result",(ev)=>onSubscribeResult(ev,resolve,reject));
+        subscribeToEvent("subscribe_result",(ev)=>onSubscribeResultLocal(ev,resolve,reject));
         publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
-        unsubscribeFromEvent("subscribe_result",(ev)=>onSubscribeResult(ev,resolve,reject));
+        unsubscribeFromEvent("subscribe_result",(ev)=>{
+            console.log("unsubscribed from subscribe_result");
+        });
     });
+    if(subscribeResult.result!="ok"){
+        console.log("Could not subscribe to channel:"+subscribeBox.value);
+        return;
+    }
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent("refresh_channels",(ev)=>refreshAfterSubscribe(ev,resolve,reject));
-        publishEvent("refresh_channels",)
-    };
+        publishEvent("refresh_channels",{});
+        unsubscribeFromEvent("refresh_channels",(_)=>{
+            console.log("unsbuscribed from refresh_channels");
+        });
+    }
    
     
 }

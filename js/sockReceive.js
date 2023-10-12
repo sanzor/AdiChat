@@ -11,7 +11,9 @@ function onSocketReceive(ev){
         handle_command_result(data);
     }
     if(data.kind="user_event"){
-        handle_user_event(data);
+        
+        
+        (data);
     }
 
     

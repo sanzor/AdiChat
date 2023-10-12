@@ -30,7 +30,7 @@
     ]},
      {pg3,[
     {hostname,"localhost"},
-    {port,30951},
+    {port,30762},
     {username,"admin"},
     {password,"test123"},
     {database,"postgresdb"}

@@ -19,7 +19,7 @@
          get_newest_messages/2,
          write_chat_message/1,
          write_chat_messages/1]).
--define(DB_SERVER_KEY,pg3).
+-define(DB_SERVER_KEY,pg2).
 
 
 
@@ -30,6 +30,7 @@ create_connection()->
     UserName=proplists:get_value(username,Pg),
     Password=proplists:get_value(password,Pg),
     Database=proplists:get_value(database,Pg),
+    io:format("~p",[Pg]),
     {ok,C}=epgsql:connect(#{
         host=>Hostname,
         port=>Port,

@@ -12,17 +12,20 @@ routes(_Environment) ->
       routes => [
                  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
                  {"/ws/id/:id",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
-                 {"/get-user",{wsapp_main_controller,get_user},#{methods=>[get,options]}},
-                 {"/get-user-by-email",{wsapp_main_controller,get_user_by_email},#{methods=>[get,options]}},
-                 {"/create-user",{wsapp_main_controller,create_user},#{methods=>[post,options]}},
-                 {"/delete-user",{wsapp_main_controller,delete_user},#{methods=>[delete]}},
-                 {"/create-topic",{wsapp_main_controller,create_topic},#{methods=>[post]}},
-                 {"/delete-topic",{wsapp_main_controller,delete_topic},#{methods=>[delete]}},
-                 {"/publish",{wsapp_main_controller,publish},#{ methods =>[post]}},
-                 {"/subscribe",{wsapp_main_controller,subscribe},#{ methods =>[post,options]}},
-                 {"/unsubscribe",{wsapp_main_controller,unsubscribe},#{ methods =>[post]}},
-                 {"/get_messages/topic/:topic",{wsapp_main_controller,get_messages},#{methods=>[get]}},
-                 {"/get_subscriptions/user/:user",{wsapp_main_controller,get_subscriptions},#{methods=>[get]}},
+                 {"/get-user",{user_controller,get_user},#{methods=>[get,options]}},
+                 {"/get-user-by-email",{user_controller,get_user_by_email},#{methods=>[get,options]}},
+                 {"/create-user",{user_controller,create_user},#{methods=>[post,options]}},
+                 {"/delete-user",{user_controller,delete_user},#{methods=>[delete]}},
+                 
+                 {"/create-topic",{topic_controller,create_topic},#{methods=>[post]}},
+                 {"/delete-topic",{topic_controller,delete_topic},#{methods=>[delete]}},
+                 {"/subscribe",{topic_controller,subscribe},#{ methods =>[post,options]}},
+                 {"/unsubscribe",{topic_controller,unsubscribe},#{ methods =>[post]}},
+                 {"/get_subscriptions/user/:user",{topic_controller,get_subscriptions},#{methods=>[get]}},
+
+                 {"/publish",{message_controller,publish},#{ methods =>[post]}},
+                 {"/get_messages/topic/:topic",{message_controller,get_messages},#{methods=>[get]}},
+                
                  {"/assets/[...]", "assets"}
                 ]
       }].
