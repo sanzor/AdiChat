@@ -2,9 +2,8 @@ import { publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
 import config from "./config.js";
 import{channelsContainer} from "./elements.js";
 import { getDataAsync, postDataAsync } from "./utils.js";
+import {subscribeBtn} from "./elements.js";
 
-subscribeToEvent("subscribe_result",onSubscribeResult);
-subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
 subscribeToEvent("subscribe_result_u",onSubscribeResultU);
 subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
 subscribeToEvent("refresh_channels",onRefreshChannels);
@@ -32,6 +31,7 @@ async function onSubscribe(){
         }
         resolve(ev.detail.result);
     }
+    console.log("inside onsubscribe");
     var subscribeResult =await new Promise((resolve,reject)=>{
         subscribeToEvent("subscribe_result",(ev)=>onSubscribeResultLocal(ev,resolve,reject));
         publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
@@ -49,7 +49,7 @@ async function onSubscribe(){
         unsubscribeFromEvent("refresh_channels",(_)=>{
             console.log("unsbuscribed from refresh_channels");
         });
-    }
+    });
    
     
 }
@@ -68,7 +68,6 @@ function setChannels(channels){
 
 function onRefreshChannels(ev){
     var channels=setChannels(ev.detail);
-    
     if(channels.length==0){
         return;
     }
@@ -81,8 +80,7 @@ function onSubscribeResultU(ev){
     if(channels.length==0){
         publishEvent("setChat",channels[0]);
         return;
-    }
-    
+    } 
 }
 
 function onUnSubscribeResult(ev){

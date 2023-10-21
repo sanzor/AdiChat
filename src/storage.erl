@@ -30,7 +30,6 @@ create_connection()->
     UserName=proplists:get_value(username,Pg),
     Password=proplists:get_value(password,Pg),
     Database=proplists:get_value(database,Pg),
-    io:format("~p",[Pg]),
     {ok,C}=epgsql:connect(#{
         host=>Hostname,
         port=>Port,

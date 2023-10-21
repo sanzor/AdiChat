@@ -77,14 +77,15 @@ handle_command(<<"create-user">>,UserData,_State)->
     end,
     {ok,reply,Reply};
 
-handle_command(<<"subscribe">>,_=#{<<"topic">> :=Topic},_State=#{<<"id">> := UserId})->
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"id">> := UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>},
-    Reply=case wsapp_server:subscribe(UserId, Topic) of
-        already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
-        {ok,Topic} -> BaseReply#{result=><<"ok">>, <<"userId">> => UserId,
-            <<"topic">>=>Topic}
-    end,    
+    Reply=case wsapp_server:subscribe(UserId, TopicName) of
+            already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
+            {ok,Topic} -> BaseReply#{result=><<"ok">>, <<"userId">> => UserId,<<"topic">>=>Topic}
+          end, 
+          io:format("sugi") ,  
     {ok,reply,Reply};
+
 handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:=UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>TopicId},
     Reply=case wsapp_server:unsubscribe(UserId,TopicId) of

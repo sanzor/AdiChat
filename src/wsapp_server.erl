@@ -99,12 +99,12 @@ online(UserId,Socket)->
 offline(UserId,Socket)->
     gen_server:call(?MODULE, {offline,{UserId,Socket}}).
 
--spec subscribe(UserId::integer(),TopicId::integer() )->OkResult::map() | already_subscribed | {error,Error::term()}.
+-spec subscribe(UserId::integer(),TopicId::integer() )->{ok,OkResult::map()}| already_subscribed | {error,Error::term()}.
 subscribe(UserId,TopicName)->
     gen_server:call(?MODULE, {subscribe,{UserId,TopicName}}).
 
 
--spec unsubscribe(UserId::integer(),TopicId::integer())->OkResult::map()| not_joined | {error,Error::term()}.
+-spec unsubscribe(UserId::integer(),TopicId::integer())->{ok,{unsubsribed,TopicId::integer()}}| not_joined | {error,Error::term()}.
 unsubscribe(UserId,TopicId)->
     gen_server:call(?MODULE, {unsubscribe,{UserId, TopicId}}).
 
@@ -186,11 +186,11 @@ handle_call({get_subscriptions,UserId},_,State)->
 
 handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
     Topic=#{<<"id">> := TopicId}= case storage:get_topic_by_name(TopicName) of
-                                topic_does_not_exist -> 
-                                    {ok,Topic}=storage:create_topic(#{<<"user_id">> => UserId , <<"name">> => TopicName}),
-                                    Topic;
-                                {ok,Topic} -> Topic
-                            end,
+                                        topic_does_not_exist -> 
+                                            {ok,Topic}=storage:create_topic(#{<<"user_id">> => UserId , <<"name">> => TopicName}),
+                                            Topic;
+                                        {ok,Topic} -> Topic
+                                 end,
     Reply=case storage:check_if_subscribed(TopicId, UserId) of
         {ok,true} -> already_subscribed;
         {ok,false} ->ok=storage:subscribe(TopicId, UserId),
@@ -199,6 +199,7 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
                 {ok,Topic}
     end,
+    io:format("\n Topic result: ~p\n",[Reply]),
     {reply,Reply,_State};
    
 

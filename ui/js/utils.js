@@ -14,23 +14,20 @@ function hideElement(elementId){
 
 async function postDataAsync(url = "", data = {}) {
     try {
-        const response = await fetch(url, {
-            method: "POST", // *GET, POST, PUT, DELETE, etc.
-             mode: "no-cors", // no-cors, *cors, same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            headers: {
-              "Content-Type": "application/json",
-              // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify(data), // body data type must match "Content-Type" header
-          });
-          console.log(response);
-          if(response.status==409){
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      var data=JSON.stringify(data);
+      var requestOptions = {
+        credentials:"same-origin",
+        method: 'POST',
+        headers: myHeaders,
+        body: data,
+        redirect: 'follow'
+      };
+      const response=await fetch(url,requestOptions);
+        if(response.status==409){
             return {result:"error",reason:"user_already_exists"};
-          }
+        }
           return response.json(); 
     }catch(error){
         console.error(error);

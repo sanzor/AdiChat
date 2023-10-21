@@ -42,9 +42,10 @@ const passwordBox=document.getElementById("passwordBox");
 const usernameBox=document.getElementById("usernameBox");
 const retypePasswordBox=document.getElementById("retypePasswordBox");
 
-export{channelsContainer};
+export{channelsContainer,subscribeBtn};
 
 const channelsContainer=document.getElementById("channelsContainer");
+const subscribeBtn=document.getElementById("subscribeBtn");
 
 export{loadOlderMessagesBtn,chatSendMessageBtn};
 
