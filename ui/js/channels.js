@@ -14,13 +14,21 @@ subscribeBtn.addEventListener("click",onSubscribe);
 
 async function onSubscribe(){
     function refreshAfterSubscribe(ev,resolve,reject){
+        unsubscribeFromEvent("refresh_channels",(_)=>{
+            console.log("unsbuscribed from refresh_channels");
+        });
         try{
             resolve(ev.detail.subscriptions);
         }catch(err){
             reject(e)
         }
     }
-    function onSubscribeResultLocal(ev,resolve,reject){
+    function onOwnSubscribeResult(ev,resolve,reject){
+        unsubscribeFromEvent("subscribe_result",(ev)=>{
+            console.log("unsubscribed from subscribe_result");
+        });
+        console.log("Own subscribe result");
+        console.log(ev.detail);
         if(ev.detail.result!="ok"){
             if(ev.topic.result=="already_subscribed"){
                 console.log("already_subscribed");
@@ -29,16 +37,15 @@ async function onSubscribe(){
             }
             reject(ev.detail.result);
         }
-        resolve(ev.detail.result);
+        resolve(ev.detail);
     }
     console.log("inside onsubscribe");
     var subscribeResult =await new Promise((resolve,reject)=>{
-        subscribeToEvent("subscribe_result",(ev)=>onSubscribeResultLocal(ev,resolve,reject));
+        subscribeToEvent("subscribe_result",(ev)=>onOwnSubscribeResult(ev,resolve,reject));
         publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
-        unsubscribeFromEvent("subscribe_result",(ev)=>{
-            console.log("unsubscribed from subscribe_result");
-        });
+      
     });
+    console.log(subscribeResult);
     if(subscribeResult.result!="ok"){
         console.log("Could not subscribe to channel:"+subscribeBox.value);
         return;
@@ -46,15 +53,18 @@ async function onSubscribe(){
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent("refresh_channels",(ev)=>refreshAfterSubscribe(ev,resolve,reject));
         publishEvent("refresh_channels",{});
-        unsubscribeFromEvent("refresh_channels",(_)=>{
-            console.log("unsbuscribed from refresh_channels");
-        });
+       
     });
    
     
 }
 
-
+function subscribeAndClose(eventName,subscribeAction,unsubscribeAction){
+    subscribeToEvent(eventName,(ev)=>{
+        unsubscribeFromEvent(eventName,unsubscribeAction());
+        subscribeAction();
+    })
+}
 
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)

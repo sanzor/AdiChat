@@ -66,8 +66,7 @@ function handle_user_event_unsubscribe(data){
     publishEvent("unsubscribe_result_u",data);
 }
 function callback_subscribe(data){
-    
-        publishEvent("subscribe_result",data);
+    publishEvent("subscribe_result",data);
    
 }
 function callback_unsubscribe(data){
