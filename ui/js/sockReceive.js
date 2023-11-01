@@ -38,7 +38,7 @@ function handle_command_result(data){
     if(data.command=="get_subscriptions"){
         console.log("publishing subs");
         
-        publishEvent("refresh_channels",data.result);
+        publishEvent("get_subscribtions_results",data.result);
     }
     if(data.command=="get_newest_messages"){
         callback_get_newest_messages(data);

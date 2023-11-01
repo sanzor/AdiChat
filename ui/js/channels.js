@@ -3,10 +3,11 @@ import config from "./config.js";
 import{channelsContainer} from "./elements.js";
 import { getDataAsync, postDataAsync } from "./utils.js";
 import {subscribeBtn} from "./elements.js";
+import { REFRESH_CHANNELS_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT } from "./commands.js";
 
 subscribeToEvent("subscribe_result_u",onSubscribeResultU);
 subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
-subscribeToEvent("refresh_channels",onRefreshChannels);
+subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
 subscribeToEvent("new_channel_message",onNewMessage);
 
 
@@ -14,7 +15,7 @@ subscribeBtn.addEventListener("click",onSubscribe);
 
 async function onSubscribe(){
     function refreshAfterSubscribe(ev,resolve,reject){
-        unsubscribeFromEvent("refresh_channels",(_)=>{
+        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,(_)=>{
             console.log("unsbuscribed from refresh_channels");
         });
         try{
@@ -27,17 +28,8 @@ async function onSubscribe(){
         unsubscribeFromEvent("subscribe_result",(ev)=>{
             console.log("unsubscribed from subscribe_result");
         });
-        console.log("Own subscribe result");
-        console.log(ev.detail);
-        if(ev.detail.result!="ok"){
-            if(ev.topic.result=="already_subscribed"){
-                console.log("already_subscribed");
-                resolve("already_subscribed");
-                return;
-            }
-            reject(ev.detail.result);
-        }
-        resolve(ev.detail);
+       
+       resolve(ev.detail);
     }
     console.log("inside onsubscribe");
     var subscribeResult =await new Promise((resolve,reject)=>{
@@ -46,19 +38,26 @@ async function onSubscribe(){
       
     });
     console.log(subscribeResult);
-    if(subscribeResult.result!="ok"){
-        console.log("Could not subscribe to channel:"+subscribeBox.value);
-        return;
-    }
-    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
-        subscribeToEvent("refresh_channels",(ev)=>refreshAfterSubscribe(ev,resolve,reject));
-        publishEvent("refresh_channels",{});
-       
-    });
-   
+    var subs=await handleSubscribeResultAsync(subscribeResult);
+    
     
 }
+async function handleSubscribeResultAsync(subscribeResult){
+    if(subscribeResult!="ok" && subscribeResult!="already_subscribed"){
+        var message="Could not subscribe to channel:"+subscribeBox.value;
+        console.log(message);
+        return new Error(message);
+    }
+    
+    
+    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
+        subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterSubscribe(ev,resolve,reject));
+        publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
+    });
+    return getSubscriptionsResult.result;
+    
 
+}
 function subscribeAndClose(eventName,subscribeAction,unsubscribeAction){
     subscribeToEvent(eventName,(ev)=>{
         unsubscribeFromEvent(eventName,unsubscribeAction());
@@ -77,6 +76,8 @@ function setChannels(channels){
 }
 
 function onRefreshChannels(ev){
+    console.log("Inside onRefresh Channels");
+    console.log(ev.detail);
     var channels=setChannels(ev.detail);
     if(channels.length==0){
         return;
@@ -169,8 +170,8 @@ function createUnsubscribeChannelButton(channel){
     unsubscribeBtn.id=channel.id+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
-    
-    unsubscribeBtn.onclick=function(){publishEvent("socket_command",{"kind":"unsubscribe","topicId":channel.id});};
+    unsubscribeBtn.onclick=function(){publishEvent("socket_command",
+                {"kind":"unsubscribe","topicId":channel.id});};
     return unsubscribeBtn;
 }
 function createDisplayChannelChatButton(channel){
