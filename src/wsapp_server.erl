@@ -195,6 +195,7 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
         {ok,true} -> already_subscribed;
         {ok,false} ->ok=storage:subscribe(TopicId, UserId),
                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic},
+                io:format("Sending to ~p",[Socket||Socket<-pg:get_members(?F(UserId)), Socket =/=From]),
                 [send(Socket,{user_event,UserId,UserEvent})|| 
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
                 {ok,Topic}
@@ -253,6 +254,7 @@ handle_info(Message,State)->
 
 terminate(_Reason,_State)->ok.
 send(Socket,Message)->
+    io:format("Sending to session ~p",[Socket]),
     Socket ! Message.
 online_sockets(User)->
     Sockets=pg:get_members(User),

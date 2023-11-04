@@ -41,7 +41,7 @@ function send(){
             socket.send("pong");
         }
         var message=JSON.parse(ev.data);
-        console.log("\nReceived: ");
+        console.log("\nReceived on socket: ");
         console.log(message);
         publishEvent("socketReceive",message);
 

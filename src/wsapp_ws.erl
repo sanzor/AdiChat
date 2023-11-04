@@ -24,6 +24,8 @@ websocket_info(send_ping,State)->
 
 
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
+    io:format("\nInside info: self: ~p\n",[self()]),
+    io:format("\nSending from info:~p",[UserEventMessage]),
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
     {reply,{text,thoas:encode(Reply)},State};
 
@@ -41,7 +43,7 @@ websocket_handle({text, Message},State)->
     case handle_command(Command,Json,State) of
             {ok,noreply} -> {ok,State};
             {ok,reply,Reply} ->
-                io:format("\n~p\n",[Reply]),
+                io:format("\n Sending :~p\n",[Reply]),
                 {reply,{text,thoas:encode(Reply)},State}       
     end;
 
@@ -83,7 +85,6 @@ handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"id">> :=
             already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
             {ok,Topic} -> BaseReply#{result=><<"ok">>, <<"userId">> => UserId,<<"topic">>=>Topic}
           end, 
-          io:format("sugi") ,  
     {ok,reply,Reply};
 
 handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:=UserId})->

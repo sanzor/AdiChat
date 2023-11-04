@@ -31,7 +31,7 @@ async function onSubscribe(){
        
        resolve(ev.detail);
     }
-    console.log("inside onsubscribe");
+   
     var subscribeResult =await new Promise((resolve,reject)=>{
         subscribeToEvent("subscribe_result",(ev)=>onOwnSubscribeResult(ev,resolve,reject));
         publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});

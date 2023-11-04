@@ -3,17 +3,21 @@ import { publishEvent ,subscribeToEvent} from "./bus.js  ";
 
 subscribeToEvent("socketReceive",onSocketReceive);
 function onSocketReceive(ev){
+   
     var data=ev.detail;
     if(data.kind=="chat"){
         handle_chat_message(data);
+        return;
     }
     if(data.kind=="command_result"){
         handle_command_result(data);
+        return;
     }
     if(data.kind="user_event"){
         
+        console.log("Received user event");
+        console.log(data);
         
-        (data);
     }
 
     
@@ -36,7 +40,7 @@ function handle_command_result(data){
         callback_unsubscribe(data);
     }
     if(data.command=="get_subscriptions"){
-        console.log("publishing subs");
+       
         
         publishEvent("get_subscribtions_results",data.result);
     }
