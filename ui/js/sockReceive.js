@@ -41,8 +41,8 @@ function handle_command_result(data){
     }
     if(data.command=="get_subscriptions"){
        
-        
-        publishEvent("get_subscribtions_results",data.result);
+        console.log("sugi");
+        publishEvent("get_subscriptions_result",data.result);
     }
     if(data.command=="get_newest_messages"){
         callback_get_newest_messages(data);

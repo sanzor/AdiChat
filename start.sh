@@ -28,5 +28,7 @@ cd -
 # Use echo to provide the password to sudo
 echo "$PGPASSWORD" | sudo -S -u "$CURRENT_USER" kubectl exec -i "$POSTGRES_POD" -- psql -U "$PGUSER" -d postgresdb -f "$(basename "$SQL_SCRIPT_PATH")"
 
-# Exit the script
+echo "Starting Erlang application..."
+rebar3 nova serve 2>&1
+start_result=$?
 exit

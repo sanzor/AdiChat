@@ -8,22 +8,14 @@ import { REFRESH_CHANNELS_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT } from "./com
 subscribeToEvent("subscribe_result_u",onSubscribeResultU);
 subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
+subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
 subscribeToEvent("new_channel_message",onNewMessage);
 
 
 subscribeBtn.addEventListener("click",onSubscribe);
 
 async function onSubscribe(){
-    function refreshAfterSubscribe(ev,resolve,reject){
-        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,(_)=>{
-            console.log("unsbuscribed from refresh_channels");
-        });
-        try{
-            resolve(ev.detail.subscriptions);
-        }catch(err){
-            reject(e)
-        }
-    }
+   
     function onOwnSubscribeResult(ev,resolve,reject){
         unsubscribeFromEvent("subscribe_result",(ev)=>{
             console.log("unsubscribed from subscribe_result");
@@ -37,13 +29,24 @@ async function onSubscribe(){
         publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
       
     });
-    console.log(subscribeResult);
+    
     var subs=await handleSubscribeResultAsync(subscribeResult);
     
     
 }
 async function handleSubscribeResultAsync(subscribeResult){
-    if(subscribeResult!="ok" && subscribeResult!="already_subscribed"){
+    function refreshAfterSubscribe(ev,resolve,reject){
+        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,(_)=>{
+            console.log("unsbuscribed from refresh_channels");
+        });
+        try{
+            resolve(ev.detail.subscriptions);
+        }catch(err){
+            reject(e)
+        }
+    }
+    console.log(subscribeResult);
+    if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
         var message="Could not subscribe to channel:"+subscribeBox.value;
         console.log(message);
         return new Error(message);
@@ -58,13 +61,20 @@ async function handleSubscribeResultAsync(subscribeResult){
     
 
 }
-function subscribeAndClose(eventName,subscribeAction,unsubscribeAction){
-    subscribeToEvent(eventName,(ev)=>{
-        unsubscribeFromEvent(eventName,unsubscribeAction());
-        subscribeAction();
-    })
-}
 
+function onUnSubscribeResult(ev){
+    var channels=setChannels(ev.detail.subscriptions);
+    if(channels.length==0){
+        publishEvent("resetChat",{});
+        return;
+    }
+    var currentChannel=JSON.parse(localStorage.getItem("currentChannel"));
+    if(ev.detail.topicId==currentChannel.id){
+        publishEvent("setChat",channels[0]);
+        return;
+    }
+    
+}
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
@@ -94,19 +104,7 @@ function onSubscribeResultU(ev){
     } 
 }
 
-function onUnSubscribeResult(ev){
-    var channels=setChannels(ev.detail.subscriptions);
-    if(channels.length==0){
-        publishEvent("resetChat",{});
-        return;
-    }
-    var currentChannel=JSON.parse(localStorage.getItem("currentChannel"));
-    if(ev.detail.topicId==currentChannel.id){
-        publishEvent("setChat",channels[0]);
-        return;
-    }
-    
-}
+
 
 function onUnSubscribeResultU(ev){
     var channels=setChannels(ev.detail.subscriptions);

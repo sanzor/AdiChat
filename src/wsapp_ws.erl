@@ -88,7 +88,7 @@ handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"id">> :=
     {ok,reply,Reply};
 
 handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:=UserId})->
-    BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>,  topic=>TopicId},
+    BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>},
     Reply=case wsapp_server:unsubscribe(UserId,TopicId) of
         not_joined -> BaseReply#{result=><<"not_joined">>};
         {ok,{unsubscribed,TopicId}} -> BaseReply#{result=><<"ok">>,<<"topicId">>=>TopicId}
