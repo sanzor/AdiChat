@@ -1,4 +1,4 @@
-# Nova Websocket Server
+# Adi Chat
 
 This is a full fledged chat web application including the web UI, server and database integration.
 
