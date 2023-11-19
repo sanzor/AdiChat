@@ -3,12 +3,11 @@ import config from "./config.js";
 import{channelsContainer} from "./elements.js";
 import { getDataAsync, postDataAsync } from "./utils.js";
 import {subscribeBtn} from "./elements.js";
-import { REFRESH_CHANNELS_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT } from "./commands.js";
+import { REFRESH_CHANNELS_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "./commands.js";
 
 subscribeToEvent("subscribe_result_u",onSubscribeResultU);
 subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
-subscribeToEvent("unsubscribe_result",onUnSubscribeResult);
 subscribeToEvent("new_channel_message",onNewMessage);
 
 
@@ -16,8 +15,8 @@ subscribeBtn.addEventListener("click",onSubscribe);
 
 async function onSubscribe(){
    
-    function onOwnSubscribeResult(ev,resolve,reject){
-        unsubscribeFromEvent("subscribe_result",(ev)=>{
+    function onOwnSubscribeResult(ev,resolve,_){
+        unsubscribeFromEvent("subscribe_result",(_)=>{
             console.log("unsubscribed from subscribe_result");
         });
        
@@ -34,35 +33,70 @@ async function onSubscribe(){
     
     
 }
+
 async function handleSubscribeResultAsync(subscribeResult){
     function refreshAfterSubscribe(ev,resolve,reject){
         unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,(_)=>{
-            console.log("unsbuscribed from refresh_channels");
+            console.log("unsbuscribed from refresh_channels after subscribed to channel");
         });
         try{
-            resolve(ev.detail.subscriptions);
+           
+            resolve(ev.detail);
         }catch(err){
             reject(e)
         }
     }
-    console.log(subscribeResult);
     if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
         var message="Could not subscribe to channel:"+subscribeBox.value;
         console.log(message);
         return new Error(message);
     }
-    
-    
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterSubscribe(ev,resolve,reject));
         publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
     });
+    console.log("ending subscribe");
+    console.log(getSubscriptionsResult);
     return getSubscriptionsResult.result;
     
 
 }
 
+async function onUnsubscribeClick(){
+    function onOwnUnsubscribeResult(ev,resolve,_){
+        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
+            console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
+        });
+        resolve(ev.detail);
+    }
+    
+   
+    var unsubscribeResult=new Promise((resolve,reject)=>{
+        subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnUnsubscribeResult(ev,resolve,reject));
+        publishEvent("socket_command",{"kind":UNSUBSCRIBE_COMMAND,"topicId":channel.id});
+    });
+    var rez=await handleUnsubscribeResultAsync(unsubscribeResult);
+     
+}
+function handleUnsubscribeResultAsync(unsubscribeResult){
+    function refreshAfterUnsubscribe(ev,resolve,reject){
+        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,function(_){
+            console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
+        });
+        try{
+
+            resolve(ev.detail);
+        }catch(err){
+            reject(err);
+        }
+    }
+    if(unsubscribeResult.result!="ok"){
+        
+    }
+}
+
 function onUnSubscribeResult(ev){
+    publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
         publishEvent("resetChat",{});
@@ -75,6 +109,8 @@ function onUnSubscribeResult(ev){
     }
     
 }
+
+
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
@@ -163,13 +199,13 @@ function createIdElement(Id){
     p.setAttribute("display","none");
     return p;
 }
+
 function createUnsubscribeChannelButton(channel){
     var unsubscribeBtn=document.createElement("button");
     unsubscribeBtn.id=channel.id+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
-    unsubscribeBtn.onclick=function(){publishEvent("socket_command",
-                {"kind":"unsubscribe","topicId":channel.id});};
+    unsubscribeBtn.onclick=onUnsubscribeClick;
     return unsubscribeBtn;
 }
 function createDisplayChannelChatButton(channel){
