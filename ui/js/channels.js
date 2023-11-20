@@ -3,7 +3,13 @@ import config from "./config.js";
 import{channelsContainer} from "./elements.js";
 import { getDataAsync, postDataAsync } from "./utils.js";
 import {subscribeBtn} from "./elements.js";
-import { REFRESH_CHANNELS_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "./commands.js";
+import { 
+    REFRESH_CHANNELS_COMMAND, 
+    REFRESH_CHANNELS_COMMAND_RESULT, 
+    SUBSCRIBE_COMMAND,
+    SUBSCRIBE_COMMAND_RESULT,
+    UNSUBSCRIBE_COMMAND, 
+    UNSUBSCRIBE_COMMAND_RESULT } from "./commands.js";
 
 subscribeToEvent("subscribe_result_u",onSubscribeResultU);
 subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
@@ -16,7 +22,7 @@ subscribeBtn.addEventListener("click",onSubscribe);
 async function onSubscribe(){
    
     function onOwnSubscribeResult(ev,resolve,_){
-        unsubscribeFromEvent("subscribe_result",(_)=>{
+        unsubscribeFromEvent(SUBSCRIBE_COMMAND_RESULT,(_)=>{
             console.log("unsubscribed from subscribe_result");
         });
        
@@ -24,8 +30,8 @@ async function onSubscribe(){
     }
    
     var subscribeResult =await new Promise((resolve,reject)=>{
-        subscribeToEvent("subscribe_result",(ev)=>onOwnSubscribeResult(ev,resolve,reject));
-        publishEvent("socket_command",{"kind":"subscribe","topic":subscribeBox.value});
+        subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
+        publishEvent("socket_command",{"kind":SUBSCRIBE_COMMAND,"topic":subscribeBox.value});
       
     });
     
@@ -36,7 +42,7 @@ async function onSubscribe(){
 
 async function handleSubscribeResultAsync(subscribeResult){
     function refreshAfterSubscribe(ev,resolve,reject){
-        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,(_)=>{
+        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,(_)=>{
             console.log("unsbuscribed from refresh_channels after subscribed to channel");
         });
         try{
@@ -78,7 +84,7 @@ async function onUnsubscribeClick(){
     var rez=await handleUnsubscribeResultAsync(unsubscribeResult);
      
 }
-function handleUnsubscribeResultAsync(unsubscribeResult){
+async function handleUnsubscribeResultAsync(unsubscribeResult){
     function refreshAfterUnsubscribe(ev,resolve,reject){
         unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,function(_){
             console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
@@ -90,9 +96,18 @@ function handleUnsubscribeResultAsync(unsubscribeResult){
             reject(err);
         }
     }
-    if(unsubscribeResult.result!="ok"){
-        
+    if(unsubscribeResult.result=="not_joined"){
+        console.log("Not joined");
+        return "not_joined";
     }
+    if(unsubscribeResult.result!="ok"){
+        var message="Could not unsubscribe from channel "
+        return new Error(message);
+    }
+    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
+        subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterUnsubscribe(ev,resolve,reject));
+        publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
+    });
 }
 
 function onUnSubscribeResult(ev){
