@@ -3,18 +3,30 @@ import config from "./config.js";
 import{channelsContainer} from "./elements.js";
 import { getDataAsync, postDataAsync } from "./utils.js";
 import {subscribeBtn} from "./elements.js";
+import { CHANNEL,TOPIC,KIND, SOCKET_COMMAND } from "./constants.js";
 import { 
     REFRESH_CHANNELS_COMMAND, 
     REFRESH_CHANNELS_COMMAND_RESULT, 
+
     SUBSCRIBE_COMMAND,
     SUBSCRIBE_COMMAND_RESULT,
-    UNSUBSCRIBE_COMMAND, 
-    UNSUBSCRIBE_COMMAND_RESULT } from "./commands.js";
+    SUBSCRIBE_COMMAND_RESULT_U,
 
-subscribeToEvent("subscribe_result_u",onSubscribeResultU);
-subscribeToEvent("unsubscribe_result_u",onUnSubscribeResultU);
+    UNSUBSCRIBE_COMMAND, 
+    UNSUBSCRIBE_COMMAND_RESULT,
+    UNSUBSCRIBE_COMMAND_RESULT_U ,
+    
+    SET_CHAT,
+    RESET_CHAT,
+    NEW_CHANNEL_MESSAGE} from "./commands.js";
+
+const CHANNELS="channels";
+const CURRENT_CHANNEL="current_channel";
+
+subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
+subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
-subscribeToEvent("new_channel_message",onNewMessage);
+subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
 
 
 subscribeBtn.addEventListener("click",onSubscribe);
@@ -31,7 +43,7 @@ async function onSubscribe(){
    
     var subscribeResult =await new Promise((resolve,reject)=>{
         subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
-        publishEvent("socket_command",{"kind":SUBSCRIBE_COMMAND,"topic":subscribeBox.value});
+        publishEvent(SOCKET_COMMAND,{KIND:SUBSCRIBE_COMMAND,TOPIC:subscribeBox.value});
       
     });
     
@@ -59,7 +71,8 @@ async function handleSubscribeResultAsync(subscribeResult){
     }
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterSubscribe(ev,resolve,reject));
-        publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
+        publishEvent(SOCKET_COMMAND
+            ,{KIND:REFRESH_CHANNELS_COMMAND});
     });
     console.log("ending subscribe");
     console.log(getSubscriptionsResult);
@@ -79,7 +92,7 @@ async function onUnsubscribeClick(){
    
     var unsubscribeResult=new Promise((resolve,reject)=>{
         subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnUnsubscribeResult(ev,resolve,reject));
-        publishEvent("socket_command",{"kind":UNSUBSCRIBE_COMMAND,"topicId":channel.id});
+        publishEvent(SOCKET_COMMAND,{KIND:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
     var rez=await handleUnsubscribeResultAsync(unsubscribeResult);
      
@@ -106,20 +119,20 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
     }
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterUnsubscribe(ev,resolve,reject));
-        publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
+        publishEvent(SOCKET_COMMAND,{KIND:REFRESH_CHANNELS_COMMAND});
     });
 }
 
 function onUnSubscribeResult(ev){
-    publishEvent("socket_command",{"kind":REFRESH_CHANNELS_COMMAND});
+    publishEvent(SOCKET_COMMAND,{kind:REFRESH_CHANNELS_COMMAND});
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
-        publishEvent("resetChat",{});
+        publishEvent(RESET_CHAT,{});
         return;
     }
-    var currentChannel=JSON.parse(localStorage.getItem("currentChannel"));
+    var currentChannel=JSON.parse(localStorage.getItem(CURRENT_CHANNEL));
     if(ev.detail.topicId==currentChannel.id){
-        publishEvent("setChat",channels[0]);
+        publishEvent(SET_CHAT,channels[0]);
         return;
     }
     
@@ -131,7 +144,7 @@ function onNewMessage(ev){
 }
 
 function setChannels(channels){
-    localStorage.setItem("channels",JSON.stringify(channels));
+    localStorage.setItem(CHANNELS,JSON.stringify(channels));
     updateChannelsContainer(channels);
     return channels;
 }
@@ -143,14 +156,14 @@ function onRefreshChannels(ev){
     if(channels.length==0){
         return;
     }
-    publishEvent("setChat",channels[0]);
+    publishEvent(SET_CHAT,channels[0]);
 }
 
 
 function onSubscribeResultU(ev){
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
-        publishEvent("setChat",channels[0]);
+        publishEvent(RESET_CHAT,channels[0]);
         return;
     } 
 }
@@ -160,10 +173,10 @@ function onSubscribeResultU(ev){
 function onUnSubscribeResultU(ev){
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
-        publishEvent("resetChat",{});
+        publishEvent(RESET_CHAT,{});
         return;
     }
-    publishEvent("setChat",channels.slice(-1));
+    publishEvent(SET_CHAT,channels.slice(-1));
 }
 
 function resetChannelsContainer(){
@@ -220,6 +233,7 @@ function createUnsubscribeChannelButton(channel){
     unsubscribeBtn.id=channel.id+'_unsubscribe_btn';
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
+    unsubscribeBtn.setAttribute(CHANNEL,JSON.stringify(channel));
     unsubscribeBtn.onclick=onUnsubscribeClick;
     return unsubscribeBtn;
 }
@@ -231,7 +245,7 @@ function createDisplayChannelChatButton(channel){
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
     channelButton.textContent=channel.name;
-    channelButton.onclick=function(args){ publishEvent("setChat",channel)};
+    channelButton.onclick=function(args){ publishEvent(SET_CHAT,channel)};
     return channelButton;
 }
 function createNewMessagesBox(channel){
