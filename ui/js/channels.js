@@ -3,7 +3,7 @@ import config from "./config.js";
 import{channelsContainer} from "./elements.js";
 import { getDataAsync, postDataAsync } from "./utils.js";
 import {subscribeBtn} from "./elements.js";
-import { CHANNEL,TOPIC,KIND, SOCKET_COMMAND } from "./constants.js";
+import { KIND, SOCKET_COMMAND, TOPIC} from "./constants.js";
 import { 
     REFRESH_CHANNELS_COMMAND, 
     REFRESH_CHANNELS_COMMAND_RESULT, 
@@ -18,10 +18,11 @@ import {
     
     SET_CHAT,
     RESET_CHAT,
-    NEW_CHANNEL_MESSAGE} from "./commands.js";
+    NEW_CHANNEL_MESSAGE} from "./events.js";
 
 const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
+const CHANNEL="channel";
 
 subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
@@ -37,13 +38,14 @@ async function onSubscribe(){
         unsubscribeFromEvent(SUBSCRIBE_COMMAND_RESULT,(_)=>{
             console.log("unsubscribed from subscribe_result");
         });
-       
+       console.log(ev.detail);
        resolve(ev.detail);
     }
    
     var subscribeResult =await new Promise((resolve,reject)=>{
+        console.log(KIND);
         subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND,{KIND:SUBSCRIBE_COMMAND,TOPIC:subscribeBox.value});
+        publishEvent(SOCKET_COMMAND,{[KIND]:SUBSCRIBE_COMMAND,[TOPIC]:subscribeBox.value});
       
     });
     
@@ -71,8 +73,7 @@ async function handleSubscribeResultAsync(subscribeResult){
     }
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterSubscribe(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND
-            ,{KIND:REFRESH_CHANNELS_COMMAND});
+        publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
     });
     console.log("ending subscribe");
     console.log(getSubscriptionsResult);
@@ -81,7 +82,7 @@ async function handleSubscribeResultAsync(subscribeResult){
 
 }
 
-async function onUnsubscribeClick(){
+async function onUnsubscribeClick(event){
     function onOwnUnsubscribeResult(ev,resolve,_){
         unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
             console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
@@ -92,7 +93,9 @@ async function onUnsubscribeClick(){
    
     var unsubscribeResult=new Promise((resolve,reject)=>{
         subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnUnsubscribeResult(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND,{KIND:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
+        var targetUnsubscribeBtn=document.getElementById(event.target.id);
+        var channel=JSON.parse(targetUnsubscribeBtn.getAttribute("channel"));
+        publishEvent(SOCKET_COMMAND,{[KIND]:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
     var rez=await handleUnsubscribeResultAsync(unsubscribeResult);
      
@@ -119,12 +122,12 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
     }
     var getSubscriptionsResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterUnsubscribe(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND,{KIND:REFRESH_CHANNELS_COMMAND});
+        publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
     });
 }
 
 function onUnSubscribeResult(ev){
-    publishEvent(SOCKET_COMMAND,{kind:REFRESH_CHANNELS_COMMAND});
+    publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
         publishEvent(RESET_CHAT,{});

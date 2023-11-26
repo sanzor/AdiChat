@@ -10,9 +10,10 @@ import{
     registerFailMessage,
 } from "./elements.js";
 import { hideElement, showElement } from "./utils.js";
+import { HIDE_REGISTER, SHOW_LOGIN, SHOW_MAIN, SHOW_REGISTER } from "./events.js";
 
-subscribeToEvent("showRegister",onShowRegister);
-subscribeToEvent("hideRegister",onHideRegister);
+subscribeToEvent(SHOW_REGISTER,onShowRegister);
+subscribeToEvent(HIDE_REGISTER,onHideRegister);
 submitBtn.addEventListener("click",onSubmit);
 backToLoginBtn.addEventListener("click",onBackToLogin);
 
@@ -38,8 +39,8 @@ function showSubmitFailMessage(message){
 }
 
 function onBackToLogin(){
-    publishEvent("hideRegister",{});
-    publishEvent("showLogin",{});
+    publishEvent(HIDE_REGISTER,{});
+    publishEvent(SHOW_LOGIN,{});
 }
 async function onSubmit(){
     console.log("onSubmit");
@@ -60,8 +61,8 @@ async function onSubmit(){
      }
      console.log(`User created:${userResult}`);
      localStorage.setItem("user",JSON.stringify(userResult));
-     publishEvent("hideRegister",{});
-     publishEvent("showMain",{});
+     publishEvent(HIDE_REGISTER,{});
+     publishEvent(SHOW_MAIN,{});
     }catch(error){
         showSubmitFailMessage(error);
     }

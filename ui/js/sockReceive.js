@@ -1,7 +1,16 @@
 
 import { publishEvent ,subscribeToEvent} from "./bus.js  ";
+import { 
+        REFRESH_CHANNELS_COMMAND, 
+        REFRESH_CHANNELS_COMMAND_RESULT,
+        RESET_CHAT, SOCKET_RECEIVE, SUBSCRIBE_COMMAND,
+        SUBSCRIBE_COMMAND_RESULT, 
+        SUBSCRIBE_COMMAND_RESULT_U, 
+        UNSUBSCRIBE_COMMAND,
+        UNSUBSCRIBE_COMMAND_RESULT, 
+        UNSUBSCRIBE_COMMAND_RESULT_U} from "./events.js";
 
-subscribeToEvent("socketReceive",onSocketReceive);
+subscribeToEvent(SOCKET_RECEIVE,onSocketReceive);
 function onSocketReceive(ev){
    
     var data=ev.detail;
@@ -27,22 +36,22 @@ function onNewChatMessage(data){
    
 }
 function handle_chat_message(data){
-    console.log('sm');
+   
     publishEvent("new_message",data.detail);
     
     
 }
 function handle_command_result(data){
-    if(data.command=="subscribe"){
+    if(data.command==SUBSCRIBE_COMMAND){
         callback_subscribe(data);
     }
-    if(data.command=="unsubscribe"){
+    if(data.command==UNSUBSCRIBE_COMMAND){
         callback_unsubscribe(data);
     }
-    if(data.command=="get_subscriptions"){
-       
-        console.log("sugi");
-        publishEvent("get_subscriptions_result",data.result);
+    if(data.command==REFRESH_CHANNELS_COMMAND){
+        
+       console.log(data);
+        publishEvent(REFRESH_CHANNELS_COMMAND_RESULT,data.result);
     }
     if(data.command=="get_newest_messages"){
         callback_get_newest_messages(data);
@@ -52,31 +61,32 @@ function handle_command_result(data){
     }
 }
 function handle_user_event(data){
-    if(data.user_event_kind=="subscribe"){
+    if(data.user_event_kind==SUBSCRIBE_COMMAND){
         handle_user_event_subscribe(data);
     }
-    if(data.user_event_kind=="unsubscribe"){
+    if(data.user_event_kind==UNSUBSCRIBE_COMMAND){
         handle_user_event_unsubscribe(data);
     }
 }
 
 function handle_user_event_subscribe(data){
     console.log("Publishing update channels");
-    publishEvent("subscribe_result_u",data);
+    publishEvent(SUBSCRIBE_COMMAND_RESULT_U,data);
    
 }
 function handle_user_event_unsubscribe(data){
     console.log("Publishing update channels");
-    publishEvent("unsubscribe_result_u",data);
+    publishEvent(UNSUBSCRIBE_COMMAND_RESULT_U,data);
 }
 function callback_subscribe(data){
-    publishEvent("subscribe_result",data);
+    console.log(data);
+    publishEvent(SUBSCRIBE_COMMAND_RESULT,data);
    
 }
 function callback_unsubscribe(data){
     if(data.result=="ok"){
-        publishEvent("unsubscribe_result",data);
-        publishEvent("resetChat",{});
+        publishEvent(UNSUBSCRIBE_COMMAND_RESULT,data);
+        publishEvent(RESET_CHAT,{});
     }
 }
 function callback_get_newest_messages(data){

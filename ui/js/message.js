@@ -1,4 +1,4 @@
-import { subscribeToEvent,publishEvent } from "./bus";
+import { subscribeToEvent,publishEvent } from "./bus.js";
 subscribeToEvent("new_message",onNewChatMessage);
 
 function onNewChatMessage(ev){
