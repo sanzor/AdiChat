@@ -1,16 +1,18 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
+import { KIND, SOCKET_COMMAND } from "./constants.js";
 import { channelsContainer, chatContainer,
     chatSendMessageBox,
     chatSendMessageBtn,
     currentChannel,
     loadOlderMessagesBtn } from "./elements.js";
+import { PUBLISH_MESSAGE, RESET_CHAT, SET_CHAT } from "./events.js";
 import { showElement } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("new_chat_message",onNewMessage);
-subscribeToEvent("setChat",onSetChatWindow);
+subscribeToEvent(SET_CHAT,onSetChatWindow);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
-subscribeToEvent("resetChat",onResetChat);
+subscribeToEvent(RESET_CHAT,onResetChat);
 
 loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
@@ -19,8 +21,8 @@ function onSendMessage(){
     var channelId=parseInt(localStorage.getItem("channelId"));
     console.log("Channel publish:"+channelId);
     var message=document.getElementById("chatSendMessageBox").value;
-    publishEvent("socket_command",{
-        "kind":"publish",
+    publishEvent(SOCKET_COMMAND,{
+        [KIND]:PUBLISH_MESSAGE,
         "topicId":channelId,
         "content":message
     })
@@ -47,7 +49,7 @@ function setChatWithChannel(channel){
     currentChannel.innerText=channel.name;
     resetChat();
     var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
-    publishEvent("socket_command",event_payload);
+    publishEvent(SOCKET_COMMAND,event_payload);
     
 }
 function setChatWithDefaultChannel(){

@@ -2,6 +2,7 @@
 import {publishEvent ,subscribeToEvent} from "./bus.js";
 import {hideElement, showElement } from "./utils.js";
 import {connect} from "./sock.js";
+import { HIDE_MAIN, SHOW_MAIN } from "./events.js";
 
 
 const connectBtn=document.getElementById("connectBtn");
@@ -12,8 +13,8 @@ const logoutBtn=document.getElementById("logoutBtn");
 const subscribeBox=document.getElementById("subscribeBox");
 
 
-subscribeToEvent("showMain",onShowMain);
-subscribeToEvent("hideMain",onHideMain);
+subscribeToEvent(SHOW_MAIN,onShowMain);
+subscribeToEvent(HIDE_MAIN,onHideMain);
 subscribeToEvent("connect",onConnect);
 subscribeToEvent("socketEvent",onSocketEvent);
 
