@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+    <script type="module" src="../js/sockReceive.js"></script>
+    <script type="module" src="../js/events.js"></script>
+    <script type="module" src="../js/constants.js"></script>
+    <script type="module" src="../js/config.js"></script>
+    <script type="module" src="../js/sock.js"></script>
+    <script type="module" src="../js/message.js"></script>
+    <script type="module" src="../js/elements.js"></script>
+    <script type="module" src="../js/bus.js"></script>  
+    <script type="module" src="../js/main.js"></script> 
+    <script type="module" src="../js/channels.js" defer></script>
+    <script type="module" src="../js/login.js"></script>
+    <script type="module" src="../js/chat.js"></script>
+    <script type="module" src="../js/register.js"></script>
+    <script type="module" src="../js/test.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/specific.css" ></script>
+    <link rel="stylesheet" type="text/css" href="../css/general.css" ></script>
+    <body>
+        <div id="loginModal">
+            <div id="loginPanel">
+                <div style="align-self: center;">Login</div>
+                <div class="formRow">
+                    <input  id="emailLoginBox" type="text" value="adriansan_93@yahoo.com">
+                    <label id="emailLoginLabel" class="subscribeLabel">Username</label>
+                </div>
+                <div class="formRow">
+                    <input id="passwordLoginBox" type="text" value="333">
+                    <label id="passwordLoginLabel" class="subscribeLabel">Password</label>
+                </div>
+                <div class="formRow">
+                    <button id="loginBtn">Login</button>
+                    <button id="registerBtn">Register</button>
+                </div>
+                <div  class="formRow">
+                    <p id="loginFailMessage"></p>
+                </div>
+            </div>
+        </div>
+        <div id="registerModal">
+            <div id="registerPanel">
+                <div class="formRow">
+                    <input  id="emailBox" type="text" value="adriansan_93@yahoo.com">
+                    <label id="emailLabel" class="subscribeLabel">Email</label>
+                </div>
+                <div class="formRow">
+                    <input  id="usernameBox" type="text" value="Adrian">
+                    <label id="usernameLabel" class="subscribeLabel">Username</label>
+                </div>
+                <div class="formRow">
+                    <input id="passwordBox" type="text" value="333">
+                    <label id="passwordLabel" class="subscribeLabel">Password</label>
+                </div>
+                <div class="formRow">
+                    <input id="retypePasswordBox" type="text" value="333">
+                    <label id="retypePasswordLabel" class="subscribeLabel">Retype Password</label>
+                </div>
+                <div class="formRow">
+                    <button id="backToLoginBtn">Back to Login</button>
+                    <button id="submitBtn">Submit</button>
+                </div>
+                <div class="formRow">
+                    <p id="registerFailMessage"></p>
+                </div>
+        </div>
+        </div>
+       <div id="mainModal">
+      
+        <div id="parentPanel" class="parent">
+            <div id="mainPanel">
+                
+                    <button id="logoutBtn">Logout</button>
+                    <div id="connectButtonsPanel" >
+                            
+                            <button id="connectBtn" type="button">Connect</button>
+                            <button id="disconnectBtn" class="disconnectButton" type="button" value="Disconnect">
+                                Disconnect
+                            </button>
+                    </div>
+                    <div id="subscribeButtonPanel" class="panel">
+                            <input  id="subscribeBox" type="text" value="">
+                            <label id="subscribeLabel" class="subscribeLabel">Channel</label>
+                            <button id="subscribeBtn" class="subscribeButton" type="button">Subscribe</button>
+                    </div> 
+                
+                <div id="channelsPanel" class="channelsPanel">
+                    <label id="channelsLabel">Channels</label>
+                        <div id="channelsAreaPanel">
+                            <div id="channelsContainer" class="chatScroll">
+                        </div>
+                        </div>
+                </div>
+                <div id="chatPanel" class="chatPanel">
+                            <div class="currentChannelNamePanel" id="currentChannelNamePanel">
+                                <label id="currentChannelNameLabel" class="currentChannelNameLabel" >Channel 1</label>
+                            </div>
+                           <div id="messagesContainer" class="chatScroll">
+                                <button id="loadOlderMessagesBtn"> Load older messages</button>
+                                <div class="chatMessageContainer">
+                                    <img class="icon" class="chatMessageIcon"/>
+                                    <div class="chatMessageMeta"> 12:32 GMT +2 </div>
+                                    <div class="chatMessageContent">sugi pwla cu dan voiculescu</div>
+                                </div>
+                           </div>
+                </div>
+                <div id="chatSendMessagePanel" class="chatSendMessagePanel">
+                    <button class="button" id="attachItemsBtn">+</button>
+                    <input class="chatSendMessageBox" id="chatSendMessageBox" ></input>
+                    <button id="chatSendMessageBtn" class="button" type="button">Send</button>
+                </div>
+            </div>
+       </div>
+    </body>
+   
+</html>
