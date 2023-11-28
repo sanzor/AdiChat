@@ -210,7 +210,7 @@ handle_call({unsubscribe,{UserId,TopicId}},{From,_},State)->
                         [send(Socket,{user_event,UserId,UserEvent})
                             || Socket<-pg:get_members(?F(UserId)), Socket =/= From],
                         {ok,{unsubscribed,TopicId}};
-                not_joined->#{result=> <<"not joined">>}
+                not_joined->not_joined
           end,
     {reply,Reply,State};      
 

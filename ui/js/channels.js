@@ -23,12 +23,23 @@ import {
 const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
 const CHANNEL="channel";
+const REMOVE_CHANNEL_FROM_LIST="remove_channel";
+const TOPIC_ID="topicId";
+const CHANNEL_ID="channelId";
 
 subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
 subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
+subscribeToEvent(REMOVE_CHANNEL_FROM_LIST,onRemoveChannelFromList);
 
+function getChannelByTopicId(topicId){
+   var elem=channelsContainer.children.find(x=>{
+        var channelId=x.getAttribute(CHANNEL_ID);
+        return channelId=topicId;
+   });
+   return elem;
+}
 
 subscribeBtn.addEventListener("click",onSubscribe);
 
@@ -38,7 +49,6 @@ async function onSubscribe(){
         unsubscribeFromEvent(SUBSCRIBE_COMMAND_RESULT,(_)=>{
             console.log("unsubscribed from subscribe_result");
         });
-       console.log(ev.detail);
        resolve(ev.detail);
     }
    
@@ -66,6 +76,7 @@ async function handleSubscribeResultAsync(subscribeResult){
             reject(e)
         }
     }
+    console.log(subscribeResult.result);
     if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
         var message="Could not subscribe to channel:"+subscribeBox.value;
         console.log(message);
@@ -75,15 +86,15 @@ async function handleSubscribeResultAsync(subscribeResult){
         subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterSubscribe(ev,resolve,reject));
         publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
     });
-    console.log("ending subscribe");
-    console.log(getSubscriptionsResult);
     return getSubscriptionsResult.result;
     
 
 }
 
 async function onUnsubscribeClick(event){
+   
     function onOwnUnsubscribeResult(ev,resolve,_){
+       
         unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
             console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
         });
@@ -91,7 +102,7 @@ async function onUnsubscribeClick(event){
     }
     
    
-    var unsubscribeResult=new Promise((resolve,reject)=>{
+    var unsubscribeResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnUnsubscribeResult(ev,resolve,reject));
         var targetUnsubscribeBtn=document.getElementById(event.target.id);
         var channel=JSON.parse(targetUnsubscribeBtn.getAttribute("channel"));
@@ -101,29 +112,16 @@ async function onUnsubscribeClick(event){
      
 }
 async function handleUnsubscribeResultAsync(unsubscribeResult){
-    function refreshAfterUnsubscribe(ev,resolve,reject){
-        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND,function(_){
-            console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
-        });
-        try{
-
-            resolve(ev.detail);
-        }catch(err){
-            reject(err);
-        }
-    }
+    console.log("before if's");
     if(unsubscribeResult.result=="not_joined"){
         console.log("Not joined");
         return "not_joined";
     }
     if(unsubscribeResult.result!="ok"){
-        var message="Could not unsubscribe from channel "
+        var message="Could not unsubscribe from channel";
         return new Error(message);
     }
-    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
-        subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterUnsubscribe(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
-    });
+   publishEvent(REMOVE_CHANNEL_FROM_LIST,{[TOPIC_ID]:unsubscribeResult.topicId});
 }
 
 function onUnSubscribeResult(ev){
@@ -145,7 +143,12 @@ function onUnSubscribeResult(ev){
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
+function onRemoveChannelFromList(ev){
+    console.log(ev.detail);
+    var channelElement=getChannelByTopicId(ev.detail.topicId);
+    channelsContainer.removeChild(channelElement);
 
+}
 function setChannels(channels){
     localStorage.setItem(CHANNELS,JSON.stringify(channels));
     updateChannelsContainer(channels);

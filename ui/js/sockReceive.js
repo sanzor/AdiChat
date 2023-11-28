@@ -84,6 +84,7 @@ function callback_subscribe(data){
    
 }
 function callback_unsubscribe(data){
+    console.log(data);
     if(data.result=="ok"){
         publishEvent(UNSUBSCRIBE_COMMAND_RESULT,data);
         publishEvent(RESET_CHAT,{});
