@@ -87,8 +87,6 @@ async function handleSubscribeResultAsync(subscribeResult){
         publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
     });
     return getSubscriptionsResult.result;
-    
-
 }
 
 async function onUnsubscribeClick(event){
