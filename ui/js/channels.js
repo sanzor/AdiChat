@@ -34,11 +34,13 @@ subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
 subscribeToEvent(REMOVE_CHANNEL_FROM_LIST,onRemoveChannelFromList);
 
 function getChannelByTopicId(topicId){
-   var elem=channelsContainer.children.find(x=>{
+    
+   var elem=[...channelsContainer.children].find(x=>{
         var channelId=x.getAttribute(CHANNEL_ID);
-        return channelId=topicId;
+        return channelId==topicId;
    });
    return elem;
+   
 }
 
 subscribeBtn.addEventListener("click",onSubscribe);
@@ -134,7 +136,6 @@ function onUnSubscribeResult(ev){
         publishEvent(SET_CHAT,channels[0]);
         return;
     }
-    
 }
 
 
@@ -145,7 +146,7 @@ function onRemoveChannelFromList(ev){
     console.log(ev.detail);
     var channelElement=getChannelByTopicId(ev.detail.topicId);
     channelsContainer.removeChild(channelElement);
-
+    publishEvent(SET_CHAT,channels.slice(-1));
 }
 function setChannels(channels){
     localStorage.setItem(CHANNELS,JSON.stringify(channels));
