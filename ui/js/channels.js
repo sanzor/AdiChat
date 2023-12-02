@@ -24,6 +24,7 @@ const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
 const CHANNEL="channel";
 const REMOVE_CHANNEL_FROM_LIST="remove_channel";
+const ADD_CHANNEL_TO_LIST="add_channel";
 const TOPIC_ID="topicId";
 const CHANNEL_ID="channelId";
 
@@ -31,9 +32,10 @@ subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
 subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
-subscribeToEvent(REMOVE_CHANNEL_FROM_LIST,onRemoveChannelFromList);
+subscribeToEvent(REMOVE_CHANNEL_FROM_LIST,onRemoveChannelFromDOM);
+subscribeToEvent(ADD_CHANNEL_TO_LIST,onAddChannelToDOM);
 
-function getChannelByTopicId(topicId){
+function getChannelDomElementById(topicId){
     
    var elem=[...channelsContainer.children].find(x=>{
         var channelId=x.getAttribute(CHANNEL_ID);
@@ -42,7 +44,8 @@ function getChannelByTopicId(topicId){
    return elem;
    
 }
-
+function getChannels(){return JSON.parse(localStorage.getItem(CHANNELS));}
+function setChannels(channels){ localStorage.setItem(CHANNES,JSON.stringify(channels));}
 subscribeBtn.addEventListener("click",onSubscribe);
 
 async function onSubscribe(){
@@ -58,37 +61,24 @@ async function onSubscribe(){
         console.log(KIND);
         subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
         publishEvent(SOCKET_COMMAND,{[KIND]:SUBSCRIBE_COMMAND,[TOPIC]:subscribeBox.value});
-      
     });
-    
     var subs=await handleSubscribeResultAsync(subscribeResult);
     
     
 }
 
 async function handleSubscribeResultAsync(subscribeResult){
-    function refreshAfterSubscribe(ev,resolve,reject){
-        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,(_)=>{
-            console.log("unsbuscribed from refresh_channels after subscribed to channel");
-        });
-        try{
-           
-            resolve(ev.detail);
-        }catch(err){
-            reject(e)
-        }
-    }
     console.log(subscribeResult.result);
     if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
         var message="Could not subscribe to channel:"+subscribeBox.value;
         console.log(message);
         return new Error(message);
     }
-    var getSubscriptionsResult=await new Promise((resolve,reject)=>{
-        subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,(ev)=>refreshAfterSubscribe(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND,{[KIND]:REFRESH_CHANNELS_COMMAND});
-    });
-    return getSubscriptionsResult.result;
+    var targetChannel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
+    var existingChannels=getChannels();
+    var newChannelList=[...existingChannels,targetChannel]
+    setChannels(newChannelList);
+    publishEvent(ADD_CHANNEL_TO_LIST,targetChannel);
 }
 
 async function onUnsubscribeClick(event){
@@ -105,7 +95,7 @@ async function onUnsubscribeClick(event){
     var unsubscribeResult=await new Promise((resolve,reject)=>{
         subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnUnsubscribeResult(ev,resolve,reject));
         var targetUnsubscribeBtn=document.getElementById(event.target.id);
-        var channel=JSON.parse(targetUnsubscribeBtn.getAttribute("channel"));
+        var channel=JSON.parse(targetUnsubscribeBtn.getAttribute(CHANNEL));
         publishEvent(SOCKET_COMMAND,{[KIND]:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
     var rez=await handleUnsubscribeResultAsync(unsubscribeResult);
@@ -139,13 +129,21 @@ function onUnSubscribeResult(ev){
 }
 
 
+function setChat(channel){
+
+}
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
-function onRemoveChannelFromList(ev){
-    console.log(ev.detail);
-    var channelElement=getChannelByTopicId(ev.detail.topicId);
+
+function onAddChannelToDOM(ev){
+
+}
+function onRemoveChannelFromDOM(ev){
+    var channelElement=getChannelDomElementById(ev.detail.topicId);
+    var channels=getChannels();
     channelsContainer.removeChild(channelElement);
+    
     publishEvent(SET_CHAT,channels.slice(-1));
 }
 function setChannels(channels){
@@ -155,13 +153,18 @@ function setChannels(channels){
 }
 
 function onRefreshChannels(ev){
-    console.log("Inside onRefresh Channels");
-    console.log(ev.detail);
     var channels=setChannels(ev.detail);
     if(channels.length==0){
         return;
     }
-    publishEvent(SET_CHAT,channels[0]);
+    var currentChannel=JSON.parse(localStorage.getItem(CURRENT_CHANNEL));
+    if(currentChannel){
+        publishEvent(SET_CHAT,currentChannel);
+    }
+    else{
+        publishEvent(SET_CHAT,channels[0]);
+    }
+
 }
 
 
