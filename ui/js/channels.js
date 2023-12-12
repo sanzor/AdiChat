@@ -44,11 +44,34 @@ function getChannelDomElementById(topicId){
    return elem;
    
 }
-function getChannels(){return JSON.parse(localStorage.getItem(CHANNELS));}
-function setChannels(channels){ localStorage.setItem(CHANNES,JSON.stringify(channels));}
-subscribeBtn.addEventListener("click",onSubscribe);
 
-async function onSubscribe(){
+function getDOMChannels(){
+
+}
+function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
+function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
+function setStorageChannels(channels){ localStorage.setItem(CHANNELS,JSON.stringify(channels));}
+
+
+subscribeBtn.addEventListener("click",onSubscribeAsync);
+
+function onRefreshChannels(ev){
+    var channels=setChannels(ev.detail);
+    if(channels.length==0){
+        return;
+    }
+    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    if(currentChannel){
+        publishEvent(SET_CHAT,currentChannel);
+    }
+    else{
+
+        publishEvent(SET_CHAT,channels[0]);
+    }
+
+}
+
+async function onSubscribeAsync(){
    
     function onOwnSubscribeResult(ev,resolve,_){
         unsubscribeFromEvent(SUBSCRIBE_COMMAND_RESULT,(_)=>{
@@ -62,7 +85,7 @@ async function onSubscribe(){
         subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
         publishEvent(SOCKET_COMMAND,{[KIND]:SUBSCRIBE_COMMAND,[TOPIC]:subscribeBox.value});
     });
-    var subs=await handleSubscribeResultAsync(subscribeResult);
+    var _=await handleSubscribeResultAsync(subscribeResult);
     
     
 }
@@ -75,34 +98,32 @@ async function handleSubscribeResultAsync(subscribeResult){
         return new Error(message);
     }
     var targetChannel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
-    var existingChannels=getChannels();
-    var newChannelList=[...existingChannels,targetChannel]
-    setChannels(newChannelList);
+    var existingChannels=getItemFromStorage(CHANNELS);
+    var newChannelList=[...existingChannels,targetChannel];
+    if(!newChannelList || newChannelList.length==0){
+        publishEvent(SET_CHAT,targetChannel);
+    }
+    setStorageChannels(newChannelList); setItemInStorage(CHANNELS,newChannelList);
     publishEvent(ADD_CHANNEL_TO_LIST,targetChannel);
 }
 
-async function onUnsubscribeClick(event){
-   
-    function onOwnUnsubscribeResult(ev,resolve,_){
-       
-        unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
-            console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
+async function onUnsubscribeAsync(event){
+    var unsubscribeResult=await new Promise((resolve,_)=>{
+        subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>{
+            unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
+                console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
+            });
+            resolve(ev.detail);
         });
-        resolve(ev.detail);
-    }
-    
-   
-    var unsubscribeResult=await new Promise((resolve,reject)=>{
-        subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnUnsubscribeResult(ev,resolve,reject));
         var targetUnsubscribeBtn=document.getElementById(event.target.id);
         var channel=JSON.parse(targetUnsubscribeBtn.getAttribute(CHANNEL));
         publishEvent(SOCKET_COMMAND,{[KIND]:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
-    var rez=await handleUnsubscribeResultAsync(unsubscribeResult);
+    var _=await handleUnsubscribeResultAsync(unsubscribeResult);
      
 }
 async function handleUnsubscribeResultAsync(unsubscribeResult){
-    console.log("before if's");
+    
     if(unsubscribeResult.result=="not_joined"){
         console.log("Not joined");
         return "not_joined";
@@ -111,7 +132,21 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         var message="Could not unsubscribe from channel";
         return new Error(message);
     }
-   publishEvent(REMOVE_CHANNEL_FROM_LIST,{[TOPIC_ID]:unsubscribeResult.topicId});
+    var existingChannels=getItemFromStorage(CHANNELS);
+    if(!existingChannels){
+        setItemInStorage(CHANNELS,[]);
+        publishEvent(RESET_CHAT,{});
+        return;
+    }
+    if(existingChannels.length==0){
+        publishEvent(RESET_CHAT,{});
+        return;
+    }
+    publishEvent(REMOVE_CHANNEL_FROM_LIST,{[TOPIC_ID]:unsubscribeResult.topicId});
+    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    if(unsubscribeResult.topicId==currentChannel.id){
+        publishEvent(SET_CHAT,existingChannels)
+    }
 }
 
 function onUnSubscribeResult(ev){
@@ -128,44 +163,26 @@ function onUnSubscribeResult(ev){
     }
 }
 
-
-function setChat(channel){
-
-}
 function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
 
 function onAddChannelToDOM(ev){
-
+    var channel=ev.detail;
+    var newChannel=createChannelContainer(channel);
+    channelsContainer.appendChild(newChannel);
 }
 function onRemoveChannelFromDOM(ev){
     var channelElement=getChannelDomElementById(ev.detail.topicId);
-    var channels=getChannels();
     channelsContainer.removeChild(channelElement);
-    
-    publishEvent(SET_CHAT,channels.slice(-1));
 }
 function setChannels(channels){
-    localStorage.setItem(CHANNELS,JSON.stringify(channels));
+    setItemInStorage(CHANNELS,channels);
     updateChannelsContainer(channels);
     return channels;
 }
 
-function onRefreshChannels(ev){
-    var channels=setChannels(ev.detail);
-    if(channels.length==0){
-        return;
-    }
-    var currentChannel=JSON.parse(localStorage.getItem(CURRENT_CHANNEL));
-    if(currentChannel){
-        publishEvent(SET_CHAT,currentChannel);
-    }
-    else{
-        publishEvent(SET_CHAT,channels[0]);
-    }
 
-}
 
 
 function onSubscribeResultU(ev){
@@ -242,7 +259,7 @@ function createUnsubscribeChannelButton(channel){
     unsubscribeBtn.innerText="X";
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
     unsubscribeBtn.setAttribute(CHANNEL,JSON.stringify(channel));
-    unsubscribeBtn.onclick=onUnsubscribeClick;
+    unsubscribeBtn.onclick=onUnsubscribeAsync;
     return unsubscribeBtn;
 }
 function createDisplayChannelChatButton(channel){
