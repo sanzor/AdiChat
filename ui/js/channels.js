@@ -23,8 +23,8 @@ import {
 const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
 const CHANNEL="channel";
-const REMOVE_CHANNEL_FROM_LIST="remove_channel";
-const ADD_CHANNEL_TO_LIST="add_channel";
+const REMOVE_CHANNEL_FROM_DOM="remove_channel";
+const ADD_CHANNEL_TO_DOM="add_channel";
 const TOPIC_ID="topicId";
 const CHANNEL_ID="channelId";
 
@@ -32,8 +32,8 @@ subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
 subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
-subscribeToEvent(REMOVE_CHANNEL_FROM_LIST,onRemoveChannelFromDOM);
-subscribeToEvent(ADD_CHANNEL_TO_LIST,onAddChannelToDOM);
+subscribeToEvent(REMOVE_CHANNEL_FROM_DOM,onRemoveChannelFromDOM);
+subscribeToEvent(ADD_CHANNEL_TO_DOM,onAddChannelToDOM);
 
 function getChannelDomElementById(topicId){
     
@@ -45,9 +45,7 @@ function getChannelDomElementById(topicId){
    
 }
 
-function getDOMChannels(){
 
-}
 function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
 function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
 
@@ -103,7 +101,7 @@ async function handleSubscribeResultAsync(subscribeResult){
         publishEvent(SET_CHAT,targetChannel);
     }
     setItemInStorage(CHANNELS,newChannelList);
-    publishEvent(ADD_CHANNEL_TO_LIST,targetChannel);
+    publishEvent(ADD_CHANNEL_TO_DOM,targetChannel);
 }
 
 async function onUnsubscribeAsync(event){
@@ -141,8 +139,11 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         publishEvent(RESET_CHAT,{});
         return;
     }
-    publishEvent(REMOVE_CHANNEL_FROM_LIST,{[TOPIC_ID]:unsubscribeResult.topicId});
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    var newExistingChannels=existingChannels.filter(x=>x.id==unsubscribeResult.topicId);
+    setItemInStorage(CHANNELS,newExistingChannels);
+    publishEvent(REMOVE_CHANNEL_FROM_DOM,{[TOPIC_ID]:unsubscribeResult.topicId});
+    
     if(unsubscribeResult.topicId==currentChannel.id){
         publishEvent(SET_CHAT,existingChannels[0]);
     }
