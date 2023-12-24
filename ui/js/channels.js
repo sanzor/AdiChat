@@ -27,13 +27,15 @@ const REMOVE_CHANNEL_FROM_DOM="remove_channel";
 const ADD_CHANNEL_TO_DOM="add_channel";
 const TOPIC_ID="topicId";
 const CHANNEL_ID="channelId";
+const SET_DOM_CHANNELS="set_DOM_channels";
 
 subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
-subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannels);
+subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannelsCommandResult);
 subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
 subscribeToEvent(REMOVE_CHANNEL_FROM_DOM,onRemoveChannelFromDOM);
 subscribeToEvent(ADD_CHANNEL_TO_DOM,onAddChannelToDOM);
+subscribeToEvent(SET_DOM_CHANNELS,onSetDOMChannels);
 
 function getChannelDomElementById(topicId){
     
@@ -52,19 +54,26 @@ function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Va
 
 subscribeBtn.addEventListener("click",onSubscribeAsync);
 
-function onRefreshChannels(ev){
-    var channels=setChannels(ev.detail);
-    if(channels.length==0){
+function onSetDOMChannels(ev){
+    var channels=ev.detail;
+    updateChannelsContainer(channels);
+}
+function onRefreshChannelsCommandResult(ev){
+    var channels=ev.detail;
+    setItemInStorage(CHANNELS,channels);
+    if(channels.length==0 || !channels){
+        if(!getItemFromStorage(CURRENT_CHANNEL)){
+            setItemInStorage(CURRENT_CHANNEL,null);
+        }
+        publishEvent(SET_DOM_CHANNELS,[]);
         return;
     }
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
-    if(currentChannel){
-        publishEvent(SET_CHAT,currentChannel);
-    }
-    else{
-
+    if(!channels.find(x=>x.id==currentChannel.id)|| !currentChannel){
         publishEvent(SET_CHAT,channels[0]);
+        return;
     }
+    publishEvent(SET_CHAT,currentChannel);
 
 }
 
@@ -94,12 +103,22 @@ async function handleSubscribeResultAsync(subscribeResult){
         console.log(message);
         return new Error(message);
     }
+    if(subscribeResult.result=='already_subscribed'){
+        console.log("already subscribed");
+        return;
+    }
     var targetChannel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
     var existingChannels=getItemFromStorage(CHANNELS);
+    if(!existingChannels){
+        existingChannels=[];
+    }
     var newChannelList=[...existingChannels,targetChannel];
-    if(!newChannelList || newChannelList.length==0){
+    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    if(!currentChannel){
+        setItemInStorage(CURRENT_CHANNEL,targetChannel);
         publishEvent(SET_CHAT,targetChannel);
     }
+    
     setItemInStorage(CHANNELS,newChannelList);
     publishEvent(ADD_CHANNEL_TO_DOM,targetChannel);
 }
@@ -130,21 +149,26 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         return new Error(message);
     }
     var existingChannels=getItemFromStorage(CHANNELS);
+    
     if(!existingChannels){
+        setItemInStorage(CURRENT_CHANNEL,null);
         setItemInStorage(CHANNELS,[]);
         publishEvent(RESET_CHAT,{});
         return;
     }
     if(existingChannels.length==0){
+        setItemInStorage(CURRENT_CHANNEL,null);
         publishEvent(RESET_CHAT,{});
         return;
     }
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    
     var newExistingChannels=existingChannels.filter(x=>x.id==unsubscribeResult.topicId);
     setItemInStorage(CHANNELS,newExistingChannels);
     publishEvent(REMOVE_CHANNEL_FROM_DOM,{[TOPIC_ID]:unsubscribeResult.topicId});
-    
     if(unsubscribeResult.topicId==currentChannel.id){
+        console.log("inside last if");
+        setItemInStorage(CURRENT_CHANNEL,existingChannels[0]);
         publishEvent(SET_CHAT,existingChannels[0]);
     }
 }
