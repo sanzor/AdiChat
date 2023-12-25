@@ -11,6 +11,7 @@ const GET_NEWEST_MESSAGES="get_newest_messages";
 
 //socket command results
 const REFRESH_CHANNELS_COMMAND_RESULT="get_subscriptions_result";
+const UNSUBSCRIBE_BUTTON_CLICK="unsubscribe_button_click"
 const UNSUBSCRIBE_COMMAND_RESULT="unsubscribe_result";
 const UNSUBSCRIBE_COMMAND_RESULT_U="unsubscribe_result_u";
 const SUBSCRIBE_COMMAND_RESULT="subscribe_result";
@@ -21,6 +22,10 @@ const SOCKET_CLOSED="socketClosed";
 const NEW_CHANNEL_MESSAGE="new_channel_message";
 const SET_CHAT="set_chat";
 const RESET_CHAT="reset_chat";
+
+const SET_CHANNELS="set_channels";
+const REMOVE_CHANNEL="remove_channel";
+const ADD_CHANNEL="add_channel";
 
 const SHOW_MAIN="showMain";
 const HIDE_MAIN="hideMain";
@@ -36,6 +41,11 @@ export {
     REFRESH_CHANNELS_COMMAND,
     REFRESH_CHANNELS_COMMAND_RESULT,
 
+    SET_CHANNELS,
+    ADD_CHANNEL,
+    REMOVE_CHANNEL,
+    
+    UNSUBSCRIBE_BUTTON_CLICK,
     UNSUBSCRIBE_COMMAND,
     UNSUBSCRIBE_COMMAND_RESULT,
     UNSUBSCRIBE_COMMAND_RESULT_U,

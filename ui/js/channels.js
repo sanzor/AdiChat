@@ -13,39 +13,28 @@ import {
     SUBSCRIBE_COMMAND_RESULT_U,
 
     UNSUBSCRIBE_COMMAND, 
+    UNSUBSCRIBE_BUTTON_CLICK,
     UNSUBSCRIBE_COMMAND_RESULT,
     UNSUBSCRIBE_COMMAND_RESULT_U ,
     
     SET_CHAT,
     RESET_CHAT,
-    NEW_CHANNEL_MESSAGE} from "./events.js";
+    NEW_CHANNEL_MESSAGE,
+    SET_CHANNELS,
+    ADD_CHANNEL,
+    REMOVE_CHANNEL} from "./events.js";
 
 const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
-const CHANNEL="channel";
-const REMOVE_CHANNEL_FROM_DOM="remove_channel";
-const ADD_CHANNEL_TO_DOM="add_channel";
 const TOPIC_ID="topicId";
-const CHANNEL_ID="channelId";
+
 const SET_DOM_CHANNELS="set_DOM_channels";
 
 subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannelsCommandResult);
 subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
-subscribeToEvent(REMOVE_CHANNEL_FROM_DOM,onRemoveChannelFromDOM);
-subscribeToEvent(ADD_CHANNEL_TO_DOM,onAddChannelToDOM);
-subscribeToEvent(SET_DOM_CHANNELS,onSetDOMChannels);
-
-function getChannelDomElementById(topicId){
-    
-   var elem=[...channelsContainer.children].find(x=>{
-        var channelId=x.getAttribute(CHANNEL_ID);
-        return channelId==topicId;
-   });
-   return elem;
-   
-}
+subscribeToEvent(UNSUBSCRIBE_BUTTON_CLICK,onUnsubscribeAsync);
 
 
 function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
@@ -54,10 +43,7 @@ function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Va
 
 subscribeBtn.addEventListener("click",onSubscribeAsync);
 
-function onSetDOMChannels(ev){
-    var channels=ev.detail;
-    updateChannelsContainer(channels);
-}
+
 function onRefreshChannelsCommandResult(ev){
     var channels=ev.detail;
     setItemInStorage(CHANNELS,channels);
@@ -65,9 +51,10 @@ function onRefreshChannelsCommandResult(ev){
         if(!getItemFromStorage(CURRENT_CHANNEL)){
             setItemInStorage(CURRENT_CHANNEL,null);
         }
-        publishEvent(SET_DOM_CHANNELS,[]);
+        publishEvent(SET_CHANNELS,[]);
         return;
     }
+    publishEvent(SET_CHANNELS,channels);
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
     if(!channels.find(x=>x.id==currentChannel.id)|| !currentChannel){
         publishEvent(SET_CHAT,channels[0]);
@@ -120,10 +107,11 @@ async function handleSubscribeResultAsync(subscribeResult){
     }
     
     setItemInStorage(CHANNELS,newChannelList);
-    publishEvent(ADD_CHANNEL_TO_DOM,targetChannel);
+    publishEvent(ADD_CHANNEL,targetChannel);
 }
 
 async function onUnsubscribeAsync(event){
+    var channel=event.detail;
     var unsubscribeResult=await new Promise((resolve,_)=>{
         subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>{
             unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
@@ -131,8 +119,6 @@ async function onUnsubscribeAsync(event){
             });
             resolve(ev.detail);
         });
-        var targetUnsubscribeBtn=document.getElementById(event.target.id);
-        var channel=JSON.parse(targetUnsubscribeBtn.getAttribute(CHANNEL));
         publishEvent(SOCKET_COMMAND,{[KIND]:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
     var _=await handleUnsubscribeResultAsync(unsubscribeResult);
@@ -162,10 +148,9 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         return;
     }
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
-    
     var newExistingChannels=existingChannels.filter(x=>x.id==unsubscribeResult.topicId);
     setItemInStorage(CHANNELS,newExistingChannels);
-    publishEvent(REMOVE_CHANNEL_FROM_DOM,{[TOPIC_ID]:unsubscribeResult.topicId});
+    publishEvent(REMOVE_CHANNEL,{[TOPIC_ID]:unsubscribeResult.topicId});
     if(unsubscribeResult.topicId==currentChannel.id){
         console.log("inside last if");
         setItemInStorage(CURRENT_CHANNEL,existingChannels[0]);
@@ -178,15 +163,7 @@ function onNewMessage(ev){
    // channelsContainer.children.forEach(elem=>)
 }
 
-function onAddChannelToDOM(ev){
-    var channel=ev.detail;
-    var newChannel=createChannelContainer(channel);
-    channelsContainer.appendChild(newChannel);
-}
-function onRemoveChannelFromDOM(ev){
-    var channelElement=getChannelDomElementById(ev.detail.topicId);
-    channelsContainer.removeChild(channelElement);
-}
+
 function setChannels(channels){
     setItemInStorage(CHANNELS,channels);
     updateChannelsContainer(channels);
@@ -215,73 +192,6 @@ function onUnSubscribeResultU(ev){
     publishEvent(SET_CHAT,channels.slice(-1));
 }
 
-function resetChannelsContainer(){
-    var channelsContainer=document.getElementById("channelsContainer");
-    channelsContainer.innerHTML='';
-}
-function updateChannelsContainer(subscriptions){
-    console.log(subscriptions);
-    resetChannelsContainer();
-    var headerRow=document.createElement("tr");
-    var h1=document.createElement("th");
-    var h2=document.createElement("th");
-    headerRow.appendChild(h1);
-    headerRow.appendChild(h2);
-    if(subscriptions==='no_subscriptions'){
-        return parentContainer;
-    }
-    var channels=createChannels(subscriptions);
-    channels.forEach(element=>{
-        channelsContainer.appendChild(element);
-    });
-    return channelsContainer;
-   
-}
-function createChannels(subscriptions){
-    console.log(subscriptions);
-    var channels=subscriptions.map(createChannelContainer);
-    return channels;
-}
-function createChannelContainer(channel){
-    var channelContainer=document.createElement("span");
-    channelContainer.setAttribute("channelId",channel.id);
-    channelContainer.setAttribute("class","channelRow");
-    channelContainer.setAttribute("channelData",channel);
-    var unsubscribeBtn=createUnsubscribeChannelButton(channel);
-    var openChatButton=createDisplayChannelChatButton(channel);
-    var newMessagesBox=createNewMessagesBox(channel);
-    channelContainer.appendChild(newMessagesBox);
-    channelContainer.appendChild(unsubscribeBtn);
-    channelContainer.appendChild(openChatButton);
-    return channelContainer;
-}
-
-function createUnsubscribeChannelButton(channel){
-    var unsubscribeBtn=document.createElement("button");
-    unsubscribeBtn.id=channel.id+'_unsubscribe_btn';
-    unsubscribeBtn.innerText="X";
-    unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
-    unsubscribeBtn.setAttribute(CHANNEL,JSON.stringify(channel));
-    unsubscribeBtn.onclick=onUnsubscribeAsync;
-    return unsubscribeBtn;
-}
-function createDisplayChannelChatButton(channel){
-   
-    var channelButton=document.createElement("button");
-    channelButton.id=channel.id;
-    channelButton.setAttribute('content',channel.name);
-    channelButton.setAttribute("class",'button');
-    channelButton.setAttribute("style","channelButton");
-    channelButton.textContent=channel.name;
-    channelButton.onclick=function(args){ publishEvent(SET_CHAT,channel)};
-    return channelButton;
-}
-function createNewMessagesBox(channel){
-    var newMessagesBox=document.createElement("p");
-    newMessagesBox.setAttribute("class","newMessagesBox");
-    newMessagesBox.innerHTML="0";
-    return newMessagesBox;
-}
 
 function updateChannelsOnMessage(data){
     var targetChannel=channelsContainer.children.filter(child=>child.innerText==data.topic);
