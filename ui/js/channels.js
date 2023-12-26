@@ -22,7 +22,8 @@ import {
     NEW_CHANNEL_MESSAGE,
     SET_CHANNELS,
     ADD_CHANNEL,
-    REMOVE_CHANNEL} from "./events.js";
+    REMOVE_CHANNEL,
+    CHANNEL_CLICK} from "./events.js";
 
 const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
@@ -34,7 +35,9 @@ subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannelsCommandResult);
 subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
+
 subscribeToEvent(UNSUBSCRIBE_BUTTON_CLICK,onUnsubscribeAsync);
+subscribeToEvent(CHANNEL_CLICK,onChannelClick);
 
 
 function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
@@ -44,6 +47,11 @@ function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Va
 subscribeBtn.addEventListener("click",onSubscribeAsync);
 
 
+function onChannelClick(event){
+    var channel=event.detail;
+    setItemInStorage(CURRENT_CHANNEL,channel);
+    publishEvent(SET_CHAT,channel);
+}
 function onRefreshChannelsCommandResult(ev){
     var channels=ev.detail;
     setItemInStorage(CHANNELS,channels);

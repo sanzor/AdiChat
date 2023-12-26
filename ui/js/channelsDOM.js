@@ -1,8 +1,9 @@
 
 import { publishEvent } from "./bus.js";
 import config from "./config.js";
-import {UNSUBSCRIBE_BUTTON_CLICK,CHANNEL_ID, CHANNEL} from "./constants.js";
-import { SET_CHANNELS,ADD_CHANNEL,REMOVE_CHANNEL } from "./events.js";
+import {CHANNEL_ID, CHANNEL} from "./constants.js";
+import { subscribeToEvent } from "./bus.js";
+import {UNSUBSCRIBE_BUTTON_CLICK , SET_CHANNELS,ADD_CHANNEL,REMOVE_CHANNEL ,CHANNEL_CLICK } from "./events.js";
 subscribeToEvent(REMOVE_CHANNEL,onRemoveChannelFromDOM);
 subscribeToEvent(ADD_CHANNEL,onAddChannelToDOM);
 subscribeToEvent(SET_CHANNELS,onSetDOMChannels);
@@ -81,7 +82,7 @@ function createUnsubscribeChannelButton(channel){
     unsubscribeBtn.setAttribute("class","channelRowUnsubscribeBtn");
     unsubscribeBtn.setAttribute(CHANNEL,JSON.stringify(channel));
     unsubscribeBtn.onclick=function(){
-        publishEvent(UNSUBSCRIBE_BUTTON_CLICK,{[CHANNEL]:channel});
+        publishEvent(UNSUBSCRIBE_BUTTON_CLICK,channel);
     };
     return unsubscribeBtn;
 }
@@ -92,7 +93,7 @@ function createDisplayChannelChatButton(channel){
     channelButton.setAttribute("class",'button');
     channelButton.setAttribute("style","channelButton");
     channelButton.textContent=channel.name;
-    channelButton.onclick=function(_){ publishEvent(SET_CHAT,channel)};
+    channelButton.onclick=function(_){ publishEvent(CHANNEL_CLICK,channel)};
     return channelButton;
 }
 function createNewMessagesBox(channel){
