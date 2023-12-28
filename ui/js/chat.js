@@ -1,5 +1,5 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
-import { KIND, SOCKET_COMMAND } from "./constants.js";
+import { KIND, SOCKET_COMMAND,CHANNEL_ID, MESSAGE_CONTENT } from "./constants.js";
 import { channelsContainer, chatContainer,
     chatSendMessageBox,
     chatSendMessageBtn,
@@ -20,12 +20,12 @@ chatSendMessageBtn.addEventListener("click",onSendMessage);
 function onSendMessage(){
     var channelId=parseInt(localStorage.getItem("channelId"));
     console.log("Channel publish:"+channelId);
-    var message=document.getElementById("chatSendMessageBox").value;
+    var message=chatSendMessageBox.value;
     publishEvent(SOCKET_COMMAND,{
         [KIND]:PUBLISH_MESSAGE,
-        "topicId":channelId,
-        "content":message
-    })
+        [CHANNEL_ID]:channelId,
+        [MESSAGE_CONTENT]:message
+    });
 }
 function onNewMessage(ev){
     console.log("Inside on new message");

@@ -20,7 +20,7 @@ const SUBSCRIBE_COMMAND_RESULT_U="subscribe_result_u";
 
 const SOCKET_RECEIVE="socketReceive";
 const SOCKET_CLOSED="socketClosed";
-const NEW_CHANNEL_MESSAGE="new_channel_message";
+const NEW_INCOMING_MESSAGE="new_channel_message";
 const SET_CHAT="set_chat";
 const RESET_CHAT="reset_chat";
 
@@ -60,7 +60,7 @@ export {
     SOCKET_CLOSED,
     SET_CHAT,
     RESET_CHAT,
-    NEW_CHANNEL_MESSAGE,
+    NEW_INCOMING_MESSAGE,
 
     PUBLISH_MESSAGE,
     GET_OLDER_MESSAGES,

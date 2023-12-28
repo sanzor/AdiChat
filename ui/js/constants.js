@@ -1,5 +1,6 @@
 
 const CHANNEL="channel";
+const MESSAGE_CONTENT="content";
 const TOPIC="topic";
 const KIND="kind";
 const SOCKET_COMMAND="socket_command";
@@ -13,5 +14,5 @@ export {
 const UNSUBSCRIBE_BUTTON_COMMAND="unsubscribe_button_command";
 const CHANNEL_ID="channelId";
 
-export{UNSUBSCRIBE_BUTTON_COMMAND,CHANNEL_ID};
+export{UNSUBSCRIBE_BUTTON_COMMAND,CHANNEL_ID,MESSAGE_CONTENT};
 

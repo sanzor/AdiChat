@@ -19,7 +19,7 @@ import {
     
     SET_CHAT,
     RESET_CHAT,
-    NEW_CHANNEL_MESSAGE,
+    NEW_INCOMING_MESSAGE,
     SET_CHANNELS,
     ADD_CHANNEL,
     REMOVE_CHANNEL,
@@ -29,16 +29,23 @@ const CHANNELS="channels";
 const CURRENT_CHANNEL="current_channel";
 const TOPIC_ID="topicId";
 
-const SET_DOM_CHANNELS="set_DOM_channels";
 
 subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
 subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT_U,onUnSubscribeResultU);
 subscribeToEvent(REFRESH_CHANNELS_COMMAND_RESULT,onRefreshChannelsCommandResult);
-subscribeToEvent(NEW_CHANNEL_MESSAGE,onNewMessage);
+subscribeToEvent(NEW_INCOMING_MESSAGE,onNewIncomingMessage);
 
 subscribeToEvent(UNSUBSCRIBE_BUTTON_CLICK,onUnsubscribeAsync);
 subscribeToEvent(CHANNEL_CLICK,onChannelClick);
 
+function onNewIncomingMessage(ev){
+     var message=ev.detail;
+     
+ }
+
+ function updateChannelsOnMessage(data){
+    var targetChannel=channelsContainer.children.filter(child=>child.innerText==data.topic);
+}
 
 function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
 function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
@@ -156,20 +163,20 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         return;
     }
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
-    var newExistingChannels=existingChannels.filter(x=>x.id==unsubscribeResult.topicId);
+    var newExistingChannels=existingChannels.filter(x=>x.id!=unsubscribeResult.topicId);
     setItemInStorage(CHANNELS,newExistingChannels);
     publishEvent(REMOVE_CHANNEL,{[TOPIC_ID]:unsubscribeResult.topicId});
+    console.log(unsubscribeResult);
     if(unsubscribeResult.topicId==currentChannel.id){
         console.log("inside last if");
-        setItemInStorage(CURRENT_CHANNEL,existingChannels[0]);
-        publishEvent(SET_CHAT,existingChannels[0]);
+        setItemInStorage(CURRENT_CHANNEL,newExistingChannels[0]);
+        publishEvent(SET_CHAT,newExistingChannels[0]);
+        
     }
 }
 
 
-function onNewMessage(ev){
-   // channelsContainer.children.forEach(elem=>)
-}
+
 
 
 function setChannels(channels){
@@ -201,6 +208,3 @@ function onUnSubscribeResultU(ev){
 }
 
 
-function updateChannelsOnMessage(data){
-    var targetChannel=channelsContainer.children.filter(child=>child.innerText==data.topic);
-}

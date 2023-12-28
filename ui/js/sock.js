@@ -1,6 +1,6 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import config from "./config.js";
-import { SOCKET_COMMAND } from "./constants.js";
+import { CHANNEL_ID, MESSAGE_CONTENT, SOCKET_COMMAND } from "./constants.js";
 import{
     SUBSCRIBE_COMMAND,
     UNSUBSCRIBE_COMMAND,
@@ -86,7 +86,7 @@ function onCommand(data){
         case SUBSCRIBE_COMMAND:   command_subscribe(data.topic);break;
         case UNSUBSCRIBE_COMMAND : command_unsubscribe(data.topicId);break;
         case REFRESH_CHANNELS_COMMAND: command_get_subscriptions();break;
-        case PUBLISH_MESSAGE :command_publish(data.topicId,data.content);break;
+        case PUBLISH_MESSAGE :command_publish(data);break;
         case "disconnect":command_disconnect();break;
         case  GET_NEWEST_MESSAGES: command_get_newest_messages(data.topicId,data.count);break;
         case  GET_OLDER_MESSAGES: command_get_older_messages(
@@ -130,13 +130,12 @@ function command_disconnect(){
     resetSubscriptionTable();
 }
 
-function command_publish(topic,message){
+function command_publish(data){
     var toSend={
         "command":PUBLISH_MESSAGE,
-        "topicId":topic,
-        "content":message
+        "topicId":data[CHANNEL_ID],
+        "content":data[MESSAGE_CONTENT]
     };
-    console.log("topic:"+topic);
     console.log("\nSending:" + JSON.stringify(toSend));
     socket.send(JSON.stringify(toSend));
 }

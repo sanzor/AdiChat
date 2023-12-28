@@ -36,8 +36,8 @@ function onNewChatMessage(data){
    
 }
 function handle_chat_message(data){
-   
-    publishEvent("new_message",data.detail);
+    console.log(data.detail);
+    publishEvent(NEW_INCOMING_MESSAGE,data.detail);
     
     
 }

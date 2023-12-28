@@ -23,14 +23,14 @@
     ]},
     {pg2,[
     {hostname,"localhost"},
-    {port,30762},
+    {port,31324},
     {username,"admin"},
     {password,"test123"},
     {database,"postgresdb"}
     ]},
      {pg3,[
     {hostname,"localhost"},
-    {port,30762},
+    {port,31324},
     {username,"admin"},
     {password,"test123"},
     {database,"postgresdb"}
