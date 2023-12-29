@@ -1,4 +1,4 @@
-export{showElement,hideElement,postDataAsync,getDataAsync};
+export{showElement,hideElement,postDataAsync,getDataAsync,getItemFromStorage,setItemInStorage};
 function showElement(elementId){
     var element=document.getElementById(elementId);
     if(element){
@@ -47,4 +47,7 @@ async function postDataAsync(url = "", data = {}) {
       console.log(response);
       return response.json(); 
 }
+
+function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
+function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
 

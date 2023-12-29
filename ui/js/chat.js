@@ -1,12 +1,12 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
-import { KIND, SOCKET_COMMAND,CHANNEL_ID, MESSAGE_CONTENT } from "./constants.js";
+import { KIND, SOCKET_COMMAND,CHANNEL_ID, MESSAGE_CONTENT, CURRENT_CHANNEL, ID} from "./constants.js";
 import { channelsContainer, chatContainer,
     chatSendMessageBox,
     chatSendMessageBtn,
     currentChannel,
     loadOlderMessagesBtn } from "./elements.js";
 import { PUBLISH_MESSAGE, RESET_CHAT, SET_CHAT } from "./events.js";
-import { showElement } from "./utils.js";
+import { getItemFromStorage,setItemInStorage } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
 subscribeToEvent("new_chat_message",onNewMessage);
@@ -18,14 +18,15 @@ loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
 function onSendMessage(){
-    var channelId=parseInt(localStorage.getItem("channelId"));
-    console.log("Channel publish:"+channelId);
-    var message=chatSendMessageBox.value;
-    publishEvent(SOCKET_COMMAND,{
+    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    console.log("Channel publish:"+currentChannel);
+    var toSend={
         [KIND]:PUBLISH_MESSAGE,
-        [CHANNEL_ID]:channelId,
-        [MESSAGE_CONTENT]:message
-    });
+        [CHANNEL_ID]:currentChannel[ID],
+        [MESSAGE_CONTENT]:chatSendMessageBox.value
+    };
+    console.log(toSend);
+    publishEvent(SOCKET_COMMAND,toSend);
 }
 function onNewMessage(ev){
     console.log("Inside on new message");
@@ -50,6 +51,7 @@ function setChatWithChannel(channel){
     resetChat();
     var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
     publishEvent(SOCKET_COMMAND,event_payload);
+    clearsChatMessageBox();
     
 }
 function setChatWithDefaultChannel(){
@@ -100,7 +102,9 @@ function get_newest_messages(id,count){
     return message;
 }
 
-
+function clearsChatMessageBox(){
+    chatSendMessageBox.value="";
+}
 
 function createChatMessageContainer(data){
     var user=data.user;

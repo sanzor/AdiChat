@@ -131,6 +131,7 @@ function command_disconnect(){
 }
 
 function command_publish(data){
+    console.log(data[CHANNEL_ID]);
     var toSend={
         "command":PUBLISH_MESSAGE,
         "topicId":data[CHANNEL_ID],

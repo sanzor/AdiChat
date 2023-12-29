@@ -1,9 +1,9 @@
 import { publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
 import config from "./config.js";
 import{channelsContainer} from "./elements.js";
-import { getDataAsync, postDataAsync } from "./utils.js";
+import { setItemInStorage,getItemFromStorage } from "./utils.js";
 import {subscribeBtn} from "./elements.js";
-import { KIND, SOCKET_COMMAND, TOPIC} from "./constants.js";
+import { KIND, SOCKET_COMMAND, TOPIC, CURRENT_CHANNEL} from "./constants.js";
 import { 
     REFRESH_CHANNELS_COMMAND, 
     REFRESH_CHANNELS_COMMAND_RESULT, 
@@ -26,7 +26,7 @@ import {
     CHANNEL_CLICK} from "./events.js";
 
 const CHANNELS="channels";
-const CURRENT_CHANNEL="current_channel";
+
 const TOPIC_ID="topicId";
 
 
@@ -47,8 +47,7 @@ function onNewIncomingMessage(ev){
     var targetChannel=channelsContainer.children.filter(child=>child.innerText==data.topic);
 }
 
-function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
-function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
+
 
 
 subscribeBtn.addEventListener("click",onSubscribeAsync);
