@@ -51,7 +51,7 @@ function setChatWithChannel(channel){
     resetChat();
     var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
     publishEvent(SOCKET_COMMAND,event_payload);
-    clearsChatMessageBox();
+    clearChatMessageBox();
     
 }
 function setChatWithDefaultChannel(){
@@ -102,7 +102,7 @@ function get_newest_messages(id,count){
     return message;
 }
 
-function clearsChatMessageBox(){
+function clearChatMessageBox(){
     chatSendMessageBox.value="";
 }
 

@@ -50,67 +50,6 @@
     margin-bottom: 1%;
 }
 
-
-#subscribeButtonPanel{
-    grid-column-start:2;
-    grid-column-end: 3;
-    grid-row-end:2;
-    display: grid;
-    padding:0.5%;
-    row-gap:5px;
-    column-gap: 5px;
-    border-color: black;
-    border:solid;
-    border-left: 1;
-    border: ridge;
-}
-#subscribeButtonPanel > *{
-    margin-left:5%
-}
-#subscribeBox{
-    grid-column-start: 1;
-    grid-column-end:2;
-}
-#subscribeButton{
-    
-    grid-column-start:1;
-    grid-row-start:2;
-}
-#subscribeLabel{
-    grid-row-start:1;
-    grid-column-start:2;
-    
-}
-
-
-#connectButtonsPanel{
-    grid-column-end: 2;
-    grid-row-end:2;
-    display: grid;
-    row-gap: 5px;
-    column-gap: 5px;
-    border: ridge;
-    padding:0.5%;
-}
-
-#urlBox{
-    grid-column-start: 1;
-    grid-column-end: 4;
-    grid-row-start: 1;
-    grid-row-end: 1;
-}
-#urlLabel{
-    grid-row-start: 1;
-    grid-column-start: 4;
-}
-#connectButton{
-    grid-row-start:2;
-}
-#disconnectButton{
-    grid-row-start: 2;
-}
-
-
 #mainPanel{
     width: 95%;
     height:85%;
@@ -128,82 +67,12 @@
 }
 
 
-#channelsPanel{
-    display: flex;
-    margin-top:0.2em;
-    margin-bottom:0.4em;
-    width: 25%;
-    flex-direction: column;
-    justify-items: flex-start;
-    border-style: #cc2;
-    border-color: red;
-    background-color: #995b6252;
-    grid-row-start:2;
-    grid-row-end:5;
-    grid-column-end:2;
-    width: initial;
-    border:solid;
-    border-radius: 1em;
-}
-#channelsLabel{
-    border-style: ridge;
-    width: 50%;
-    align-self: center;
-    text-align: center;
-    padding-top:1%;
-    padding-bottom: 1%;
-    border:solid;
-    border-radius: 2em;
-    margin-top:0.5%;
-    border-color:rgb(75, 31, 31);
-  
-}
-#chatPanel{
-    grid-row-start:2;
-    grid-row-end:5;
-    grid-column-start:2;
-    grid-column-end:4;
-    margin-left: 0.7%;
-    margin-top:0.5%;
-    margin-bottom: 0.7%;
-    width: 100%;
-    flex-direction: row;
-    justify-items: flex-start;
-    align-items: inherit;
-   
-    border-style: double;
-    border-color: rgb(22, 41, 77);
-    background-color: beige;
-    border:solid;
-    border-radius: 2em;
-    display: grid;
-    grid-template-columns: 5% 90% 5%;
-    grid-template-rows: 5% 90% 1fr;
-}
 #scrollPanel{
     grid-column-start: 3;
     grid-row-start:2;
     grid-row-end:5;
 }
 
-#currentChannelNamePanel{
-    grid-column-start: 2;
-    grid-column-end:3;
-    grid-row-start:1;
-    grid-row-end:2;
-    margin-top:2%;
-    margin-bottom: 0.5%;
-    margin-inline-end: 2%;
-    width: 90%;
-    align-self: stretch;
-    border-style: groove;
-    border:solid;
-    border-color: rgb(18, 163, 120);
-    border-radius: 1em;
-    align-self: center;
-    text-align: center;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-}
 
 .chatScroll::-webkit-scrollbar{
     width: 2em;
@@ -219,75 +88,9 @@
     border-radius: 100vw;
     height: 0.2em;
 }
-#messagesContainer{
-    display:flex;
-    flex-direction: column;
-    grid-column-start:2;
-    grid-column-end: 3;
-    grid-row-start:2;
-    grid-row-end:3;
-    width:100%;
-    margin-top:2%;
-    margin-bottom: 0.5%;
-    border:solid;
-    border-radius:1em;
-    overflow-y:scroll;
-    scroll-margin-right: 1%;
-    background-color: rgba(139, 139, 129, 0.842);
-}
-
-#loadOlderMessagesBtn{
-    width: inherit;
-    display:block ;
-    background-color: rgba(139, 139, 129, 0.842);
-    border-color:rgba(139, 139, 129, 0.842); ;
-}
-#chatSendMessagePanel{
-    justify-content: flex-start;
-    display: flex;
-    grid-row-start:5;
-    grid-row-end:6;
-    grid-column-start: 2;
-    grid-column-end:3;
-    flex-direction: row;
-}
-#chatSendMessageBox{
-  margin-right: 0.7%;
-  margin-left:0.7%;
-  width: 90%;
-  height: 20%;
-  padding-top:0.2%;
-  padding-bottom:0.4%;
-  
-}
-#chatSendMessageButton{
-    grid-row-start:1;
-    grid-row-end:12;
-    grid-column-start: 4;
-    grid-column-end:8;
-}
 
 
 
-#channelsAreaPanel{
-    width: initial;
-    height: 40%;
-    border-bottom: solid;
-    border-bottom-color: #cc2;
-
-}
-
-#channelsContainer{
-    max-height: 90%;
-    height: initial;
-    width:auto;
-    overflow-y: scroll;
-    padding-left: 1%;
-    padding-top:5%;
-    border-bottom-style: solid;
-    border-bottom-color: cadetblue;
-    
-}
 
 
 

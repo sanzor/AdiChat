@@ -1,0 +1,58 @@
+#subscribeButtonPanel{
+    grid-column-start:2;
+    grid-column-end: 3;
+    grid-row-end:2;
+    display: grid;
+    padding:0.5%;
+    row-gap:5px;
+    column-gap: 5px;
+    border-color: black;
+    border:solid;
+    border-left: 1;
+    border: ridge;
+}
+#subscribeButtonPanel > *{
+    margin-left:5%
+}
+#subscribeBox{
+    grid-column-start: 1;
+    grid-column-end:2;
+}
+#subscribeButton{
+    
+    grid-column-start:1;
+    grid-row-start:2;
+}
+#subscribeLabel{
+    grid-row-start:1;
+    grid-column-start:2;
+    
+}
+
+#connectButtonsPanel{
+    grid-column-end: 2;
+    grid-row-end:2;
+    display: grid;
+    row-gap: 5px;
+    column-gap: 5px;
+    border: ridge;
+    padding:0.5%;
+}
+
+#urlBox{
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 1;
+}
+#urlLabel{
+    grid-row-start: 1;
+    grid-column-start: 4;
+}
+#connectButton{
+    grid-row-start:2;
+}
+#disconnectButton{
+    grid-row-start: 2;
+}
+

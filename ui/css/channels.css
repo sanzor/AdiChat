@@ -1,0 +1,75 @@
+
+
+#channelsPanel{
+    display: flex;
+    margin-top:0.2em;
+    margin-bottom:0.4em;
+    width: 25%;
+    flex-direction: column;
+    justify-items: flex-start;
+    border-style: #cc2;
+    border-color: red;
+    background-color: #995b6252;
+    grid-row-start:2;
+    grid-row-end:5;
+    grid-column-end:2;
+    width: initial;
+    border:solid;
+    border-radius: 1em;
+}
+
+#channelsAreaPanel{
+    width: initial;
+    height: 40%;
+    border-bottom: solid;
+    border-bottom-color: #cc2;
+}
+
+#channelsContainer{
+    max-height: 90%;
+    height: initial;
+    width:auto;
+    overflow-y: scroll;
+    padding-left: 1%;
+    padding-top:5%;
+    border-bottom-style: solid;
+    border-bottom-color: cadetblue;
+    
+}
+
+#channelsLabel{
+    border-style: ridge;
+    width: 50%;
+    align-self: center;
+    text-align: center;
+    padding-top:1%;
+    padding-bottom: 1%;
+    border:solid;
+    border-radius: 2em;
+    margin-top:0.5%;
+    border-color:rgb(75, 31, 31);
+}
+
+.channelRow{
+    width: initial;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0.2em;
+}
+
+.channelRowUnsubscribeBtn{
+    border-style: inset;
+    background-color: red;
+    text-align: center;
+    width: 20%;
+}
+
+.channelRowBtn{
+    text-align: center;
+    
+}
+.channelRowMessagesCount{
+    
+}
+
+
