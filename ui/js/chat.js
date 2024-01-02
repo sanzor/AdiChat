@@ -9,10 +9,17 @@ import { PUBLISH_MESSAGE, RESET_CHAT, SET_CHAT } from "./events.js";
 import { getItemFromStorage,setItemInStorage } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
-subscribeToEvent("new_chat_message",onNewMessage);
+const APPEND_MESSAGE="append_message";
+
+subscribeToEvent(APPEND_MESSAGE,onNewMessage);
 subscribeToEvent(SET_CHAT,onSetChatWindow);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 subscribeToEvent(RESET_CHAT,onResetChat);
+subscribeToEvent(MESSAGE_PUBLISHED,onMessagePublished);
+
+function onMessagePublished(ev){
+
+}
 
 loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
@@ -26,16 +33,18 @@ function onSendMessage(){
         [MESSAGE_CONTENT]:chatSendMessageBox.value
     };
     console.log(toSend);
-    publishEvent(SOCKET_COMMAND,toSend);
+    publishEvent(APPEND_MESSAGE,toSend);
+    publishEvent(SOCKET_COMMAND,{[KIND]:PUBLISH_MESSAGE,});
 }
 function onNewMessage(ev){
+    var message=ev.detail;
     console.log("Inside on new message");
-    appendMessageToChat(ev.detail);
-}
-
-function appendMessageToChat(message){
     var messageElement=createChatMessageContainer(message);
     chatContainer.appendChild(messageElement);
+}
+
+function changeMessageStatus(messageId,status){
+    
 }
 function onSetChatWindow(ev){
     console.log(ev.detail);
@@ -75,7 +84,7 @@ function onResetChat(_){
 function onLoadOlderMessages(){
     var count=Array.length(chatMessageContainer.children);
     var eventPayload=get_older_messages(currentChannel.id,count,CHANNEL_MESSAGES_COUNT);
-    publishEvent("socket_command",eventPayload);
+    publishEvent(SOCKET_COMMAND,eventPayload);
 }
 function onGetMessagesResult(ev){
    
@@ -111,10 +120,13 @@ function createChatMessageContainer(data){
     var topic=data.topic;
     var message=data.message;
 
-    
+    var chatMessageContainer=document.createElement("div");
+    chatMessageContainer.setAttribute("class","chatMessageContainer");
+
     var icon=document.createElement("img");
     var content=document.createElement("div","chatMessageContent");
     var meta=document.createElement("div");
+    var status=document.createElement("div");
 
     meta.setAttribute("class","chatMessageMeta");
     meta.innerText=user;
@@ -124,13 +136,15 @@ function createChatMessageContainer(data){
     content.setAttribute("class","chatMessageContent");
     content.innerText=message;
 
+    status.setAttribute("class","chatMessageStatusPending");
+    status.innerText="tick";
 
-    var chatMessageContainer=document.createElement("div");
-    chatMessageContainer.setAttribute("class","chatMessageContainer");
+  
 
     chatMessageContainer.appendChild(icon);
     chatMessageContainer.appendChild(meta);
     chatMessageContainer.appendChild(content);
+    chatMessageContainer.appendChild(status);
     return chatMessageContainer;
 
 

@@ -8,6 +8,7 @@ const SOCKET_COMMAND="socket_command";
 const ID="id";
 
 
+
 export {
     CHANNEL,TOPIC,KIND,SOCKET_COMMAND,CURRENT_CHANNEL,ID
 };
