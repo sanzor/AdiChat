@@ -48,6 +48,11 @@ async function postDataAsync(url = "", data = {}) {
       return response.json(); 
 }
 
-function getItemFromStorage(Key){return JSON.parse(localStorage.getItem(Key));}
+function getItemFromStorage(Key){
+  var item=localStorage.getItem(Key);
+  if(!item){
+    return undefined;
+  }
+  return JSON.parse(localStorage.getItem(Key));}
 function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
 

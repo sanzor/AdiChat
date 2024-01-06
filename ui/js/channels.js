@@ -111,10 +111,13 @@ async function handleSubscribeResultAsync(subscribeResult){
     var targetChannel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
     var existingChannels=getItemFromStorage(CHANNELS);
     if(!existingChannels){
+        setItemInStorage(CURRENT_CHANNEL,targetChannel);
+        publishEvent(SET_CHAT,targetChannel);
         existingChannels=[];
     }
     var newChannelList=[...existingChannels,targetChannel];
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    console.log(currentChannel);
     if(!currentChannel){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
         publishEvent(SET_CHAT,targetChannel);
