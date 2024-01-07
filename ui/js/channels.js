@@ -60,17 +60,19 @@ function onChannelClick(event){
 }
 function onRefreshChannelsCommandResult(ev){
     var channels=ev.detail;
-    setItemInStorage(CHANNELS,channels);
+   
     if(channels.length==0 || !channels){
-        if(!getItemFromStorage(CURRENT_CHANNEL)){
-            setItemInStorage(CURRENT_CHANNEL,null);
-        }
         publishEvent(SET_CHANNELS,[]);
         return;
+
+        
     }
+    setItemInStorage(CHANNELS,channels);
     publishEvent(SET_CHANNELS,channels);
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
-    if(!channels.find(x=>x.id==currentChannel.id)|| !currentChannel){
+    
+    if(!channels.find(x=>x.id==currentChannel.id)|| currentChannel==null){
+        setItemInStorage(CURRENT_CHANNEL,channels[0]);
         publishEvent(SET_CHAT,channels[0]);
         return;
     }

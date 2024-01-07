@@ -50,9 +50,11 @@ async function postDataAsync(url = "", data = {}) {
 
 function getItemFromStorage(Key){
   var item=localStorage.getItem(Key);
-  if(!item){
-    return undefined;
+  console.log(item);
+  if(item==null || item=="undefined"){
+    return null;
   }
-  return JSON.parse(localStorage.getItem(Key));}
+  return JSON.parse(item);
+}
 function setItemInStorage(Key,Value){ localStorage.setItem(Key,JSON.stringify(Value));}
 
