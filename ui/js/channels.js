@@ -71,7 +71,7 @@ function onRefreshChannelsCommandResult(ev){
     publishEvent(SET_CHANNELS,channels);
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
     
-    if(!channels.find(x=>x.id==currentChannel.id)|| currentChannel==null){
+    if(currentChannel==null || !channels.find(x=>x.id==currentChannel.id)){
         setItemInStorage(CURRENT_CHANNEL,channels[0]);
         publishEvent(SET_CHAT,channels[0]);
         return;
@@ -115,14 +115,17 @@ async function handleSubscribeResultAsync(subscribeResult){
     if(!existingChannels){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
         publishEvent(SET_CHAT,targetChannel);
-        existingChannels=[];
+        setItemInStorage(CHANNELS,[targetChannel]);
+        return;
     }
     var newChannelList=[...existingChannels,targetChannel];
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
     console.log(currentChannel);
-    if(!currentChannel){
+    if(currentChannel==null ||  !existingChannels.find(x=>x.id!=currentChannel.id)){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
+        setItemInStorage(CHANNELS,newChannelList);
         publishEvent(SET_CHAT,targetChannel);
+        return;
     }
     
     setItemInStorage(CHANNELS,newChannelList);
