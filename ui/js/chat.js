@@ -10,6 +10,7 @@ import { getItemFromStorage,setItemInStorage } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
 const APPEND_MESSAGE="append_message";
+const MESSAGE_PUBLISHED="chat_message_published";
 
 subscribeToEvent(APPEND_MESSAGE,onNewMessage);
 subscribeToEvent(SET_CHAT,onSetChatWindow);
@@ -25,6 +26,7 @@ loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
 function onSendMessage(){
+    console.log("Inside send message");
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
     console.log("Channel publish:"+currentChannel);
     var toSend={
