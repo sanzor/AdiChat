@@ -36,7 +36,8 @@ function onSendMessage(){
     };
     console.log(toSend);
     publishEvent(APPEND_MESSAGE,toSend);
-    publishEvent(SOCKET_COMMAND,{[KIND]:PUBLISH_MESSAGE,});
+    //here
+    publishEvent(SOCKET_COMMAND,{[KIND]:PUBLISH_MESSAGE,//here});
 }
 function onNewMessage(ev){
     var message=ev.detail;
