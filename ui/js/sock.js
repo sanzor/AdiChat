@@ -1,6 +1,6 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import config from "./config.js";
-import { CHANNEL_ID, MESSAGE_CONTENT, SOCKET_COMMAND } from "./constants.js";
+import { CHANNEL_ID, KIND, MESSAGE_CONTENT, SOCKET_COMMAND } from "./constants.js";
 import{
     SUBSCRIBE_COMMAND,
     UNSUBSCRIBE_COMMAND,
@@ -82,7 +82,7 @@ function onAsyncCommand(ev){
 function onCommand(data){
     console.log(data);
     console.log(`\nSending [${data.kind}] command : ${data} to socket\n`);
-    switch(data.kind){
+    switch(data[KIND]){
         case SUBSCRIBE_COMMAND:   command_subscribe(data.topic);break;
         case UNSUBSCRIBE_COMMAND : command_unsubscribe(data.topicId);break;
         case REFRESH_CHANNELS_COMMAND: command_get_subscriptions();break;

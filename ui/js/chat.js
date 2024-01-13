@@ -13,7 +13,7 @@ const APPEND_MESSAGE="append_message";
 const MESSAGE_PUBLISHED="chat_message_published";
 
 subscribeToEvent(APPEND_MESSAGE,onNewMessage);
-subscribeToEvent(SET_CHAT,onSetChatWindow);
+subscribeToEvent(SET_CHAT,onSetChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 subscribeToEvent(RESET_CHAT,onResetChat);
 subscribeToEvent(MESSAGE_PUBLISHED,onMessagePublished);
@@ -37,7 +37,7 @@ function onSendMessage(){
     console.log(toSend);
     publishEvent(APPEND_MESSAGE,toSend);
     //here
-    publishEvent(SOCKET_COMMAND,{[KIND]:PUBLISH_MESSAGE,//here});
+    publishEvent(SOCKET_COMMAND,toSend);
 }
 function onNewMessage(ev){
     var message=ev.detail;
@@ -49,12 +49,10 @@ function onNewMessage(ev){
 function changeMessageStatus(messageId,status){
     
 }
-function onSetChatWindow(ev){
+function onSetChat(ev){
     console.log(ev.detail);
     console.log(ev.detail.name);
     setChatWithChannel(ev.detail);
-    
-   
 }
 
 function setChatWithChannel(channel){
@@ -78,11 +76,7 @@ function setChatWithDefaultChannel(){
     setChatWithChannel(channel);
 
 }
-function onResetChat(_){
-    localStorage.removeItem("currentChannelId");
-    chatContainer.innerHTML=null;
-    currentChannel.innerText=null;
-}
+
 
 function onLoadOlderMessages(){
     var count=Array.length(chatMessageContainer.children);
@@ -114,44 +108,7 @@ function get_newest_messages(id,count){
     return message;
 }
 
-function clearChatMessageBox(){
-    chatSendMessageBox.value="";
-}
 
-function createChatMessageContainer(data){
-    var user=data.user;
-    var topic=data.topic;
-    var message=data.message;
-
-    var chatMessageContainer=document.createElement("div");
-    chatMessageContainer.setAttribute("class","chatMessageContainer");
-
-    var icon=document.createElement("img");
-    var content=document.createElement("div","chatMessageContent");
-    var meta=document.createElement("div");
-    var status=document.createElement("div");
-
-    meta.setAttribute("class","chatMessageMeta");
-    meta.innerText=user;
-
-    icon.setAttribute("class","chatMessageIcon");
-
-    content.setAttribute("class","chatMessageContent");
-    content.innerText=message;
-
-    status.setAttribute("class","chatMessageStatusPending");
-    status.innerText="tick";
-
-  
-
-    chatMessageContainer.appendChild(icon);
-    chatMessageContainer.appendChild(meta);
-    chatMessageContainer.appendChild(content);
-    chatMessageContainer.appendChild(status);
-    return chatMessageContainer;
-
-
-}
 function resetChat(){
     chatContainer.innerHTML=null;
 }
