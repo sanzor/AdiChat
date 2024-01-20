@@ -5,27 +5,36 @@ import { channelsContainer, chatContainer,
     chatSendMessageBtn,
     currentChannel,
     loadOlderMessagesBtn } from "./elements.js";
-import { PUBLISH_MESSAGE, RESET_CHAT, SET_CHAT } from "./events.js";
+import { PUBLISH_MESSAGE, RESET_CHAT, RESET_CHAT_DOM, SET_CHAT } from "./events.js";
 import { getItemFromStorage,setItemInStorage } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
-const APPEND_MESSAGE="append_message";
+
 const MESSAGE_PUBLISHED="chat_message_published";
 
 subscribeToEvent(APPEND_MESSAGE,onNewMessage);
+
 subscribeToEvent(SET_CHAT,onSetChat);
-subscribeToEvent("get_messages_result",onGetMessagesResult);
 subscribeToEvent(RESET_CHAT,onResetChat);
+subscribeToEvent("get_messages_result",onGetMessagesResult);
+
 subscribeToEvent(MESSAGE_PUBLISHED,onMessagePublished);
 
+
+
+function onResetChat(_){
+    publishEvent(RESET_CHAT_DOM,{});
+}
 function onMessagePublished(ev){
 
 }
 
 loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
-chatSendMessageBtn.addEventListener("click",onSendMessage);
 
-function onSendMessage(){
+
+
+
+function onSendMessage(ev){
     console.log("Inside send message");
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
     console.log("Channel publish:"+currentChannel);
@@ -35,16 +44,9 @@ function onSendMessage(){
         [MESSAGE_CONTENT]:chatSendMessageBox.value
     };
     console.log(toSend);
-    publishEvent(APPEND_MESSAGE,toSend);
-    //here
     publishEvent(SOCKET_COMMAND,toSend);
 }
-function onNewMessage(ev){
-    var message=ev.detail;
-    console.log("Inside on new message");
-    var messageElement=createChatMessageContainer(message);
-    chatContainer.appendChild(messageElement);
-}
+
 
 function changeMessageStatus(messageId,status){
     

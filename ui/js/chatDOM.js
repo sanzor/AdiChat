@@ -1,5 +1,24 @@
 
+import{PUBLISH_MESSAGE, RESET_CHAT_DOM} from '../js/events';
+import { publishEvent, subscribeToEvent } from './bus';
+import { chatSendMessageBox } from './elements';
+const APPEND_MESSAGE="append_message";
 
+subscribeToEvent(APPEND_MESSAGE,onNewMessage);
+subscribeToEvent(RESET_CHAT_DOM,onResetChat);
+chatSendMessageBtn.addEventListener("click",onSendMessage);
+
+function onSendMessage(){
+    publishEvent(APPEND_MESSAGE,toSend);
+    publishEvent(PUBLISH_MESSAGE,chatSendMessageBox.value);
+}
+
+function onNewMessage(ev){
+    var message=ev.detail;
+    console.log("Inside on new message");
+    var messageElement=createChatMessageContainer(message);
+    chatContainer.appendChild(messageElement);
+}
 
 function onResetChat(_){
     localStorage.removeItem("currentChannelId");

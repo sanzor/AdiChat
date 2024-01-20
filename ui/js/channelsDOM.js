@@ -9,6 +9,8 @@ subscribeToEvent(ADD_CHANNEL,onAddChannelToDOM);
 subscribeToEvent(SET_CHANNELS,onSetDOMChannels);
 
 
+
+
 function getChannelDomElementById(topicId){
     
     var elem=[...channelsContainer.children].find(x=>{
