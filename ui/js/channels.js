@@ -98,8 +98,11 @@ async function onSubscribeAsync(){
     
     
 }
-
+const state={
+    first_chat_set:false
+};
 async function handleSubscribeResultAsync(subscribeResult){
+
     console.log(subscribeResult.result);
     if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
         var message="Could not subscribe to channel:"+subscribeBox.value;
@@ -130,6 +133,10 @@ async function handleSubscribeResultAsync(subscribeResult){
     
     setItemInStorage(CHANNELS,newChannelList);
     publishEvent(ADD_CHANNEL,targetChannel);
+    if(state.first_chat_set==false){
+        state.first_chat_set=true;
+        publishEvent(SET_CHAT,targetChannel);
+    }
 }
 
 async function onUnsubscribeAsync(event){

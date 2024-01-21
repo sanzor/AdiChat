@@ -4,37 +4,25 @@ import { channelsContainer, chatContainer,
     chatSendMessageBox,
     chatSendMessageBtn,
     currentChannel,
-    loadOlderMessagesBtn } from "./elements.js";
-import { PUBLISH_MESSAGE, RESET_CHAT, RESET_CHAT_DOM, SET_CHAT } from "./events.js";
+    loadOlderMessagesBtn, 
+    loginFailMessage} from "./elements.js";
+import { PUBLISH_MESSAGE, RESET_CHAT, RESET_CHAT_DOM, SELF_PUBLISH_MESSAGE, SET_CHAT ,SET_CHAT_DOM} from "./events.js";
 import { getItemFromStorage,setItemInStorage } from "./utils.js";
 
 const CHANNEL_MESSAGES_COUNT=10;
-
-const MESSAGE_PUBLISHED="chat_message_published";
-
-subscribeToEvent(APPEND_MESSAGE,onNewMessage);
 
 subscribeToEvent(SET_CHAT,onSetChat);
 subscribeToEvent(RESET_CHAT,onResetChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
 
-subscribeToEvent(MESSAGE_PUBLISHED,onMessagePublished);
+subscribeToEvent(SELF_PUBLISH_MESSAGE,onSelfPublish);
 
 
 
 function onResetChat(_){
     publishEvent(RESET_CHAT_DOM,{});
 }
-function onMessagePublished(ev){
-
-}
-
-loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
-
-
-
-
-function onSendMessage(ev){
+function onSelfPublish(ev){
     console.log("Inside send message");
     var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
     console.log("Channel publish:"+currentChannel);
@@ -47,23 +35,26 @@ function onSendMessage(ev){
     publishEvent(SOCKET_COMMAND,toSend);
 }
 
+loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 
-function changeMessageStatus(messageId,status){
-    
-}
+
 function onSetChat(ev){
+    var newestMessagesPromise=new Promise((resolve,reject)=>{
+        subscribeToEvent()
+    });
     console.log(ev.detail);
     console.log(ev.detail.name);
     setChatWithChannel(ev.detail);
+    publishEvent(SET_CHAT_DOM,ev);
 }
 
 function setChatWithChannel(channel){
-    console.log(channel.name);
-    currentChannel.innerText=channel.name;
-    resetChat();
-    var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
-    publishEvent(SOCKET_COMMAND,event_payload);
-    clearChatMessageBox();
+    // console.log(channel.name);
+    // currentChannel.innerText=channel.name;
+    // resetChat();
+    // var event_payload=get_newest_messages(currentChannel.id,CHANNEL_MESSAGES_COUNT);
+    // publishEvent(SOCKET_COMMAND,event_payload);
+    // clearChatMessageBox();
     
 }
 function setChatWithDefaultChannel(){

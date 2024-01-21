@@ -1,19 +1,35 @@
 
-import{PUBLISH_MESSAGE, RESET_CHAT_DOM} from '../js/events';
+import{PUBLISH_MESSAGE, RESET_CHAT_DOM, SELF_PUBLISH_MESSAGE} from '../js/events';
 import { publishEvent, subscribeToEvent } from './bus';
-import { chatSendMessageBox } from './elements';
-const APPEND_MESSAGE="append_message";
+import { CURRENT_CHANNEL } from './constants';
+import { chatSendMessageBox, currentChannel } from './elements';
+import { getItemFromStorage } from './utils';
+const APPEND_MESSAGE_DOM="append_message";
 
-subscribeToEvent(APPEND_MESSAGE,onNewMessage);
+subscribeToEvent(APPEND_MESSAGE_DOM,onAppendedMessage);
 subscribeToEvent(RESET_CHAT_DOM,onResetChat);
+subscribeToEvent(SET_CHAT_DOM,onSetChat);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
-function onSendMessage(){
-    publishEvent(APPEND_MESSAGE,toSend);
-    publishEvent(PUBLISH_MESSAGE,chatSendMessageBox.value);
+function onSetChat(ev){
+    console.log(channel.name);
+    currentChannel.innerText=ev.detail.name;
+}
+function onSendMessage(_){
+    var message=chatSendMessageBox.value;
+    var user=getItemFromStorage("user");
+    var channel=getItemFromStorage(CURRENT_CHANNEL);
+    var toSend={
+        ["user"]:user["name"],
+        ["topic"]:channel,
+        ["message"]:message
+    }
+    console.log(toSend);
+    publishEvent(APPEND_MESSAGE_DOM,toSend);
+    publishEvent(SELF_PUBLISH_MESSAGE,message);
 }
 
-function onNewMessage(ev){
+function onAppendedMessage(ev){
     var message=ev.detail;
     console.log("Inside on new message");
     var messageElement=createChatMessageContainer(message);

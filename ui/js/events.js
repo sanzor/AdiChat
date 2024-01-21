@@ -4,6 +4,7 @@ const REFRESH_CHANNELS_COMMAND="get_subscriptions";
 const SUBSCRIBE_COMMAND="subscribe";
 const UNSUBSCRIBE_COMMAND="unsubscribe";
 const PUBLISH_MESSAGE="publish";
+const SELF_PUBLISH_MESSAGE="self_publish";
 const GET_OLDER_MESSAGES="get_older_messages";
 const GET_NEWEST_MESSAGES="get_newest_messages";
 
@@ -24,6 +25,7 @@ const SOCKET_CLOSED="socketClosed";
 
 const NEW_INCOMING_MESSAGE="new_channel_message";
 const SET_CHAT="set_chat";
+const SET_CHAT_DOM="set_chat_dom";
 const RESET_CHAT="reset_chat";
 const RESET_CHAT_DOM="reset_chat_dom";
 
@@ -62,11 +64,13 @@ export {
     SOCKET_RECEIVE,
     SOCKET_CLOSED,
     SET_CHAT,
+    SET_CHAT_DOM,
     RESET_CHAT,
     RESET_CHAT_DOM,
     NEW_INCOMING_MESSAGE,
 
     PUBLISH_MESSAGE,
+    SELF_PUBLISH_MESSAGE,
     GET_OLDER_MESSAGES,
     GET_NEWEST_MESSAGES,
 
