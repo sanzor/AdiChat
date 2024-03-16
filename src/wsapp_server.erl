@@ -238,7 +238,8 @@ handle_cast({publish,{TopicId,Message}},State)->
     {ok,Subscribers}=storage:get_subscriptions_for_topic(TopicId),
     io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [TopicId,Subscribers]),
-    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-Subscribers],
+    UIDS=lists:map(fun(_=#{<<"user_id">>:=UID})->UID end, Subscribers),
+    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
     {noreply,State}.
 
 %% @doc 
