@@ -117,8 +117,10 @@ async function handleSubscribeResultAsync(subscribeResult){
     var existingChannels=getItemFromStorage(CHANNELS);
     if(!existingChannels){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
+        
         publishEvent(SET_CHAT,targetChannel);
         setItemInStorage(CHANNELS,[targetChannel]);
+        publishEvent(ADD_CHANNEL,targetChannel);
         return;
     }
     var newChannelList=[...existingChannels,targetChannel];
@@ -128,6 +130,7 @@ async function handleSubscribeResultAsync(subscribeResult){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
         setItemInStorage(CHANNELS,newChannelList);
         publishEvent(SET_CHAT,targetChannel);
+        publishEvent(ADD_CHANNEL,targetChannel);
         return;
     }
     
@@ -181,7 +184,9 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
     setItemInStorage(CHANNELS,newExistingChannels);
     publishEvent(REMOVE_CHANNEL,{[TOPIC_ID]:unsubscribeResult.topicId});
     console.log(unsubscribeResult);
-    if(unsubscribeResult.topicId==currentChannel.id){
+    if(unsubscribeResult.topicId==currentChannel.id && newExistingChannels && newExistingChannels.length>0){
+        console.log(newExistingChannels);
+        
         console.log("inside last if");
         setItemInStorage(CURRENT_CHANNEL,newExistingChannels[0]);
         publishEvent(SET_CHAT,newExistingChannels[0]);

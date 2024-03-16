@@ -1,6 +1,6 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import { KIND, SOCKET_COMMAND,CHANNEL_ID, MESSAGE_CONTENT, CURRENT_CHANNEL, ID} from "./constants.js";
-import { channelsContainer, chatContainer,
+import { chatContainer,
     chatSendMessageBox,
     chatSendMessageBtn,
     currentChannel,
@@ -39,13 +39,14 @@ loadOlderMessagesBtn.addEventListener("click",onLoadOlderMessages);
 
 
 function onSetChat(ev){
+   
     var newestMessagesPromise=new Promise((resolve,reject)=>{
         subscribeToEvent()
     });
     console.log(ev.detail);
     console.log(ev.detail.name);
     setChatWithChannel(ev.detail);
-    publishEvent(SET_CHAT_DOM,ev);
+    publishEvent(SET_CHAT_DOM,ev.detail);
 }
 
 function setChatWithChannel(channel){
@@ -56,18 +57,6 @@ function setChatWithChannel(channel){
     // publishEvent(SOCKET_COMMAND,event_payload);
     // clearChatMessageBox();
     
-}
-function setChatWithDefaultChannel(){
-    //to make this with event and async , not leak channel logic
-    if(channelsContainer.children.length==0){
-        console.log("No channels present");
-        //implement default view of chat
-        return;
-    }
-    var defaultChannel=channelsContainer.children[0];
-    var channel=JSON.parse(defaultChannel.getAttribute("channel"));
-    setChatWithChannel(channel);
-
 }
 
 
@@ -102,8 +91,5 @@ function get_newest_messages(id,count){
 }
 
 
-function resetChat(){
-    chatContainer.innerHTML=null;
-}
 
 

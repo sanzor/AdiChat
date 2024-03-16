@@ -257,6 +257,7 @@ send(Socket,Message)->
     Socket ! Message.
 online_sockets(User)->
     Sockets=pg:get_members(User),
+    io:format("Sockets : ~p",[Sockets]),
     Sockets.
 
 

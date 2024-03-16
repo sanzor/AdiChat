@@ -36,6 +36,7 @@ function onNewChatMessage(data){
    
 }
 function handle_chat_message(data){
+    console.log("New Message !!!");
     console.log(data.detail);
     publishEvent(NEW_INCOMING_MESSAGE,data.detail);
     
@@ -50,7 +51,7 @@ function handle_command_result(data){
     }
     if(data.command==REFRESH_CHANNELS_COMMAND){
         
-       console.log(data);
+        console.log(data);
         publishEvent(REFRESH_CHANNELS_COMMAND_RESULT,data.result);
     }
     if(data.command=="get_newest_messages"){
