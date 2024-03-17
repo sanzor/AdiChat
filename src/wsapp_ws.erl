@@ -1,4 +1,5 @@
 -module(wsapp_ws).
+-include("../include/domain.hrl").
 -export([init/1,
          websocket_init/1,
          websocket_handle/2,
@@ -55,17 +56,18 @@ terminate(_,_,State)->
     wsapp_server:offline(Id,self()),
     ok.
 
-handle_command(<<"create-topic">>,TopicData,_State)->
+handle_command(<<"create-topic">>,_=#{<<"name">>:=Name,<<"user_id">>:=UserId},_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-topic">>},
-    Reply=case wsapp_server:create_topic(TopicData) of
+    
+    Reply=case wsapp_server:create_topic(#create_topic_params{name = Name,user_id = UserId}) of
         {ok,Topic}->BaseReply#{result=>Topic};
         {error,Error}->{error,Error}
     end,
     {ok,reply,Reply};
 
-handle_command(<<"get-user">>,TopicData,_State)->
+handle_command(<<"get-user">>,UserId,_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-topic">>},
-    Reply=case wsapp_server:create_topic(TopicData) of
+    Reply=case wsapp_server:get_user(UserId) of
         {ok,Topic}->BaseReply#{result=>Topic};
         {error,Error}->{error,Error}
     end,
@@ -74,7 +76,7 @@ handle_command(<<"get-user">>,TopicData,_State)->
 handle_command(<<"create-user">>,UserData,_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-user">>},
     Reply=case wsapp_server:create_user(UserData) of
-        {ok,Topic}->BaseReply#{result=>Topic};
+        {ok,User}->BaseReply#{result=>User};
          already_exists->BaseReply#{result=>error,reason=>user_already_exists}
     end,
     {ok,reply,Reply};

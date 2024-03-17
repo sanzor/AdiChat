@@ -28,7 +28,9 @@ create_user(_Req=#{json := Json})->
         {error,{bad_request,ValidationErrors}}->
             {json,400,#{<<"Content-Type">>=> <<"application/json">>},ValidationErrors};
         {error,Error}->
-            {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error}
+            {json,500,#{<<"Content-Type">>=> <<"application/json">>},Error};
+        Rez-> io:format("~p",[Rez]), 
+            {json,500,#{},Rez}
 end.
         
 delete_user(_Req=#{parsed_qs:=#{<<"id">> := UserId}})->

@@ -1,4 +1,5 @@
 -module(storage).
+-include("../include/domain.hrl").
 -export([
          to_map/3,
          create_user/1,
@@ -63,17 +64,22 @@ get_user_by_email(Email)->
     Value.
 
 
--spec create_user(UserData::map())-> {ok,User::map()} | already_exists | {error,Error::any()}.
+-spec create_user(UserData::map())-> {ok,User::domain:user()} | already_exists | {error,Error::any()}.
 create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">>:=Password})->
+        
         Statement= <<"INSERT INTO  wsuser(email,password,name) values ($1,$2,$3) RETURNING *">>,
         {ok,C}=create_connection(),
         Result=case epgsql:equery(C,Statement,[Email,Password,Name]) of
-                   
+                    
                     {error,{error,error,<<"23505">>,unique_violation,_,_}}->already_exists;
                     {ok,_,Columns,Values}->
+                                    
                                   Value=case to_records(Columns, Values) of
                                   [] ->user_does_not_exist;
-                                  Else->{ok,lists:nth(1, Else)}
+                                  Else-> io:format("\nInside case of sql module !!!!!!!!\n ~p",[Else]),
+                                        #{<<"name">>:=Name,<<"email">>:=Email,<<"password">>:=Password,<<"id">>:=Id}=lists:nth(1, Else),
+                                        User=#user{ id=Id,name=Name,email=Email,password=Password},
+                                        User
                                   end,
                                   Value
                     end,
@@ -97,7 +103,7 @@ delete_user(UserId)->
     end.
 
 
--spec get_topic_by_name(TopicName::binary())->{ok,Topic::map()} | topic_does_not_exist | {error,Error::any()}.
+-spec get_topic_by_name(TopicName::binary())->{ok,Topic::domain:topic()} | topic_does_not_exist | {error,Error::any()}.
 get_topic_by_name(TopicName)->
     Statement= <<"Select * FROM topic WHERE name=$1">>,
     {ok,C}=create_connection(),
@@ -108,7 +114,7 @@ get_topic_by_name(TopicName)->
     end,
     Value.
 
--spec get_topic(TopicId::integer())->{ok,Topic::map()} | topic_does_not_exist | {error,Error::any()}.   
+-spec get_topic(TopicId::integer())->{ok,Topic::domain:topic()} | topic_does_not_exist | {error,Error::any()}.   
 get_topic(TopicId)->
     Statement= <<"Select * FROM topic WHERE id=$1">>,
     {ok,C}=create_connection(),
@@ -118,7 +124,7 @@ get_topic(TopicId)->
         Else->{ok,lists:nth(1, Else)}
     end,
     Value.
--spec create_topic(TopicData::map())-> {ok,Topic::map()} | already_exists | {error,Error::any()}.
+-spec create_topic(TopicData::map())-> {ok,Topic::domain:topic()} | already_exists | {error,Error::any()}.
 create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
     
         Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
@@ -140,7 +146,7 @@ create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
 
 
 
--spec delete_topic(Id::integer())-> ok | {error,Error::any()}.
+-spec delete_topic(Id::domain:topic_id())-> ok | {error,Error::any()}.
 delete_topic(Id)->
     try
         Statement= <<"DELETE FROM  topic WHERE id=$1">>,
@@ -160,7 +166,7 @@ subscribe(TopicId,UserId)->
    
 
 
--spec unsubscribe(TopicId::number(),UserId::number())-> ok | not_joined | {error,Error::term()}.
+-spec unsubscribe(TopicId::domain:topic_id(),UserId::domain:user_id())-> ok | not_joined | {error,Error::term()}.
 unsubscribe(TopicId,UserId)->
     Statement= <<"DELETE FROM  user_topic WHERE topic_id=$1 and user_id = $2">>,
     {ok,C}=create_connection(),
@@ -170,21 +176,21 @@ unsubscribe(TopicId,UserId)->
 
 
 
--spec get_subscriptions_for_topic(TopicId::number())-> {ok,list()} | {error,Reason::term()}.
+-spec get_subscriptions_for_topic(TopicId::domain:topic_id())-> {ok,list()} | {error,Reason::term()}.
 get_subscriptions_for_topic(TopicId)->
     Statement= <<"SELECT user_id FROM  user_topic WHERE topic_id = $1">>,
     {ok,C}=create_connection(),
     {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId]),
     {ok,to_records(Columns, Values)}.
 
--spec get_user_subscriptions(UserId::number())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
+-spec get_user_subscriptions(UserId::domain:user_id())-> {ok,Subscriptions::list()}  | {error,Error::term()}.
 get_user_subscriptions(UserId)-> 
     Statement= <<"SELECT topic.id,topic.name FROM  user_topic INNER JOIN topic on user_topic.topic_id=topic.id WHERE user_topic.user_id = $1">>,
     {ok,C}=create_connection(),
     {ok,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
      {ok,to_records(Columns, Values)}.
     
--spec check_if_subscribed(Topic::number(),User::number())->{ok,boolean()}|{error,Error::term()}.
+-spec check_if_subscribed(Topic::domain:topic_id(),UserId::domain:user_id())->{ok,boolean()}|{error,Error::term()}.
 check_if_subscribed(TopicId,UserId)->
     
     Statement= <<"SELECT Count(user_id) FROM  user_topic WHERE topic_id = $1 AND user_id=$2">>,
@@ -192,7 +198,7 @@ check_if_subscribed(TopicId,UserId)->
     {ok,_,[{Count}]}=epgsql:equery(C,Statement,[TopicId,UserId]),
     {ok,Count>0}.
 
--spec does_topic_exist(TopicId::number())-> true | false | {error,Error::any()}.
+-spec does_topic_exist(TopicId::domain:topic_id())-> true | false | {error,Error::any()}.
 does_topic_exist(TopicId)->
     Statement= <<"SELECT 1 FROM topic WHERE id = $1;">>,
     {ok,C}=create_connection(),
@@ -203,7 +209,7 @@ does_topic_exist(TopicId)->
 
 
 
--spec get_oldest_messages(TopicId::integer(),StartIndex::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
+-spec get_oldest_messages(TopicId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
 
 get_oldest_messages(TopicId,StartIndex,Count)->
     Statement="SELECT * FROM message WHERE topic_id = $1 AND id < $2 ORDER BY id DESC LIMIT $3;",
@@ -211,7 +217,7 @@ get_oldest_messages(TopicId,StartIndex,Count)->
     {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId,StartIndex,Count]),
     {ok,to_records(Columns, Values)}.
 
--spec get_newest_messages(TopicId::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
+-spec get_newest_messages(TopicId::domain:topic_id(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
 get_newest_messages(TopicId,Count)->
     Statement="SELECT * FROM message WHERE topic_id = $1 ORDER BY id DESC LIMIT $2;",
     {ok,C}=create_connection(),

@@ -1,6 +1,6 @@
 -module(wsapp_server).
 -behaviour(gen_server).
-
+-include("../include/domain.hrl").
 -export([init/1,
          handle_call/3,
          handle_cast/2,
@@ -32,7 +32,7 @@
 }).
 %----------------------------API ----------------------------------%
 
--spec get_user(UserId::integer())->{ok,User::map()} | {error,Error::any()} | user_does_not_exist.
+-spec get_user(UserId::domain:user_id())->{ok,User::map()} | {error,Error::any()} | user_does_not_exist.
 
 get_user(UserId)->
     gen_server:call(?MODULE,{get_user,UserId}).
@@ -42,21 +42,22 @@ get_user(UserId)->
 get_user_by_email(Email)->
     gen_server:call(?MODULE,{get_user_by_email,Email}).
 
--spec create_user(UserData::any())->{ok,User::any()} 
+-spec create_user(UserData::domain:create_user_params())->{ok,User::domain:user()} 
                         | {error,{400,ValidationErrors::list()}}
                         | {error,Error::any()}.
 
 create_user(UserData)->
+    io:format("\nInside create user"),
     gen_server:call(?MODULE,{create_user,UserData}).
 
 
--spec delete_user(UserId::number())->ok | {error,Error::any()}.
+-spec delete_user(UserId::domain:user_id())->ok | {error,Error::any()}.
 delete_user(UserId)->
     gen_server:call(?MODULE,{delete_user,UserId}).
 
 
--spec create_topic(TopicData::any())->
-                        {ok,Topic::any()} 
+-spec create_topic(TopicData::domain:create_topic_params())->
+                        {ok,Topic::domain:topic()} 
                         | {error,{400,ValidationErrors::list()}}
                         | {error,Error::any()}.
 
@@ -64,7 +65,7 @@ create_topic(TopicData)->
     gen_server:call(?MODULE,{create_user,TopicData}).
 
 
--spec delete_topic(TopicId::number())->ok | {error,Error::any()}.
+-spec delete_topic(TopicId::domain:topic_id())->ok | {error,Error::any()}.
 delete_topic(TopicId)->
     gen_server:call(?MODULE,{delete_user,TopicId}).
 
@@ -72,39 +73,39 @@ delete_topic(TopicId)->
 
 
 
--spec get_older_messages(TopidId::number(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
+-spec get_older_messages(TopidId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
 get_older_messages(TopicId,StartIndex,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,StartIndex,Count}}).
 
 
--spec get_newest_messages(TopidId::number(),Count::integer())->{ok,Messages::list()} | error .
+-spec get_newest_messages(TopidId::domain:topic_id(),Count::integer())->{ok,Messages::list()} | error .
 get_newest_messages(TopicId,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,Count}}).
 
--spec get_subscriptions(UserId::integer())->{ok,Channels::list()}  | {error,Reason::any()}.
+-spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::list()}  | {error,Reason::any()}.
 get_subscriptions(UserId)->
     gen_server:call(?MODULE,{get_subscriptions,UserId}).
 
--spec publish(TopicId::integer(),Message::any())->ok.
+-spec publish(TopicId::domain:topic_id(),Message::any())->ok.
 publish(TopicId,Message)->
     gen_server:cast(?MODULE, {publish,{TopicId,Message}}).
 
 
--spec online(UserId::integer(),Socket::pid())->ok.
+-spec online(UserId::domain:user_id(),Socket::pid())->ok.
 online(UserId,Socket)->
     gen_server:call(?MODULE, {online,{UserId,Socket}}).
 
 
--spec offline(UserId::integer() |iodata(),Socket::pid())->ok.
+-spec offline(UserId::domain:user_id() |iodata(),Socket::pid())->ok.
 offline(UserId,Socket)->
     gen_server:call(?MODULE, {offline,{UserId,Socket}}).
 
--spec subscribe(UserId::integer(),TopicId::integer() )->{ok,OkResult::map()}| already_subscribed | {error,Error::term()}.
+-spec subscribe(UserId::domain:user_id(),TopicId::domain:topic_id() )->{ok,OkResult::map()}| already_subscribed | {error,Error::term()}.
 subscribe(UserId,TopicName)->
     gen_server:call(?MODULE, {subscribe,{UserId,TopicName}}).
 
 
--spec unsubscribe(UserId::integer(),TopicId::integer())->{ok,{unsubsribed,TopicId::integer()}}| not_joined | {error,Error::term()}.
+-spec unsubscribe(UserId::domain:user_id(),TopicId::domain:topic_id())->{ok,{unsubsribed,TopicId::domain:topic_id()}}| not_joined | {error,Error::term()}.
 unsubscribe(UserId,TopicId)->
     gen_server:call(?MODULE, {unsubscribe,{UserId, TopicId}}).
 
@@ -137,6 +138,7 @@ handle_call({get_user_by_email,Email},_,State)->
          user_does_not_exist ->{reply,user_does_not_exist,State}
     end;
 handle_call({create_user,UserData},_,State)->
+   
     case validator:validate_user_data(UserData) of
         {false,ValidationErrors} -> {error,{400,ValidationErrors}};
         
