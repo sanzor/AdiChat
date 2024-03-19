@@ -62,7 +62,7 @@ async function onSubmit(){
      console.log(`User created:${userResult}`);
      localStorage.setItem("user",JSON.stringify(userResult));
      publishEvent(HIDE_REGISTER,{});
-     //publishEvent(SHOW_MAIN,{});
+     publishEvent(SHOW_MAIN,{});
     }catch(error){
         showSubmitFailMessage(error);
     }
@@ -99,6 +99,7 @@ async function createUserAsync(userData){
     console.log(url);
     
     var result=await postDataAsync(url,userData);
+    console.log("Result create user\n:");
     console.log(result);
     return result;
 }

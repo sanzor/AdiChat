@@ -1,4 +1,5 @@
 -module(topic_controller).
+-include("../../include/domain.hrl").
 -export([
          index/1,
          create_topic/1,
@@ -12,7 +13,8 @@ index(_Req) ->
 
 create_topic(_Req=#{json := TopicData})->
     case wsapp_server:create_topic(TopicData) of
-        {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
+        {ok,Topic} -> T=utils:from_topic(Topic),
+                      { json,200,#{<<"Content-Type">>=> <<"application/json">>},T};
         {error,{bad_request,ValidationErrors}}->
             {json,400,#{<<"Content-Type">>=> <<"application/json">>},ValidationErrors};
         {error,Error}->

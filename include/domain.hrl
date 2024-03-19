@@ -46,11 +46,16 @@
 }.
 
 -record(topic,{
+    id::topic_id(),
     name::string(),
     created_by::integer(),
     created_at::string()
 }).
 -type topic()::#topic{
+    id::topic_id(),
+    name::string(),
+    created_by::integer(),
+    created_at::string()
 }.
 
 

@@ -41,30 +41,34 @@ create_connection()->
     }),
     {ok,C}.
     
--spec get_user(UserId::integer())->{ok,User::map()} | {error,Error::any()}.
+-spec get_user(UserId::domain:user_id())->{ok,User::domain:user()} | {error,Error::any()}.
 get_user(UserId)->
     Statement= <<"Select * FROM wsuser WHERE id=$1">>,
     {ok,C}=create_connection(),
     {ok,Columns,Values}=epgsql:equery(C,Statement,[UserId]),
     Value=case to_records(Columns, Values) of
         [] ->user_does_not_exist;
-        Else->{ok,lists:nth(1, Else)}
+        Else->  UserMap=lists:nth(1, Else),
+                User=utils:to_user(UserMap),
+                {ok,User}
     end,
     Value.
 
--spec get_user_by_email(UserId::integer())->{ok,User::map()} | user_does_not_exist.
+-spec get_user_by_email(UserId::domain:user_id())->{ok,User::domain:user()} | user_does_not_exist.
 get_user_by_email(Email)->
     Statement= <<"Select * FROM wsuser WHERE email=$1">>,
     {ok,C}=create_connection(),
     {ok,Columns,Values}=epgsql:equery(C,Statement,[Email]),
     Value=case to_records(Columns, Values) of
         [] ->user_does_not_exist;
-        Else->{ok,lists:nth(1, Else)}
+        Else->    UserMap=lists:nth(1, Else),
+                  User=utils:to_user(UserMap),
+                  {ok,User}
     end,
     Value.
 
 
--spec create_user(UserData::map())-> {ok,User::domain:user()} | already_exists | {error,Error::any()}.
+-spec create_user(UserData::domain:create_user_params())-> {ok,User::domain:user()} | already_exists | {error,Error::any()}.
 create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">>:=Password})->
         
         Statement= <<"INSERT INTO  wsuser(email,password,name) values ($1,$2,$3) RETURNING *">>,
@@ -75,12 +79,13 @@ create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">
                     {ok,_,Columns,Values}->
                                     
                                   Value=case to_records(Columns, Values) of
-                                  [] ->user_does_not_exist;
-                                  Else-> io:format("\nInside case of sql module !!!!!!!!\n ~p",[Else]),
-                                        #{<<"name">>:=Name,<<"email">>:=Email,<<"password">>:=Password,<<"id">>:=Id}=lists:nth(1, Else),
-                                        User=#user{ id=Id,name=Name,email=Email,password=Password},
-                                        User
-                                  end,
+                                            [] -> user_does_not_exist;
+                                            Else-> 
+                                                    UserMap=lists:nth(1, Else),
+                                                    User=utils:to_user(UserMap),
+                                                    {ok,User}
+                                                   
+                                        end,
                                   Value
                     end,
         Result.
@@ -91,7 +96,7 @@ create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">
 
 
 
--spec delete_user(UserId::number())-> ok  | {error,Error::any()}.
+-spec delete_user(UserId::domain:user_id())-> ok  | {error,Error::any()}.
 delete_user(UserId)->
     try
         Statement= <<"DELETE FROM  wsuser WHERE id = $1">>,
@@ -110,7 +115,9 @@ get_topic_by_name(TopicName)->
     {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicName]),
     Value=case to_records(Columns, Values) of
         [] ->topic_does_not_exist;
-        Else->{ok,lists:nth(1, Else)}
+        Else->  TopicMap=lists:nth(1, Else),
+                Topic=Topic=utils:to_topic(TopicMap),
+                {ok,Topic}
     end,
     Value.
 
@@ -121,10 +128,12 @@ get_topic(TopicId)->
     {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId]),
     Value=case to_records(Columns, Values) of
         [] ->topic_does_not_exist;
-        Else->{ok,lists:nth(1, Else)}
+        Else->  TopicMap=lists:nth(1, Else),
+                Topic=Topic=utils:to_topic(TopicMap),
+                {ok,Topic}  
     end,
     Value.
--spec create_topic(TopicData::map())-> {ok,Topic::domain:topic()} | already_exists | {error,Error::any()}.
+-spec create_topic(TopicData::domain:create_topic_params())-> {ok,Topic::domain:topic()} | already_exists | {error,Error::any()}.
 create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
     
         Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
@@ -135,7 +144,9 @@ create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
                     {ok,_,Columns,Values}->
                                   Value=case to_records(Columns, Values) of
                                   [] ->user_does_not_exist;
-                                  Else->{ok,lists:nth(1, Else)}
+                                  Else-> TopicMap=lists:nth(1, Else),
+                                         Topic=utils:to_topic(TopicMap),
+                                         {ok,Topic}
                                   end,
                                   Value
                     end,
@@ -157,7 +168,7 @@ delete_topic(Id)->
     Error:Reason->{error,{Error,Reason}}
 end.
 
--spec subscribe(TopicId::integer(),UserId::integer())-> ok | {error,Error::any()}.
+-spec subscribe(TopicId::domain:topic_id(),UserId::domain:user_id())-> ok | {error,Error::any()}.
 subscribe(TopicId,UserId)->
     Statement= <<"INSERT INTO  user_topic(topic_id,user_id) values ($1,$2)">>,
     {ok,C}=create_connection(),

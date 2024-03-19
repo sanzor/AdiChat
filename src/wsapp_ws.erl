@@ -16,7 +16,7 @@ websocket_init(State=#{<<"id">> :=Id})->
      
     {ok,User}= wsapp_server:get_user(Id),                         
     io:format("User is:~p",[User]),      
-    #{<<"id">> :=UserId}=User,
+    #user{id =UserId}=User,
     ok=wsapp_server:online(UserId,self()),
     {reply,ping,State#{<<"user">>=>User}}.
 
@@ -60,7 +60,7 @@ handle_command(<<"create-topic">>,_=#{<<"name">>:=Name,<<"user_id">>:=UserId},_S
     BaseReply=#{kind=>"command_result",command=> <<"create-topic">>},
     
     Reply=case wsapp_server:create_topic(#create_topic_params{name = Name,user_id = UserId}) of
-        {ok,Topic}->BaseReply#{result=>Topic};
+        {ok,Topic}->BaseReply#{result=>utils:from_topic(Topic)};
         {error,Error}->{error,Error}
     end,
     {ok,reply,Reply};
@@ -68,7 +68,7 @@ handle_command(<<"create-topic">>,_=#{<<"name">>:=Name,<<"user_id">>:=UserId},_S
 handle_command(<<"get-user">>,UserId,_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-topic">>},
     Reply=case wsapp_server:get_user(UserId) of
-        {ok,Topic}->BaseReply#{result=>Topic};
+        {ok,User}->BaseReply#{result=>utils:from_user(User)};
         {error,Error}->{error,Error}
     end,
     {ok,reply,Reply};
@@ -76,7 +76,7 @@ handle_command(<<"get-user">>,UserId,_State)->
 handle_command(<<"create-user">>,UserData,_State)->
     BaseReply=#{kind=>"command_result",command=> <<"create-user">>},
     Reply=case wsapp_server:create_user(UserData) of
-        {ok,User}->BaseReply#{result=>User};
+        {ok,User}->BaseReply#{result=>utils:from_user(User)};
          already_exists->BaseReply#{result=>error,reason=>user_already_exists}
     end,
     {ok,reply,Reply};

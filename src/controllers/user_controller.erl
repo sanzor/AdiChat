@@ -1,4 +1,5 @@
 -module(user_controller).
+-include("../../include/domain.hrl").
 -export([
          index/1,
          create_user/1,
@@ -11,19 +12,23 @@ index(_Req) ->
 
 get_user(_Req=#{parsed_qs := #{<<"id">> := Id}})-> 
 case wsapp_server:get_user(binary_to_integer(Id)) of
-    {ok,User} ->{json,200,#{<<"Content-Type">> => <<"application/json">>},User};
+               
+    {ok,User} -> Payload=utils:from_user(User),
+                 {json,200,#{<<"Content-Type">> => <<"application/json">>},Payload};
      user_does_not_exist ->{status,404}
 end.
 get_user_by_email(_Req=#{parsed_qs := #{<<"email">> :=Email}})->
     case wsapp_server:get_user_by_email(Email) of
-            {ok,User} ->{json,200,#{<<"Content-Type">> => <<"application/json">>},User};
+            {ok,User} ->  Payload=utils:from_user(User),
+                         {json,200,#{<<"Content-Type">> => <<"application/json">>},Payload};
             user_does_not_exist ->{status,404}
     end.
     
 create_user(_Req=#{json := Json})->
     io:format("\nJson is: ~p\n",[Json]),
     case wsapp_server:create_user(Json) of
-        {ok,User} -> {json,200,#{<<"Content-Type">>=> <<"application/json">>},User};
+        {ok,User} ->  Payload=utils:from_user(User),
+                     {json,200,#{<<"Content-Type">>=> <<"application/json">>},Payload};
         {error,user_already_exists}->{status,409};
         {error,{bad_request,ValidationErrors}}->
             {json,400,#{<<"Content-Type">>=> <<"application/json">>},ValidationErrors};

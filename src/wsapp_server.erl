@@ -187,9 +187,9 @@ handle_call({get_subscriptions,UserId},_,State)->
  
 
 handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
-    Topic=#{<<"id">> := TopicId}= case storage:get_topic_by_name(TopicName) of
+    Topic=#topic{id= TopicId}= case storage:get_topic_by_name(TopicName) of
                                         topic_does_not_exist -> 
-                                            {ok,Topic}=storage:create_topic(#{<<"user_id">> => UserId , <<"name">> => TopicName}),
+                                            {ok,Topic}=storage:create_topic(#create_topic_params{user_id = UserId , name = TopicName}),
                                             Topic;
                                         {ok,Topic} -> Topic
                                  end,
