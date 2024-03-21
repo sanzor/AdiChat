@@ -69,7 +69,7 @@ get_user_by_email(Email)->
 
 
 -spec create_user(UserData::domain:create_user_params())-> {ok,User::domain:user()} | already_exists | {error,Error::any()}.
-create_user(_UserData=#{<<"name">> :=Name , <<"email">> := Email , <<"password">>:=Password})->
+create_user(_UserData=#create_user_params{email = Email,name = Name,password = Password})->
         
         Statement= <<"INSERT INTO  wsuser(email,password,name) values ($1,$2,$3) RETURNING *">>,
         {ok,C}=create_connection(),
@@ -134,7 +134,7 @@ get_topic(TopicId)->
     end,
     Value.
 -spec create_topic(TopicData::domain:create_topic_params())-> {ok,Topic::domain:topic()} | already_exists | {error,Error::any()}.
-create_topic(_TopicData = #{<<"user_id">> := UserId,<<"name">> := TopicName})->
+create_topic(_TopicData =#create_topic_params{user_id = UserId,name = TopicName})->
     
         Statement= <<"INSERT INTO  topic(name,created_by) values ($1,$2) RETURNING * ">>,
         {ok,C}=create_connection(),

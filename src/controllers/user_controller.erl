@@ -24,9 +24,9 @@ get_user_by_email(_Req=#{parsed_qs := #{<<"email">> :=Email}})->
             user_does_not_exist ->{status,404}
     end.
     
-create_user(_Req=#{json := Json})->
-    io:format("\nJson is: ~p\n",[Json]),
-    case wsapp_server:create_user(Json) of
+create_user(_Req=#{json := #{<<"name">>:=Name,<<"email">>:=Email,<<"password">>:=Password}})->
+    Params=#create_user_params{name = Name,email = Email,password = Password},
+    case wsapp_server:create_user(Params) of
         {ok,User} ->  Payload=utils:from_user(User),
                      {json,200,#{<<"Content-Type">>=> <<"application/json">>},Payload};
         {error,user_already_exists}->{status,409};

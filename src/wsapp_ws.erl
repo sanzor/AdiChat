@@ -85,7 +85,8 @@ handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"id">> :=
     BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>},
     Reply=case wsapp_server:subscribe(UserId, TopicName) of
             already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
-            {ok,Topic} -> BaseReply#{result=><<"ok">>, <<"userId">> => UserId,<<"topic">>=>Topic}
+            {ok,#subscribe_result{result = Result,subscriber_id = SubscriberId}} -> 
+                BaseReply#{result=><<"ok">>, <<"userId">> => SubscriberId,<<"topic">>=>utils:from_topic(Result)}
           end, 
     {ok,reply,Reply};
 

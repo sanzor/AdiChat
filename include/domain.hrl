@@ -4,7 +4,8 @@
     user/0,
     topic/0,
     create_user_params/0,
-    create_topic_params/0]
+    create_topic_params/0,
+    subscribe_result/0]
 ).
 -type user_id()::number().
 -type topic_id()::number().
@@ -45,6 +46,9 @@
     password::string()
 }.
 
+
+
+
 -record(topic,{
     id::topic_id(),
     name::string(),
@@ -58,6 +62,14 @@
     created_at::string()
 }.
 
+-record(subscribe_result,{
+    result::topic() ,
+    subscriber_id::user_id()
+}).
+-type subscribe_result()::#subscribe_result{
+    result::topic() ,
+    subscriber_id::user_id()
+}.
 
 
 

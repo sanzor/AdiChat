@@ -11,8 +11,9 @@
 index(_Req) ->
     {ok, [{message, "Hello world!"}]}.
 
-create_topic(_Req=#{json := TopicData})->
-    case wsapp_server:create_topic(TopicData) of
+create_topic(_Req=#{json := #{<<"user_id">> := UserId,<<"name">> := TopicName}})->
+    Params=#create_topic_params{user_id = UserId,name =TopicName},
+    case wsapp_server:create_topic(Params) of
         {ok,Topic} -> T=utils:from_topic(Topic),
                       { json,200,#{<<"Content-Type">>=> <<"application/json">>},T};
         {error,{bad_request,ValidationErrors}}->

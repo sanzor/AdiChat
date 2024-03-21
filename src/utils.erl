@@ -8,7 +8,7 @@ from_user(_=#user{id = Id,email = Email,name = Name,password=Password})->
 from_topic(_=#topic{id = Id,name=Name,created_by = CreatedBy})->
     #{id=>Id,name=>Name,creted_by=>CreatedBy}.
 
-to_user(_=#{id:=Id,name:=Name,email:=Email,password:=Password})->
+to_user(_=#{<<"id">>:=Id,<<"name">>:=Name,<<"email">>:=Email,<<"password">>:=Password})->
     #user{id = Id,name = Name,email = Email,password = Password}.
-to_topic(_=#{id:=Id,name:=Name,created_by:=CreatedBy})->
+to_topic(_=#{<<"id">>:=Id,<<"name">>:=Name,<<"created_by">>:=CreatedBy})->
     #topic{id = Id,name = Name,created_by = CreatedBy}.

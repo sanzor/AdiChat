@@ -100,7 +100,7 @@ online(UserId,Socket)->
 offline(UserId,Socket)->
     gen_server:call(?MODULE, {offline,{UserId,Socket}}).
 
--spec subscribe(UserId::domain:user_id(),TopicId::domain:topic_id() )->{ok,OkResult::map()}| already_subscribed | {error,Error::term()}.
+-spec subscribe(UserId::domain:user_id(),TopicId::domain:topic_id() )->{ok,SubscribeResult::domain:subscribe_result()}| already_subscribed | {error,Error::term()}.
 subscribe(UserId,TopicName)->
     gen_server:call(?MODULE, {subscribe,{UserId,TopicName}}).
 
@@ -145,7 +145,8 @@ handle_call({create_user,UserData},_,State)->
          true -> io:format("\n:~p\n",[UserData]),
                 case storage:create_user(UserData) of
                      already_exists ->{reply,{error,user_already_exists},State};
-                    {ok,User} -> {reply,{ok,User},State};
+                    {ok,User} -> io:format("\nResulting User:~p",[User]),
+                                 {reply,{ok,User},State};
                     {error,Error}->{reply,{error,Error},State};
                      _->{reply,already_exists,State}
                  end
@@ -189,7 +190,8 @@ handle_call({get_subscriptions,UserId},_,State)->
 handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
     Topic=#topic{id= TopicId}= case storage:get_topic_by_name(TopicName) of
                                         topic_does_not_exist -> 
-                                            {ok,Topic}=storage:create_topic(#create_topic_params{user_id = UserId , name = TopicName}),
+                                             Params=#create_topic_params{user_id = UserId , name = TopicName},
+                                            {ok,Topic}=storage:create_topic(Params),
                                             Topic;
                                         {ok,Topic} -> Topic
                                  end,
@@ -199,9 +201,11 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic},
                 [send(Socket,{user_event,UserId,UserEvent})|| 
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
-                {ok,Topic}
+                Result=#subscribe_result{result = Topic,subscriber_id = UserId },
+                {ok,Result}
     end,
-    io:format("\n Topic result: ~p\n",[Reply]),
+   
+    io:format("\n Subscribe result: ~p\n",[Reply]),
     {reply,Reply,_State};
    
 
