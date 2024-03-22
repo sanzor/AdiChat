@@ -8,7 +8,8 @@ import {
         SUBSCRIBE_COMMAND_RESULT_U, 
         UNSUBSCRIBE_COMMAND,
         UNSUBSCRIBE_COMMAND_RESULT, 
-        UNSUBSCRIBE_COMMAND_RESULT_U} from "./events.js";
+        UNSUBSCRIBE_COMMAND_RESULT_U,
+        NEW_INCOMING_MESSAGE} from "./events.js";
 
 subscribeToEvent(SOCKET_RECEIVE,onSocketReceive);
 function onSocketReceive(ev){

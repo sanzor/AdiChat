@@ -25,15 +25,17 @@ websocket_info(send_ping,State)->
 
 
 websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
+    
     io:format("\nInside info: self: ~p\n",[self()]),
     io:format("\nSending from info:~p",[UserEventMessage]),
     Reply=UserEventMessage#{kind=><<"user_event">>,user=>User},
     {reply,{text,thoas:encode(Reply)},State};
 
 
-websocket_info(Message,State)->
-    io:format("\nWeird: ~p\ntrace",[Message]),
-    Reply=Message#{ kind=><<"chat">>},
+websocket_info(_=#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone},State)->
+    FormattedDateTime=utils:datetime_to_string(CreatedAt),
+    Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>FormattedDateTime,timezone=>Timezone, kind=><<"chat">>},
+    io:format("\nWeird: ~p\ntrace",[Reply]),
     {reply,{text,thoas:encode(Reply)},State}.
 
 websocket_handle({text, Message},State)->
@@ -105,15 +107,15 @@ handle_command(<<"publish">>,Json,_State)->
     #{<<"id">>:= UserId}=_State,
     
     DateTime=calendar:universal_time(),
-    Message=#{
-         <<"user_id">>=>UserId,
-         <<"topic_id">>=> TopicId,
-         <<"content">> => Content,
-         <<"created_at">> =>DateTime,
-         <<"timezone">>=><<"utc+2">>
+    Message=#message{
+         user_id =UserId,
+         topic_id= TopicId,
+         content = Content,
+         created_at = DateTime,
+         timezone= <<"utc+2">>
         },
    
-    ok=wsapp_server:publish(TopicId,Message),
+    ok=wsapp_server:publish(Message),
     {ok,noreply};
 
 handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->

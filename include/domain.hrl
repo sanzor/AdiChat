@@ -5,7 +5,8 @@
     topic/0,
     create_user_params/0,
     create_topic_params/0,
-    subscribe_result/0]
+    subscribe_result/0,
+    message/0]
 ).
 -type user_id()::number().
 -type topic_id()::number().
@@ -69,7 +70,27 @@
 -type subscribe_result()::#subscribe_result{
     result::topic() ,
     subscriber_id::user_id()
+
 }.
 
+
+
+-record(message,{
+    content::message_content(),
+    user_id::user_id(),
+    topic_id::topic_id(),
+    created_at::string(),
+    timezone::string()
+}).
+
+-type message()::#message{
+    content::message_content(),
+    user_id::user_id(),
+    topic_id::topic_id(),
+    created_at::string(),
+    timezone::binary()
+}.
+
+-type message_content()::string().
 
 

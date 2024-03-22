@@ -235,22 +235,21 @@ get_newest_messages(TopicId,Count)->
     {ok,Columns,Values}=epgsql:equery(C,Statement,[TopicId,Count]),
     {ok,to_records(Columns, Values)}.
 
--spec write_chat_message(Message::any())->ok | {error,Error::any()}.
-write_chat_message(Message)->
-   #{ 
-        <<"topic_id">>:=TopicId,
-        <<"user_id">> :=UserId,
-        <<"content">>:=Content,
-        <<"created_at">>:=CreatedAt,
-        <<"timezone">> :=Timezone}=Message,
-    
+-spec write_chat_message(Message::domain:message())->ok | {error,Error::any()}.
+write_chat_message(Input=#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone})->
+
     Statement= <<"INSERT INTO  message(topic_id,user_id,message,created_at,timezone) 
                 values ($1,$2,$3,$4,$5)">>,
+    io:format("\nInput is ~p\n",[Input]),
     {ok,C}=create_connection(),
-    {ok,_}=epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]),
+    {ok,_}=case epgsql:equery(C,Statement,[TopicId,UserId,Content,CreatedAt,Timezone]) of
+             {ok,_} -> {ok,1};
+             {error,Reason}->io:format("\nError ~p",[Reason]),
+                             Reason
+           end,
      ok.   
 
--spec write_chat_messages(Messages::list())->{ok,Inserted::integer()} | {error,Error::any()}.
+-spec write_chat_messages(Messages::[domain:message()])->{ok,Inserted::integer()} | {error,Error::any()}.
 write_chat_messages(Messages)->
     Statement= <<"INSERT INTO  message(topic_id,user_id,content,createdAt,timezone) values ($1,$2,$3,$4)">>,
     {ok,C}=create_connection(),
@@ -261,8 +260,8 @@ write_chat_messages(Messages)->
 
 write_messages(_Connection,_Stmt,[])->ok;
 write_messages(Connection,Stmt,[Message|Rest])->
-    #{topic_id :=TopicId,user_id :=UserId,content:=Content,
-      created_at:=CreatedAt,timezone:=Timezone}=Message,
+    #message{topic_id =TopicId,user_id =UserId,content=Content,
+      created_at=CreatedAt,timezone=Timezone}=Message,
     epgsql:execute(Connection,Stmt,[TopicId,UserId,Content,CreatedAt,Timezone]),
     write_messages(Connection, Stmt, Rest).
 
