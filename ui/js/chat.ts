@@ -1,4 +1,5 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
+import { Channel } from "./domain/Channel.js";
 import { KIND, SOCKET_COMMAND,CHANNEL_ID, MESSAGE_CONTENT, CURRENT_CHANNEL, ID} from "./constants.js";
 import { 
     chatSendMessageBox,
@@ -44,7 +45,7 @@ function onSetChat(ev:CustomEvent){
     publishEvent(SET_CHAT_DOM,ev.detail);
 }
 
-function setChatWithChannel(channel){
+function setChatWithChannel(channel:Channel){
 }
 
 
@@ -53,7 +54,7 @@ function onLoadOlderMessages(ev:Event){
     // var eventPayload=get_older_messages(currentChannel.id,count,CHANNEL_MESSAGES_COUNT);
     // publishEvent(SOCKET_COMMAND,eventPayload);
 }
-function onGetMessagesResult(ev){
+function onGetMessagesResult(ev:CustomEvent){
    
 }
 

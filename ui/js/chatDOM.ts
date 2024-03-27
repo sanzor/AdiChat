@@ -1,9 +1,11 @@
 
 import{PUBLISH_MESSAGE,SET_CHAT_DOM, RESET_CHAT_DOM, SELF_PUBLISH_MESSAGE} from './events.js';
 import { publishEvent, subscribeToEvent } from './bus.js';
+import { Channel } from './domain/Channel.js';
 import { CURRENT_CHANNEL } from './constants.js';
 import { chatSendMessageBox, currentChannel,chatContainer, chatSendMessageBtn } from './elements.js';
 import { getItemFromStorage } from './utils.js';
+import { ChatMessage } from './domain/chatMessage.js';
 const APPEND_MESSAGE_DOM="append_message";
 
 subscribeToEvent(APPEND_MESSAGE_DOM,onAppendedMessage);
@@ -11,14 +13,14 @@ subscribeToEvent(RESET_CHAT_DOM,onResetChat);
 subscribeToEvent(SET_CHAT_DOM,onSetChat);
 chatSendMessageBtn.addEventListener("click",onSendMessage);
 
-function onSetChat(ev){
+function onSetChat(ev:CustomEvent){
     console.log(ev.detail);
     var channel=ev.detail;
     console.log("On set chat dom");
     console.log(channel.name);
     currentChannel.innerText=ev.detail.name;
 }
-function onSendMessage(_){
+function onSendMessage(_:Event){
     var message=chatSendMessageBox.value;
     var user=getItemFromStorage<User>("user")!;
     var channel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
@@ -27,19 +29,20 @@ function onSendMessage(_){
         ["topic"]:channel,
         ["message"]:message
     }
+
     console.log(appendMessage);
     publishEvent(APPEND_MESSAGE_DOM,appendMessage);
     publishEvent(SELF_PUBLISH_MESSAGE,message);
 }
 
-function onAppendedMessage(ev){
+function onAppendedMessage(ev:CustomEvent){
     var message=ev.detail;
     console.log("Inside on new message");
     var messageElement=createChatMessageContainer(message);
     chatContainer.appendChild(messageElement);
 }
 
-function onResetChat(_){
+function onResetChat(_:CustomEvent){
     localStorage.removeItem("currentChannelId");
     chatContainer.innerHTML='';
     currentChannel.innerText='';

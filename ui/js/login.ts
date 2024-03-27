@@ -34,18 +34,18 @@ async function startLoginFlow(){
    
     await tryLoginAsync(userResult);
 }
-function onShowLogin(ev){
+function onShowLogin(ev:CustomEvent){
     showElement("loginModal");
 }
-function onHideLogin(ev){
+function onHideLogin(ev:CustomEvent){
     hideElement("loginModal");
 }
 
-async function tryLoginAsync(User){
+async function tryLoginAsync(user:User){
     console.log("try login");
     try {
-        console.log(User.id);
-        var userResult=await getUserByIdAsync(User.id);
+        console.log(user.id);
+        var userResult=await getUserByIdAsync(user.id);
         if(userResult){
             publishEvent("showMain",{});
             return;
@@ -111,7 +111,7 @@ async function getUserByEmailAsync(){
 
 
 function clearLoginErrorMessage(){
-    loginFailMessage.innerHTML=undefined;
+    loginFailMessage.innerHTML='';
     loginFailMessage.style.display="none";
 }
 function showLoginErrorMessage(message){

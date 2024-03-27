@@ -4,6 +4,7 @@ import {CHANNEL_ID, CHANNEL} from "./constants.js";
 import { subscribeToEvent } from "./bus.js";
 import {UNSUBSCRIBE_BUTTON_CLICK , SET_CHANNELS,ADD_CHANNEL,REMOVE_CHANNEL ,CHANNEL_CLICK, NEW_INCOMING_MESSAGE } from "./events.js";
 import { channelsContainer } from "./elements.js";
+import { Channel } from "./domain/Channel.js";
 subscribeToEvent(REMOVE_CHANNEL,onRemoveChannelFromDOM);
 subscribeToEvent(ADD_CHANNEL,onAddChannelToDOM);
 subscribeToEvent(SET_CHANNELS,onSetDOMChannels);

@@ -13,17 +13,11 @@ import{
     } from "./events.js";
 export{connect,send};
 
-const SOCKET_COMMAND_KIND="kind";
-const SOCKET_COMMAND_CONTENT="content";
-
 subscribeToEvent("close_socket",onCloseSocketCommand);
 subscribeToEvent(SOCKET_COMMAND,onAsyncCommand);
 window.addEventListener("beforeunload",onUnload);
-var socket=null;
+var socket:WebSocket=null!;
 
-// function send(commandKind,content){
-//     publishEvent(SOCKET_COMMAND,{SOCKET_COMMAND_KIND:commandKind,SOCKET_COMMAND_CONTENT:content});
-// }
 function onCloseSocketCommand(){
     if(socket){
         console.log("closing websocket");
@@ -127,7 +121,6 @@ function command_get_subscriptions(){
 }
 function command_disconnect(){
     publishEvent("close_socket",{});
-    resetSubscriptionTable();
 }
 
 function command_publish(data){

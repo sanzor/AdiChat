@@ -1,3 +1,0 @@
-interface ChatMessage extends HTMLDivElement{
-    
-}

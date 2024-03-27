@@ -1,5 +1,6 @@
 import { publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
-import config from "./config.js";
+import { ChatMessage } from "./domain/chatMessage.js";
+import { Channel } from "./domain/Channel.js";
 import{channelsContainer} from "./elements.js";
 import { setItemInStorage,getItemFromStorage } from "./utils.js";
 import {subscribeBtn,subscribeBox} from "./elements.js";
@@ -39,17 +40,18 @@ subscribeToEvent(UNSUBSCRIBE_BUTTON_CLICK,onUnsubscribeAsync);
 subscribeToEvent(CHANNEL_CLICK,onChannelClick);
 
 function onNewIncomingMessage(ev:CustomEvent){
-     var message=ev.detail as cha;
+     var message=ev.detail as ChatMessage;
      var currentChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
      if(currentChannel ==null){
         return;
      }
-
+     updateChannelsOnMessage(message);
      
  }
 
- function updateChannelsOnMessage(data:CustomEvent){
-    var targetChannel=channelsContainer.children.filter(child=>child.innerText==data.topic);
+ function updateChannelsOnMessage(data:ChatMessage){
+    var targetChannel=Array.from(channelsContainer.children)
+        .filter(child=>(child as HTMLDivElement).innerText==data.topicId.toString());
 }
 
 
@@ -63,8 +65,8 @@ function onChannelClick(event:CustomEvent){
     setItemInStorage(CURRENT_CHANNEL,channel);
     publishEvent(SET_CHAT,channel);
 }
-function onRefreshChannelsCommandResult(ev){
-    var channels=ev.detail;
+function onRefreshChannelsCommandResult(ev:CustomEvent){
+    var channels=ev.detail as Array<Channel>;
    
     if(channels.length==0 || !channels){
         publishEvent(SET_CHANNELS,[]);
@@ -74,7 +76,7 @@ function onRefreshChannelsCommandResult(ev){
     }
     setItemInStorage(CHANNELS,channels);
     publishEvent(SET_CHANNELS,channels);
-    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    var currentChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL)!;
     
     if(currentChannel==null || !channels.find(x=>x.id==currentChannel.id)){
         setItemInStorage(CURRENT_CHANNEL,channels[0]);
@@ -118,8 +120,8 @@ async function handleSubscribeResultAsync(subscribeResult){
         console.log("already subscribed");
         return;
     }
-    var targetChannel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
-    var existingChannels=getItemFromStorage(CHANNELS);
+    var targetChannel:Channel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
+    var existingChannels=getItemFromStorage<Array<Channel>>(CHANNELS);
     if(!existingChannels){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
         
@@ -129,9 +131,9 @@ async function handleSubscribeResultAsync(subscribeResult){
         return;
     }
     var newChannelList=[...existingChannels,targetChannel];
-    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    var currentChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
     console.log(currentChannel);
-    if(currentChannel==null ||  !existingChannels.find(x=>x.id!=currentChannel.id)){
+    if(currentChannel==null ||  !existingChannels.find(x=>x.id!=currentChannel?.id)){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
         setItemInStorage(CHANNELS,newChannelList);
         publishEvent(SET_CHAT,targetChannel);
@@ -171,7 +173,7 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         var message="Could not unsubscribe from channel";
         return new Error(message);
     }
-    var existingChannels=getItemFromStorage(CHANNELS);
+    var existingChannels=getItemFromStorage<Array<Channel>>(CHANNELS);
     
     if(!existingChannels){
         setItemInStorage(CURRENT_CHANNEL,null);
@@ -184,12 +186,12 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
         publishEvent(RESET_CHAT,{});
         return;
     }
-    var currentChannel=getItemFromStorage(CURRENT_CHANNEL);
+    var currentChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
     var newExistingChannels=existingChannels.filter(x=>x.id!=unsubscribeResult.topicId);
     setItemInStorage(CHANNELS,newExistingChannels);
     publishEvent(REMOVE_CHANNEL,{[TOPIC_ID]:unsubscribeResult.topicId});
     console.log(unsubscribeResult);
-    if(unsubscribeResult.topicId==currentChannel.id && newExistingChannels && newExistingChannels.length>0){
+    if(unsubscribeResult.topicId==currentChannel?.id && newExistingChannels && newExistingChannels.length>0){
         console.log(newExistingChannels);
         
         console.log("inside last if");
@@ -212,7 +214,7 @@ function setChannels(channels:Array<Channel>){
 
 
 
-function onSubscribeResultU(ev){
+function onSubscribeResultU(ev:CustomEvent){
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
         publishEvent(RESET_CHAT,channels[0]);
@@ -222,7 +224,7 @@ function onSubscribeResultU(ev){
 
 
 
-function onUnSubscribeResultU(ev){
+function onUnSubscribeResultU(ev:CustomEvent){
     var channels=setChannels(ev.detail.subscriptions);
     if(channels.length==0){
         publishEvent(RESET_CHAT,{});
