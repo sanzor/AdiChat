@@ -1,6 +1,14 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import config from "./config.js";
-import { CHANNEL_ID, KIND, MESSAGE_CONTENT, SOCKET_COMMAND } from "./constants.js";
+import { SOCKET_COMMAND } from "./constants.js";
+import { Command,
+         PublishCommand,
+         SubscribeCommand,
+         UnsubscribeCommand,
+         RefreshChannelsCommand,
+         DisconnectCommand,
+         GetNewestMessagesCommand,
+         GetOlderMessagesCommand } from "../js/domain/commands/Index.js";
 import{
     SUBSCRIBE_COMMAND,
     UNSUBSCRIBE_COMMAND,
@@ -12,6 +20,7 @@ import{
     SOCKET_CLOSED,
     } from "./events.js";
 export{connect,send};
+
 
 subscribeToEvent("close_socket",onCloseSocketCommand);
 subscribeToEvent(SOCKET_COMMAND,onAsyncCommand);
@@ -73,20 +82,44 @@ function onAsyncCommand(ev){
     var data=ev.detail;
     onCommand(data);
 }
-function onCommand(data){
+function onCommand(data:Command){
     console.log(data);
     console.log(`\nSending [${data.kind}] command : ${data} to socket\n`);
-    switch(data[KIND]){
-        case SUBSCRIBE_COMMAND:   command_subscribe(data.topic);break;
-        case UNSUBSCRIBE_COMMAND : command_unsubscribe(data.topicId);break;
-        case REFRESH_CHANNELS_COMMAND: command_get_subscriptions();break;
-        case PUBLISH_MESSAGE :command_publish(data);break;
-        case "disconnect":command_disconnect();break;
-        case  GET_NEWEST_MESSAGES: command_get_newest_messages(data.topicId,data.count);break;
-        case  GET_OLDER_MESSAGES: command_get_older_messages(
-            data.topicId,
-            data.startIndex,
-            data.count);break;
+    switch(data.kind){
+        case SUBSCRIBE_COMMAND:  
+            if(isSubscribeCommand(data)) 
+                command_subscribe((data as SubscribeCommand).topic);
+            break;
+        case UNSUBSCRIBE_COMMAND : 
+            if(isUnsubscribeCommand(data))
+                command_unsubscribe((data as UnsubscribeCommand).topicId);
+            break;
+        case REFRESH_CHANNELS_COMMAND:
+            if(isRefreshChannelsCommand(data))
+                command_get_subscriptions();
+            break;
+        case PUBLISH_MESSAGE :
+            if(isPublishMessage(data))
+                command_publish(data as PublishCommand);
+            break;
+        case "disconnect":
+            if(isDisconnectCommand(data))
+            command_disconnect();
+            break;
+        case  GET_NEWEST_MESSAGES: 
+            if(isGetNewestMessagesCommand(data)){
+                var cmd=data as GetNewestMessagesCommand;
+                command_get_newest_messages(cmd);
+            }
+            
+            break;
+        case  GET_OLDER_MESSAGES: 
+            if(isGetOlderMessagesCommand(data)){
+                var command=data as GetOlderMessagesCommand;
+                command_get_older_messages(command);
+            }
+           
+        break;
     }
 }
 function command_subscribe(topic){
@@ -123,37 +156,66 @@ function command_disconnect(){
     publishEvent("close_socket",{});
 }
 
-function command_publish(data){
-    console.log(data[CHANNEL_ID]);
+function command_publish(command:PublishCommand){
+    console.log(command.topicId);
     var toSend={
         "command":PUBLISH_MESSAGE,
-        "topicId":data[CHANNEL_ID],
-        "content":data[MESSAGE_CONTENT]
+        "topicId":command.topicId,
+        "content":command.message
     };
     console.log("\nSending:" + JSON.stringify(toSend));
     socket.send(JSON.stringify(toSend));
 }
 
-function command_get_newest_messages(topicId,count){
+function command_get_newest_messages(command:GetNewestMessagesCommand){
     
     var message={
         "command":GET_NEWEST_MESSAGES,
-        "topicId":topicId,
-        "count":count,
+        "topicId":command.topicId,
+        "count":command.count,
         
     }
     console.log(message);
     socket.send(JSON.stringify(message));
 }
-function command_get_older_messages(topicId,startIndex,count){
+function command_get_older_messages(command:GetOlderMessagesCommand){
     var message={
         "command":GET_OLDER_MESSAGES,
-        "topicId":topicId,
-        "startIndex":startIndex,
-        "count":count,
+        "topicId":command.topicId,
+        "startIndex":command.startIndex,
+        "count":command.count,
         
     }
     console.log(message);
     socket.send(JSON.stringify(message));
+}
+
+
+function isSubscribeCommand(command: Command): command is SubscribeCommand {
+    return command.kind === "subscribe";
+}
+
+function isUnsubscribeCommand(command: Command): command is UnsubscribeCommand {
+    return command.kind === "unsubscribe";
+}
+
+function isRefreshChannelsCommand(command: Command): command is RefreshChannelsCommand {
+    return command.kind === "refresh_channels";
+}
+
+function isPublishMessage(command: Command): command is PublishCommand {
+    return command.kind === "publish";
+}
+
+function isDisconnectCommand(command: Command): command is DisconnectCommand {
+    return command.kind === "disconnect";
+}
+
+function isGetNewestMessagesCommand(command: Command): command is GetNewestMessagesCommand {
+    return command.kind === "get_newest_messages";
+}
+
+function isGetOlderMessagesCommand(command: Command): command is GetOlderMessagesCommand {
+    return command.kind === "get_older_messages";
 }
 

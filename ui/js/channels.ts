@@ -1,12 +1,12 @@
-import { publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
+import { publishCommand, publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
 import { ChatMessage } from "./domain/chatMessage.js";
 import { Channel } from "./domain/Channel.js";
 import{channelsContainer} from "./elements.js";
 import { setItemInStorage,getItemFromStorage } from "./utils.js";
 import {subscribeBtn,subscribeBox} from "./elements.js";
 import { KIND, SOCKET_COMMAND, TOPIC, CURRENT_CHANNEL} from "./constants.js";
-import { 
-    REFRESH_CHANNELS_COMMAND, 
+import { PublishCommand } from "./domain/commands/PublishCommand.js";
+import {
     REFRESH_CHANNELS_COMMAND_RESULT, 
 
     SUBSCRIBE_COMMAND,
@@ -25,6 +25,7 @@ import {
     ADD_CHANNEL,
     REMOVE_CHANNEL,
     CHANNEL_CLICK} from "./events.js";
+import { SubscribeCommand } from "./domain/commands/SubscribeCommand.js";
 
 const CHANNELS="channels";
 
@@ -99,7 +100,7 @@ async function onSubscribeAsync(){
     var subscribeResult =await new Promise((resolve,reject)=>{
         console.log(KIND);
         subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
-        publishEvent(SOCKET_COMMAND,{[KIND]:SUBSCRIBE_COMMAND,[TOPIC]:subscribeBox.value});
+        publishCommand({kind:"subscribe",topic: subscribeBox.value} as SubscribeCommand);
     });
     var _=await handleSubscribeResultAsync(subscribeResult);
     

@@ -30,7 +30,7 @@ function onHideRegister(ev){
     hideElement("registerModal");
 }
 function cleanSubmitFailMessage(){
-    registerFailMessage.innerHTML=undefined;
+    registerFailMessage.innerHTML='';
 }
 
 function showSubmitFailMessage(message){

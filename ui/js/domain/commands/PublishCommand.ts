@@ -1,6 +1,6 @@
 import { Command } from "./Command";
 
-export interface PublishMessage extends Command {
+export interface PublishCommand extends Command {
     kind: "publish";
     userId: number;
     topicId: number;
