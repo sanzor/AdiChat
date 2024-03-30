@@ -1,4 +1,4 @@
-import { Message } from "./message";
+import { Message } from "./Message";
 
 export interface ChatMessage extends Message{
     kind:""

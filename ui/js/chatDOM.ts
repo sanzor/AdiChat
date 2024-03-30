@@ -1,11 +1,11 @@
 
-import{PUBLISH_MESSAGE,SET_CHAT_DOM, RESET_CHAT_DOM, SELF_PUBLISH_MESSAGE} from './events.js';
+import{SET_CHAT_DOM, RESET_CHAT_DOM, SELF_PUBLISH_MESSAGE} from './events.js';
 import { publishEvent, subscribeToEvent } from './bus.js';
-import { Channel } from './domain/Channel.js';
+import { Channel } from './Domain/Channel';
 import { CURRENT_CHANNEL } from './constants.js';
+import { User } from './Domain/User';
 import { chatSendMessageBox, currentChannel,chatContainer, chatSendMessageBtn } from './elements.js';
 import { getItemFromStorage } from './utils.js';
-import { ChatMessage } from './domain/chatMessage.js';
 const APPEND_MESSAGE_DOM="append_message";
 
 subscribeToEvent(APPEND_MESSAGE_DOM,onAppendedMessage);
@@ -23,6 +23,8 @@ function onSetChat(ev:CustomEvent){
 function onSendMessage(_:Event){
     var message=chatSendMessageBox.value;
     var user=getItemFromStorage<User>("user")!;
+
+
     var channel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
     var appendMessage={
         ["user"]:user.name,

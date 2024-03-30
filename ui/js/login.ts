@@ -1,9 +1,10 @@
 import config from "./config";
-import { getDataAsync } from "./utils";
+import { getDataAsync, getItemFromStorage } from "./utils";
 import{loginButton,emailLoginBox,passwordLoginBox,loginFailMessage, registerBtn} 
 from "./elements";
 import { subscribeToEvent,publishEvent} from "./bus";
 import { hideElement,showElement } from "./utils";
+import {User} from "./Domain/User";
 loginButton.addEventListener("click",onLogin);
 registerBtn.addEventListener("click",onRegister);
 
@@ -24,15 +25,13 @@ async function onDomContentLoaded(){
 }
 async function startLoginFlow(){
     console.log("start login flow");
-    var userRaw=localStorage.getItem("user");
+    var user=getItemFromStorage<User>("user");
     
-    if(!userRaw){
+    if(!user){
         publishEvent("showLogin",{});
         return;
     }
-    var userResult=JSON.parse(userRaw);
-   
-    await tryLoginAsync(userResult);
+    await tryLoginAsync(user);
 }
 function onShowLogin(ev:CustomEvent){
     showElement("loginModal");
@@ -90,13 +89,13 @@ function onRegister(){
 
 
 
-async function getUserByIdAsync(Id){
+async function getUserByIdAsync(Id):Promise<User|null>{
     var url=`${config.baseHttpUrl}/get-user?id=${Id}`;
     var result=await getDataAsync(url);
     return result;
 }
 
-async function getUserByEmailAsync(){
+async function getUserByEmailAsync():Promise<User|null>{
     var email=emailLoginBox.value;
     var password=passwordLoginBox.value;
     var url=`${config.baseHttpUrl}/get-user-by-email?email=${email}&password=${password}`;

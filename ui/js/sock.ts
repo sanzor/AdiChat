@@ -1,14 +1,14 @@
 import { publishEvent, subscribeToEvent } from "./bus.js";
 import config from "./config.js";
 import { SOCKET_COMMAND } from "./constants.js";
-import { Command,
-         PublishCommand,
-         SubscribeCommand,
-         UnsubscribeCommand,
-         RefreshChannelsCommand,
-         DisconnectCommand,
-         GetNewestMessagesCommand,
-         GetOlderMessagesCommand } from "../js/domain/commands/Index.js";
+import { Command} from './Domain/Commands/Command.js';
+import { PublishCommand} from './Domain/Commands/PublishCommand';
+import { SubscribeCommand} from './Domain/Commands/SubscribeCommand';
+import { UnsubscribeCommand} from './Domain/Commands/UnsubscribeCommand';
+import { RefreshChannelsCommand} from './Domain/Commands/RefreshChannelsCommand';
+import { DisconnectCommand} from './Domain/Commands/DisconnectCommand';
+import { GetNewestMessagesCommand} from './Domain/Commands/GetNewestMessagesCommand';
+import { GetOlderMessagesCommand} from './Domain/Commands/GetOlderMessagesCommand';
 import{
     SUBSCRIBE_COMMAND,
     UNSUBSCRIBE_COMMAND,

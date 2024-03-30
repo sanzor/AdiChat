@@ -6,11 +6,12 @@ const TOPIC="topic";
 const KIND="kind";
 const SOCKET_COMMAND="socket_command";
 const ID="id";
+const USER="user";
 
 
 
 export {
-    CHANNEL,TOPIC,KIND,SOCKET_COMMAND,CURRENT_CHANNEL,ID
+    CHANNEL,TOPIC,KIND,SOCKET_COMMAND,CURRENT_CHANNEL,ID,USER
 };
 
 

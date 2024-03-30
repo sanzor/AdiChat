@@ -2,7 +2,7 @@
 import config from "./config";
 import{emailBox,passwordBox,usernameBox,retypePasswordBox} from "./elements.js";
 import {publishEvent,subscribeToEvent } from "./bus.js";
-import { postDataAsync } from "./utils.js";
+import { postDataAsync, setItemInStorage } from "./utils.js";
 
 import{
     backToLoginBtn,
@@ -11,6 +11,10 @@ import{
 } from "./elements.js";
 import { hideElement, showElement } from "./utils.js";
 import { HIDE_REGISTER, SHOW_LOGIN, SHOW_MAIN, SHOW_REGISTER } from "./events.js";
+import { USER } from "./constants.js";
+import { CreateUserParams } from "./Domain/DTO/CreateUserParams.js";
+import { CreateUserResult } from "./Domain/DTO/CreateUserResult.js";
+import { User } from "./Domain/User.js";
 
 subscribeToEvent(SHOW_REGISTER,onShowRegister);
 subscribeToEvent(HIDE_REGISTER,onHideRegister);
@@ -47,20 +51,21 @@ async function onSubmit(){
     var userData=getCreateUserData();
     console.log(`User data for creating:${userData}`);  
     var validateResult=validateCreateUserData(userData);
-    if(!validateResult){
-         
-         showSubmitFailMessage(`Invalid data having reason:${validateResult.message}`);
+    if(validateResult instanceof Error){
+         const err:Error=validateResult
+         showSubmitFailMessage(`Invalid data having reason:${err.message}`);
          return;
     }
+    const succesfulData:CreateUserParams=validateResult;
     try{
     
-     var userResult=await createUserAsync(userData);
+     var userResult=await createUserAsync(succesfulData);
      if(userResult.result=="error"){
        handleUserCreateError(userResult);
        return;
      }
      console.log(`User created:${userResult}`);
-     localStorage.setItem("user",JSON.stringify(userResult));
+     setItemInStorage(USER,(userResult.result as User));
      publishEvent(HIDE_REGISTER,{});
      publishEvent(SHOW_MAIN,{});
     }catch(error){
@@ -68,7 +73,7 @@ async function onSubmit(){
     }
 }
 
-function getCreateUserData(){
+function getCreateUserData():CreateUserParams{
     let userData={
         email:emailBox.value,
         password:passwordBox.value,
@@ -78,7 +83,7 @@ function getCreateUserData(){
    }
    return userData;
 }
-function validateCreateUserData(data){
+function validateCreateUserData(data):CreateUserParams|Error{
     console.log(data);
     if(data.name==undefined || data.name==null){
         return new Error("Invalid username");
@@ -94,10 +99,9 @@ function validateCreateUserData(data){
 
 }
 
-async function createUserAsync(userData){
+async function createUserAsync(userData):Promise<CreateUserResult>{
     var url=`${config.baseHttpUrl}/create-user`;
     console.log(url);
-    
     var result=await postDataAsync(url,userData);
     console.log("Result create user\n:");
     console.log(result);

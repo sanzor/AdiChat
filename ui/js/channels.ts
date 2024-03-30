@@ -1,15 +1,12 @@
 import { publishCommand, publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus.js";
-import { ChatMessage } from "./domain/chatMessage.js";
-import { Channel } from "./domain/Channel.js";
+import { ChatMessage } from "./Domain/ChatMessage.js";
+import { Channel } from "./Domain/Channel.js";
 import{channelsContainer} from "./elements.js";
 import { setItemInStorage,getItemFromStorage } from "./utils.js";
 import {subscribeBtn,subscribeBox} from "./elements.js";
-import { KIND, SOCKET_COMMAND, TOPIC, CURRENT_CHANNEL} from "./constants.js";
-import { PublishCommand } from "./domain/commands/PublishCommand.js";
+import { KIND, SOCKET_COMMAND, CURRENT_CHANNEL} from "./constants.js";
 import {
     REFRESH_CHANNELS_COMMAND_RESULT, 
-
-    SUBSCRIBE_COMMAND,
     SUBSCRIBE_COMMAND_RESULT,
     SUBSCRIBE_COMMAND_RESULT_U,
 
@@ -25,7 +22,9 @@ import {
     ADD_CHANNEL,
     REMOVE_CHANNEL,
     CHANNEL_CLICK} from "./events.js";
-import { SubscribeCommand } from "./domain/commands/SubscribeCommand.js";
+import { SubscribeCommand } from "./Domain/Commands/SubscribeCommand";
+import { SubscribeResult } from "./Domain/Responses/CommandResult/SubscribeResult.js";
+import { UnsubscribeResult } from "./Domain/Responses/CommandResult/UnsubscribeResult.js";
 
 const CHANNELS="channels";
 
@@ -90,16 +89,16 @@ function onRefreshChannelsCommandResult(ev:CustomEvent){
 
 async function onSubscribeAsync(){
    
-    function onOwnSubscribeResult(ev,resolve,_){
+    function onOwnSubscribeResult(ev:CustomEvent,resolve,_){
         unsubscribeFromEvent(SUBSCRIBE_COMMAND_RESULT,(_)=>{
             console.log("unsubscribed from subscribe_result");
         });
-       resolve(ev.detail);
+       resolve(ev.detail as SubscribeResult);
     }
    
-    var subscribeResult =await new Promise((resolve,reject)=>{
+    var subscribeResult =await new Promise<SubscribeResult>((resolve,reject)=>{
         console.log(KIND);
-        subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev)=>onOwnSubscribeResult(ev,resolve,reject));
+        subscribeToEvent(SUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));
         publishCommand({kind:"subscribe",topic: subscribeBox.value} as SubscribeCommand);
     });
     var _=await handleSubscribeResultAsync(subscribeResult);
@@ -109,7 +108,7 @@ async function onSubscribeAsync(){
 const state={
     first_chat_set:false
 };
-async function handleSubscribeResultAsync(subscribeResult){
+async function handleSubscribeResultAsync(subscribeResult:SubscribeResult){
 
     console.log(subscribeResult.result);
     if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
@@ -121,7 +120,7 @@ async function handleSubscribeResultAsync(subscribeResult){
         console.log("already subscribed");
         return;
     }
-    var targetChannel:Channel={id:subscribeResult.topic.id,name:subscribeResult.topic.name};
+    var targetChannel:Channel=subscribeResult.topic!;
     var existingChannels=getItemFromStorage<Array<Channel>>(CHANNELS);
     if(!existingChannels){
         setItemInStorage(CURRENT_CHANNEL,targetChannel);
@@ -152,19 +151,19 @@ async function handleSubscribeResultAsync(subscribeResult){
 
 async function onUnsubscribeAsync(event){
     var channel=event.detail;
-    var unsubscribeResult=await new Promise((resolve,_)=>{
-        subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev)=>{
+    var unsubscribeResult=await new Promise<UnsubscribeResult>((resolve,_)=>{
+        subscribeToEvent(UNSUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>{
             unsubscribeFromEvent(REFRESH_CHANNELS_COMMAND_RESULT,function(_){
                 console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
             });
-            resolve(ev.detail);
+            resolve(ev.detail as UnsubscribeResult);
         });
         publishEvent(SOCKET_COMMAND,{[KIND]:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
     var _=await handleUnsubscribeResultAsync(unsubscribeResult);
      
 }
-async function handleUnsubscribeResultAsync(unsubscribeResult){
+async function handleUnsubscribeResultAsync(unsubscribeResult:UnsubscribeResult){
     console.log(unsubscribeResult);
     if(unsubscribeResult.result=="not_joined"){
         console.log("Not joined");
@@ -208,7 +207,7 @@ async function handleUnsubscribeResultAsync(unsubscribeResult){
 
 function setChannels(channels:Array<Channel>){
     setItemInStorage(CHANNELS,channels);
-    updateChannelsContainer(channels);
+    //updateChannelsContainer(channels);
     return channels;
 }
 

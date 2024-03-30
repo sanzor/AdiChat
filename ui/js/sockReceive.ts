@@ -1,4 +1,6 @@
 
+import { CommandResult } from "./Domain/Responses/CommandResult/CommandResult.js";
+import { SubscribeResult } from "./Domain/Responses/CommandResult/SubscribeResult.js";
 import { publishEvent ,subscribeToEvent} from "./bus";
 import { 
         REFRESH_CHANNELS_COMMAND, 
@@ -43,7 +45,7 @@ function handle_chat_message(data){
     
     
 }
-function handle_command_result(data){
+function handle_command_result(data:CommandResult){
     if(data.command==SUBSCRIBE_COMMAND){
         callback_subscribe(data);
     }
@@ -80,7 +82,7 @@ function handle_user_event_unsubscribe(data){
     console.log("Publishing update channels");
     publishEvent(UNSUBSCRIBE_COMMAND_RESULT_U,data);
 }
-function callback_subscribe(data){
+function callback_subscribe(data:SubscribeResult){
     console.log(data);
     publishEvent(SUBSCRIBE_COMMAND_RESULT,data);
    

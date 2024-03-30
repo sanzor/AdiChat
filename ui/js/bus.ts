@@ -1,4 +1,4 @@
-import { Command } from "./domain/commands/Command";
+import { Command } from "./Domain/Commands/Command";
 
 
 

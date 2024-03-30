@@ -1,15 +1,16 @@
-import { publishEvent, subscribeToEvent } from "./bus.js";
-import { Channel } from "./domain/Channel.js";
-import { KIND, SOCKET_COMMAND,CHANNEL_ID, MESSAGE_CONTENT, CURRENT_CHANNEL, ID} from "./constants.js";
+import { publishCommand, publishEvent, subscribeToEvent } from "./bus.js";
+import { Channel } from "./Domain/Channel.js";
+import { KIND,CHANNEL_ID, MESSAGE_CONTENT, CURRENT_CHANNEL, USER} from "./constants.js";
 import { 
     chatSendMessageBox,
-    currentChannel,
     loadOlderMessagesBtn} from "./elements.js";
 import { PUBLISH_MESSAGE, RESET_CHAT, RESET_CHAT_DOM, SELF_PUBLISH_MESSAGE, SET_CHAT ,SET_CHAT_DOM} from "./events.js";
 import { getItemFromStorage } from "./utils.js";
+import { User } from "./Domain/User.js";
+import { PublishCommand } from "./Domain/Commands/PublishCommand";
 
-const CHANNEL_MESSAGES_COUNT=10;
 
+loadOlderMessagesBtn?.addEventListener("click",onLoadOlderMessages);
 subscribeToEvent(SET_CHAT,onSetChat);
 subscribeToEvent(RESET_CHAT,onResetChat);
 subscribeToEvent("get_messages_result",onGetMessagesResult);
@@ -25,17 +26,20 @@ function onSelfPublish(ev:CustomEvent){
     
     console.log("Inside send message");
     var currentChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL)!;
+    var user=getItemFromStorage<User>(USER);
     console.log("Channel publish:"+currentChannel);
     var toSend={
         [KIND]:PUBLISH_MESSAGE,
+        "userId":user?.id,
         [CHANNEL_ID]:currentChannel.id,
         [MESSAGE_CONTENT]:chatSendMessageBox.value
-    };
+    } as PublishCommand;
+    
     console.log(toSend);
-    publishEvent(SOCKET_COMMAND,toSend);
+    publishCommand(toSend);
 }
 
-loadOlderMessagesBtn?.addEventListener("click",onLoadOlderMessages);
+
 
 
 function onSetChat(ev:CustomEvent){
