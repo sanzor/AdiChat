@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "strict": true,
+        "noEmit": false
+    },
+    "include": [
+        "./ui/ts/**/*.ts"
+    ]
+}
