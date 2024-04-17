@@ -1,3 +1,13 @@
+
+const connectBtn:HTMLButtonElement=document.getElementById("connectBtn")! as HTMLButtonElement;
+const logoutBtn:HTMLButtonElement=document.getElementById("logoutBtn")! as HTMLButtonElement;
+const disconnectBtn:HTMLButtonElement=document.getElementById("disconnectBtn")! as HTMLButtonElement;
+
+export{
+    connectBtn,
+    disconnectBtn,
+    logoutBtn
+};
 export{
     chatContainer,
     chatSendMessageBtn,

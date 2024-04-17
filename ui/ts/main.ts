@@ -3,11 +3,7 @@ import {publishEvent ,subscribeToEvent} from "./bus";
 import {hideElement, showElement } from "./utils";
 import {connect} from "./sock";
 import { HIDE_MAIN, SHOW_LOGIN, SHOW_MAIN } from "./events";
-
-
-const connectBtn=document.getElementById("connectBtn")!;
-const disconnectBtn=document.getElementById("disconnectBtn")!;
-const logoutBtn=document.getElementById("logoutBtn")!;
+import { connectBtn,disconnectBtn,logoutBtn } from "./elements";
 
 
 subscribeToEvent(SHOW_MAIN,onShowMain);

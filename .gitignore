@@ -20,3 +20,5 @@ ws2/
 private/
 /resources/rebar.lock
 rebar3.crashdump
+*/dist/*
+*/ui/js/*

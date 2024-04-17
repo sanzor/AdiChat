@@ -3,7 +3,8 @@
         "target": "es5",
         "module": "commonjs",
         "strict": true,
-        "noEmit": false
+        "noEmit": false,
+        "outDir": "./ui/js"
     },
     "include": [
         "./ui/ts/**/*.ts"
