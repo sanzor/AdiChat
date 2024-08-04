@@ -14,23 +14,9 @@
     epgsql
    ]},
   {env,[
-    {pg,[
-    {hostname,"localhost"},
+     {pg2,[
+    {hostname,"10.103.235.170"},
     {port,5432},
-    {username,"postgres"},
-    {password,"sanzor93"},
-    {database,"ws_db"}
-    ]},
-    {pg2,[
-    {hostname,"localhost"},
-    {port,31324},
-    {username,"admin"},
-    {password,"test123"},
-    {database,"postgresdb"}
-    ]},
-     {pg3,[
-    {hostname,"localhost"},
-    {port,31324},
     {username,"admin"},
     {password,"test123"},
     {database,"postgresdb"}

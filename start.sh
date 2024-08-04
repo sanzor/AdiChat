@@ -10,25 +10,20 @@ SQL_SCRIPT_PATH="/home/sanzor/NovaWebsocketServer/resources/tables.pgsql"
 # Define the Kubernetes context you want to use
 KUBE_CONTEXT="docker-desktop"
 
-# Get the current username
-CURRENT_USER=$(whoami)
-
 # Get the PostgreSQL pod name
 POSTGRES_POD=$(kubectl get pods -l app=postgres -o jsonpath='{.items[0].metadata.name}' --context="$KUBE_CONTEXT")
 
-# Change working directory to where the SQL script is located
-cd "$(dirname "$SQL_SCRIPT_PATH")"
-
 # Copy the SQL script to the PostgreSQL pod
-kubectl cp "$(basename "$SQL_SCRIPT_PATH")" "$POSTGRES_POD:$(basename "$SQL_SCRIPT_PATH")" --context="$KUBE_CONTEXT"
+kubectl cp "$SQL_SCRIPT_PATH" "$POSTGRES_POD:/tmp/tables.pgsql" --context="$KUBE_CONTEXT"
 
-# Change back to the original working directory
-cd -
+# Execute the SQL script inside the PostgreSQL pod
+kubectl exec -i "$POSTGRES_POD" --context="$KUBE_CONTEXT" -- env PGPASSWORD="$PGPASSWORD" psql -U "$PGUSER" -d postgresdb -f /tmp/tables.pgsql
 
-# Use echo to provide the password to sudo
-echo "$PGPASSWORD" | sudo -S -u "$CURRENT_USER" kubectl exec -i "$POSTGRES_POD" -- psql -U "$PGUSER" -d postgresdb -f "$(basename "$SQL_SCRIPT_PATH")"
+# Remove the SQL script from the PostgreSQL pod (optional)
+kubectl exec -i "$POSTGRES_POD" --context="$KUBE_CONTEXT" -- rm /tmp/tables.pgsql
 
+# Start the Erlang application
 echo "Starting Erlang application..."
 rebar3 nova serve 2>&1
 start_result=$?
-exit
+exit $start_result
