@@ -21,10 +21,12 @@ start(_StartType, _StartArgs) ->
       Hosts ->io:format("\nFound Hosts: ~p\n",[Hosts]),
               io:format("\nResults from pinging~p",[{Host,ping_node(Host)}||Host<-Hosts])
     end,
+    storage:start(),
     wsapp_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->
+  storage:stop(),
     ok.
 
 ping_node(Node)->

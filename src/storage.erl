@@ -18,19 +18,21 @@
          get_oldest_messages/3,
          get_newest_messages/2,
          write_chat_message/1,
-         write_chat_messages/1]).
+         write_chat_messages/1,
+         start/0,
+         stop/0]).
 
--define(USER_TABLE,"wsuser.dets").
--define(TOPIC_TABLE,"topic.dets").
--define(USER_TOPIC_TABLE,"user_topic.dets").
--define(MESSAGE_TABLE,"message.dets").
+-define(USER_TABLE,user).
+-define(TOPIC_TABLE,topic).
+-define(USER_TOPIC_TABLE,user_topic).
+-define(MESSAGE_TABLE,message).
 
 -spec start()->ok | {error,term()}.
 start()->
-    dets:open_file(?USER_TABLE,[]),
-    dets:open_file(?TOPIC_TABLE,[]),
-    dets:open_file(?USER_TOPIC_TABLE,[]),
-    dets:open_file(?MESSAGE_TABLE,[]).
+    dets:open_file(?USER_TABLE,[{file,"user.dets"}]),
+    dets:open_file(?TOPIC_TABLE,[{file,"topic.dets"}]),
+    dets:open_file(?USER_TOPIC_TABLE,[{file,"user_topic.dets"}]),
+    dets:open_file(?MESSAGE_TABLE,[{file,"message.dets"}]).
 
 -spec stop() -> ok | {error, term()}.
 stop()->
