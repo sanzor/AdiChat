@@ -3,7 +3,8 @@
 -export([datetime_to_string/1]).
 -include("../include/domain.hrl").
 -spec from_user(User::domain:user())->map().
-from_user(_=#user{id = Id,email = Email,name = Name,password=Password})->
+from_user(User=#user{id = Id,email = Email,name = Name,password=Password})->
+    io:format("\nSugi User value:~p",[User]),
     #{id=>Id,email=>Email,name=>Name,password=>Password}.
 
 from_topic(_=#topic{id = Id,name=Name,created_by = CreatedBy})->

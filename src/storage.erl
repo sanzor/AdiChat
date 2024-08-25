@@ -20,6 +20,7 @@
          write_chat_message/1,
          write_chat_messages/1,
          start/0,
+         
          stop/0]).
 
 -define(USER_TABLE,user).
@@ -44,9 +45,9 @@ stop()->
 
 -spec create_user(UserData::domain:create_user_params())->{ok,domain:user()}| already_exists | {error,term()}.
 create_user(#create_user_params{email = Email,name = Name,password=Password})->
-    case dets:match_object(?USER_TABLE, {'_','_',Email,'_'}) of
+    case dets:match_object(?USER_TABLE, {'_',Email,'_','_'}) of
         [] -> NewId=erlang:unique_integer([monotonic,positive]),
-              NewUser={NewId,Email,Password,Name},
+              NewUser={NewId,Email,Name,Password},
               dets:insert(?USER_TABLE, NewUser),
               {ok,NewUser};
         _ -> already_exists
@@ -55,7 +56,7 @@ create_user(#create_user_params{email = Email,name = Name,password=Password})->
 -spec get_user(UserId::domain:user_id())-> {ok,domain:user()} | user_does_not_exist | {error,term()}.
 get_user(UserId)->
     case dets:lookup(?USER_TABLE,UserId) of
-        [User]->{ok,User};
+        [{Id,Email,Name,Password}]->{ok,#{id=>Id,email=>Email,password=>Password,name=>Name}};
         []-> user_does_not_exist
 end.
 
@@ -64,7 +65,7 @@ end.
 get_user_by_email(Email)->
     case dets:match_object(?USER_TABLE,{'_',Email,'_','_'}) of
         [] -> user_does_not_exist;
-        [User]-> {ok,User}
+        [{Id,Email,Name,Password}]-> {ok,#{id=>Id,email=>Email,password=>Password,name=>Name}}
 end.
 
 -spec delete_user(UserId::domain:user_id())->ok | {error,term()}.
