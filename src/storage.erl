@@ -56,7 +56,7 @@ create_user(#create_user_params{email = Email,name = Name,password=Password})->
 -spec get_user(UserId::domain:user_id())-> {ok,domain:user()} | user_does_not_exist | {error,term()}.
 get_user(UserId)->
     case dets:lookup(?USER_TABLE,UserId) of
-        [{Id,Email,Name,Password}]->{ok,#{id=>Id,email=>Email,password=>Password,name=>Name}};
+        [{Id,Email,Name,Password}]->{ok,#user{id=Id,email=Email,password=Password,name=Name}};
         []-> user_does_not_exist
 end.
 
@@ -65,7 +65,7 @@ end.
 get_user_by_email(Email)->
     case dets:match_object(?USER_TABLE,{'_',Email,'_','_'}) of
         [] -> user_does_not_exist;
-        [{Id,Email,Name,Password}]-> {ok,#{id=>Id,email=>Email,password=>Password,name=>Name}}
+        [{Id,Email,Name,Password}]-> {ok,#user{id=Id,email=Email,password=Password,name=Name}}
 end.
 
 -spec delete_user(UserId::domain:user_id())->ok | {error,term()}.
@@ -127,14 +127,14 @@ unsubscribe(TopicId,UserId)->
         [] -> not_joined
 end.
 
--spec get_subscriptions_for_topic(TopicId::domain:topic_id())-> {ok,list()} | {error,Reason::term()}.
+-spec get_subscriptions_for_topic(TopicId::domain:topic_id())-> {ok,[domain:user_topic()]} | {error,Reason::term()}.
 get_subscriptions_for_topic(TopicId)->
-    Result=[#{<<"id">>=>Id, <<"user_id">>=>UserId, <<"topic_id">>=>TopicId ,<<"created_at">>=>CreatedAt} || {Id,UserId,_,CreatedAt}<-dets:match_object(?USER_TOPIC_TABLE, {'_','_',TopicId,'_'})],
+    Result=[#user_topic{id=Id, user_id=UserId, topic_id=TopicId ,created_at =CreatedAt} || {Id,UserId,_,CreatedAt}<-dets:match_object(?USER_TOPIC_TABLE, {'_','_',TopicId,'_'})],
     Result.
 
--spec get_user_subscriptions(UserId::domain:user_id()) -> {ok,list()}|{error,Reason::term()}.
+-spec get_user_subscriptions(UserId::domain:user_id()) -> {ok,[domain:user_topic()]}|{error,Reason::term()}.
 get_user_subscriptions(UserId)->
-    Result=[#{<<"id">>=>Id, <<"user_id">>=>UserId, <<"topic_id">>=>TopicId ,<<"created_at">>=>CreatedAt}||{Id,_,TopicId,CreatedAt}
+    Result=[#user_topic{id=Id, user_id=UserId, topic_id=TopicId ,created_at = CreatedAt}||{Id,_,TopicId,CreatedAt}
     <-dets:match_object(?USER_TOPIC_TABLE, {'_',UserId,'_','_'})],
     Result.
 
@@ -146,26 +146,19 @@ check_if_subscribed(TopicId,UserId)->
     end,
     Result.
 
-
-    % id SERIAL PRIMARY KEY,
-    % topic_id INTEGER REFERENCES topic(id),
-    % user_id INTEGER REFERENCES wsuser(id),
-    % message VARCHAR(255),
-    % created_at TIMESTAMPTZ,
-    % timezone VARCHAR(255)
--spec get_newest_messages(TopicId::domain:topic_id(),Count::number())->{ok,Messages::list()}|{error,Reason::term()}.
+-spec get_newest_messages(TopicId::domain:topic_id(),Count::number())->{ok,Messages::[domain:message()]}|{error,Reason::term()}.
 get_newest_messages(TopicId,Count)->
     Messages=case dets:match(?MESSAGE_TABLE,{'_',TopicId,'_','_','_','_'},Count) of
                 '$end_of_table' -> [];
                  {error,Reason}->{error,Reason};
                  Results->
                     {ok,[
-                     #{<<"id">> => Id ,
-                     <<"user_id">>=> UserId ,
-                     <<"topic_id">>=> TopicId,
-                     <<"message">>=> Message,
-                     <<"created_at">>=> CreatedAt,
-                     <<"timezone">>=> Timezone}||{Id,UserId,_,Message,CreatedAt,Timezone}<-Results]}
+                     #message{
+                     user_id= UserId ,
+                     topic_id= TopicId,
+                     content= Message,
+                     created_at= CreatedAt,
+                     timezone= Timezone}||{Id,UserId,_,Message,CreatedAt,Timezone}<-Results]}
              end,
     Messages.
 
@@ -177,12 +170,12 @@ get_oldest_messages(TopicId,StartIndex,Count)->
              fun({Id,UserId,_TopicId,Message,CreatedAt,Timezone},Acc)->
                 case {Id<StartIndex,length(Acc)<Count} of
                     {true,true}->
-                        [#{<<"id">>=>Id,
-                           <<"user_id">>=>UserId,
-                           <<"topic_id">>=>TopicId,
-                           <<"message">>=>Message,
-                           <<"created_at">>=>CreatedAt,
-                           <<"timeezone">>=>Timezone}|Acc];
+                        [#message{message_id = Id,
+                           user_id=UserId,
+                           topic_id=TopicId,
+                           content=Message,
+                           created_at = CreatedAt,
+                           timezone =Timezone}];
                     _ ->Acc
                 end
             end,

@@ -24,16 +24,16 @@
 
 -record(create_topic_params,{
     name::string(),
-    user_id::number()
+    user_id::user_id()
 }).
 
 -type create_topic_params()::#create_topic_params{
-    name::string(),
-    user_id::number()
+    user_id::user_id(),
+    name::string()
 }.
 
 -record(user,{
-    id::integer(),
+    id::user_id(),
     name::string(),
     email::string(),
     password::string()
@@ -41,13 +41,11 @@
 
 
 -type user()::#user{
-    id::integer(),
+    id::user_id(),
     name::string(),
     email::string(),
     password::string()
 }.
-
-
 
 
 -record(topic,{
@@ -70,12 +68,23 @@
 -type subscribe_result()::#subscribe_result{
     result::topic() ,
     subscriber_id::user_id()
-
 }.
 
-
-
+-record(user_topic,{
+    id::user_topic_id(),
+    topic_id::topic_id(),
+    user_id::user_id(),
+    created_at::string()
+}).
+-type user_topic()::#user_topic{
+    id::user_topic_id(),
+    topic_id::topic_id(),
+    user_id::user_id(),
+    created_at::string()
+}.
+-type user_topic_id()::integer().
 -record(message,{
+    message_id::message_id(),
     content::message_content(),
     user_id::user_id(),
     topic_id::topic_id(),
@@ -84,6 +93,7 @@
 }).
 
 -type message()::#message{
+    message_id::message_id(),
     content::message_content(),
     user_id::user_id(),
     topic_id::topic_id(),
@@ -92,5 +102,5 @@
 }.
 
 -type message_content()::string().
-
+-type message_id()::number().
 
