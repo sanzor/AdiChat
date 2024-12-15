@@ -32,12 +32,12 @@
 }).
 %----------------------------API ----------------------------------%
 
--spec get_user(UserId::domain:user_id())->{ok,User::map()} | {error,Error::any()} | user_does_not_exist.
+-spec get_user(UserId::domain:user_id())->{ok,User::domain:user()} | {error,Error::any()} | user_does_not_exist.
 
 get_user(UserId)->
     gen_server:call(?MODULE,{get_user,UserId}).
 
--spec get_user_by_email(Email::binary())->{ok,User::map()} |  user_does_not_exist.
+-spec get_user_by_email(Email::binary())->{ok,User::domain:user()} |  user_does_not_exist.
 
 get_user_by_email(Email)->
     gen_server:call(?MODULE,{get_user_by_email,Email}).
@@ -73,16 +73,16 @@ delete_topic(TopicId)->
 
 
 
--spec get_older_messages(TopidId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::list()} | error .
+-spec get_older_messages(TopidId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::[domain:message()]} | error .
 get_older_messages(TopicId,StartIndex,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,StartIndex,Count}}).
 
 
--spec get_newest_messages(TopidId::domain:topic_id(),Count::integer())->{ok,Messages::list()} | error .
+-spec get_newest_messages(TopidId::domain:topic_id(),Count::integer())->{ok,Messages::[domain:message()]} | error .
 get_newest_messages(TopicId,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,Count}}).
 
--spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::list()}  | {error,Reason::any()}.
+-spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::[domain:user_topic()]}  | {error,Reason::any()}.
 get_subscriptions(UserId)->
     gen_server:call(?MODULE,{get_subscriptions,UserId}).
 
@@ -134,7 +134,9 @@ handle_call({get_user,UserId},_,State)->
 
 handle_call({get_user_by_email,Email},_,State)->
     case storage:get_user_by_email(Email) of
-        {ok,User} ->{reply,{ok,User},State};
+        {ok,User} ->
+           
+            {reply,{ok,User},State};
          user_does_not_exist ->{reply,user_does_not_exist,State}
     end;
 handle_call({create_user,UserData},_,State)->

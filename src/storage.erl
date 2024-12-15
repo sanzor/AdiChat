@@ -49,7 +49,7 @@ create_user(#create_user_params{email = Email,name = Name,password=Password})->
         [] -> NewId=erlang:unique_integer([monotonic,positive]),
               NewUser={NewId,Email,Name,Password},
               dets:insert(?USER_TABLE, NewUser),
-              {ok,NewUser};
+              {ok,#user{id =NewId,email = Email,name = Name,password = Password}};
         _ -> already_exists
     end.
 
@@ -81,13 +81,13 @@ create_topic(#create_topic_params{name = TopicName,user_id = UserId})->
             CreatedAt=erlang:now(),
             Topic={NewId,TopicName,UserId,CreatedAt},
             dets:insert(?TOPIC_TABLE, Topic),
-            {ok,Topic};
+            {ok,#topic{id=NewId,name = TopicName,created_at = CreatedAt,created_by = UserId }};
         [_] -> already_exists
 end.
 -spec get_topic(TopicId::integer())->{ok,Topic::domain:topic()} | topic_does_not_exist | {error,Error::any()}.   
 get_topic(TopicId)->
     case dets:lookup(?TOPIC_TABLE,TopicId) of 
-        [Topic] -> {ok,Topic};
+        [{NewId,TopicName,UserId,CreatedAt}] -> {ok,#topic{id=NewId,name = TopicName,created_at = CreatedAt,created_by = UserId }};
         _ -> topic_does_not_exist
 end.
 
@@ -96,7 +96,7 @@ end.
 get_topic_by_name(TopicName)->
     case dets:match_object(?TOPIC_TABLE,{'_',TopicName,'_','_'}) of
         [] -> user_does_not_exist;
-        [Topic]-> {ok,Topic}
+        [{NewId,TopicName,UserId,CreatedAt}]-> {ok,#topic{id=NewId,name = TopicName,created_at = CreatedAt,created_by = UserId }}
 end.
 
 -spec delete_topic(Id::domain:topic_id()) -> ok | {error, term()}.

@@ -13,7 +13,6 @@ init(#{req :=Req})->
     {ok,#{<<"id">> => binary_to_integer(Id)}}.
 
 websocket_init(State=#{<<"id">> :=Id})->
-
     {ok,User}= wsapp_server:get_user(Id),                         
     io:format("User is:~p",[User]),      
     #user{id=UserId}=User,
