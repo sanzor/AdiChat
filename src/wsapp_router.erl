@@ -10,7 +10,7 @@ routes(_Environment) ->
     [#{prefix => "",
       security => false,
       routes => [
-                 {"/", { wsapp_main_controller, index}, #{methods => [get]}},
+                %  {"/", { wsapp_main_controller, index}, #{methods => [get]}},
                  {"/ws/id/:id",wsapp_ws,#{protocol=>ws,idle_timeout=>30000}},
                  {"/get-user",{user_controller,get_user},#{methods=>[get,options]}},
                  {"/get-user-by-email",{user_controller,get_user_by_email},#{methods=>[get,options]}},

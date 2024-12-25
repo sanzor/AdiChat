@@ -22,3 +22,10 @@ private/
 rebar3.crashdump
 */dist/*
 */ui/js/*
+
+node_modules/*
+node_modules/
+package.json
+package-lock.json
+*.dets
+.gitignore
