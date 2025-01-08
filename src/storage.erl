@@ -95,7 +95,7 @@ end.
 
 get_topic_by_name(TopicName)->
     case dets:match_object(?TOPIC_TABLE,{'_',TopicName,'_','_'}) of
-        [] -> user_does_not_exist;
+        [] -> topic_does_not_exist;
         [{NewId,TopicName,UserId,CreatedAt}]-> {ok,#topic{id=NewId,name = TopicName,created_at = CreatedAt,created_by = UserId }}
 end.
 

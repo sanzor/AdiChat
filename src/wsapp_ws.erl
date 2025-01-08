@@ -14,9 +14,10 @@ init(#{req :=Req})->
 
 websocket_init(State=#{<<"id">> :=Id})->
     {ok,User}= wsapp_server:get_user(Id),                         
-    io:format("User is:~p",[User]),      
+      
     #user{id=UserId}=User,
     ok=wsapp_server:online(UserId,self()),
+    io:format("User is:~p",[User]),   
     {reply,ping,State#{<<"user">>=>User}}.
 
 websocket_info(send_ping,State)->
