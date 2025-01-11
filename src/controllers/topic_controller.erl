@@ -5,7 +5,8 @@
          create_topic/1,
          delete_topic/1,
          subscribe/1,
-         unsubscribe/1
+         unsubscribe/1,
+         get_subscriptions/1
         ]).
 
 index(_Req) ->
