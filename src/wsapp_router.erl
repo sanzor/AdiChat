@@ -21,7 +21,7 @@ routes(_Environment) ->
                  {"/delete-topic",{topic_controller,delete_topic},#{methods=>[delete]}},
                  {"/subscribe",{topic_controller,subscribe},#{ methods =>[post,options]}},
                  {"/unsubscribe",{topic_controller,unsubscribe},#{ methods =>[post]}},
-                 {"/get_subscriptions/user/:user",{topic_controller,get_subscriptions},#{methods=>[get]}},
+                 {"/get_subscriptions/:user_id",{topic_controller,get_subscriptions},#{methods=>[get]}},
 
                  {"/publish",{message_controller,publish},#{ methods =>[post]}},
                  {"/get_messages/topic/:topic",{message_controller,get_messages},#{methods=>[get]}},

@@ -199,9 +199,7 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
                                  end,
     Reply=case storage:check_if_subscribed(TopicId, UserId) of
         true -> already_subscribed;
-        false
-    
- ->ok=storage:subscribe(TopicId, UserId),
+        false->ok=storage:subscribe(TopicId, UserId),
                 UserEvent=#{user_event_kind => <<"subscribe">>,topic => Topic},
                 [send(Socket,{user_event,UserId,UserEvent})|| 
                             Socket<-pg:get_members(?F(UserId)), Socket =/=From],
