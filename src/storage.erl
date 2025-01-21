@@ -142,7 +142,7 @@ get_user_subscriptions(UserId)->
 check_if_subscribed(TopicId,UserId)->
     Result=case dets:match_object(?USER_TOPIC_TABLE, {'_',UserId,TopicId,'_'}) of
         []->false;
-        [_]-> true
+        [R]-> io:format("\nResult from check if subscribed: \n~p",[R]), true
     end,
     Result.
 

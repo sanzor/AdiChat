@@ -41,8 +41,8 @@ unsubscribe(_Req=#{parsed_qs := #{ <<"user">> :=User, <<"topic">> := Topic}})->
 get_subscriptions(_=#{bindings := #{<<"user_id">> := UserId}})->
     try
         {ok,Subscriptions}=wsapp_server:get_subscriptions(UserId),
+        io:format("\nSubscriptions for ~p are:\n ~p",[UserId,Subscriptions]),
         JsonSubs=[utils:from_user_topic(Subscription) || Subscription<-Subscriptions],
-        io:format("Subscriptions: ~p",[JsonSubs]),
         {json,200,#{<<"Content-Type">>=> <<"application/json">>},#{ <<"user_id">> => UserId, <<"subscriptions">> =>JsonSubs}}
     catch
         Error:Reason -> {status,500,#{},#{<<"error">> => Error ,<<"reason">> =>Reason}}

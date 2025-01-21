@@ -193,10 +193,11 @@ handle_call({subscribe,{UserId,TopicName}},{From,_},_State)->
     Topic=#topic{id= TopicId}= case storage:get_topic_by_name(TopicName) of
                                         topic_does_not_exist -> 
                                              Params=#create_topic_params{user_id = UserId , name = TopicName},
-                                            {ok,Topic}=storage:create_topic(Params),
-                                            Topic;
-                                        {ok,Topic} -> Topic
-                                 end,
+                                            {ok,NewTopic}=storage:create_topic(Params),
+                                            io:format("Created new topic"),
+                                            NewTopic;
+                                        {ok,ExistingTopic} -> ExistingTopic
+                                end,
     Reply=case storage:check_if_subscribed(TopicId, UserId) of
         true -> already_subscribed;
         false->ok=storage:subscribe(TopicId, UserId),
