@@ -82,7 +82,7 @@ get_older_messages(TopicId,StartIndex,Count)->
 get_newest_messages(TopicId,Count)->
     gen_server:call(?MODULE,{get_messages,{TopicId,Count}}).
 
--spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::[domain:user_topic()]}  | {error,Reason::any()}.
+-spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::[domain:topic()]}  | {error,Reason::any()}.
 get_subscriptions(UserId)->
     gen_server:call(?MODULE,{get_subscriptions,UserId}).
 

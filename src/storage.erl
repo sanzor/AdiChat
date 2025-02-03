@@ -132,11 +132,14 @@ get_subscriptions_for_topic(TopicId)->
     Result=[#user_topic{id=Id, user_id=UserId, topic_id=TopicId ,created_at =CreatedAt} || {Id,UserId,_,CreatedAt}<-dets:match_object(?USER_TOPIC_TABLE, {'_','_',TopicId,'_'})],
     Result.
 
--spec get_user_subscriptions(UserId::domain:user_id()) -> {ok,[domain:user_topic()]}|{error,Reason::term()}.
+-spec get_user_subscriptions(UserId::domain:user_id()) -> {ok,[domain:topic()]}|{error,Reason::term()}.
 get_user_subscriptions(UserId)->
-    Result=[#user_topic{id=Id, user_id=UserId, topic_id=TopicId ,created_at = CreatedAt}||{Id,_,TopicId,CreatedAt}
-    <-dets:match_object(?USER_TOPIC_TABLE, {'_',UserId,'_','_'})],
-    io:format("user:~p is subscribed to user_topics:~p",[UserId,Result]),
+    Result = [
+            #topic{id = TopicId, name = Name}
+            || {_, _, TopicId, _} <- dets:match_object(?USER_TOPIC_TABLE, {'_', UserId, '_', '_'}),
+               {_, Name, _, _} <- dets:match_object(?TOPIC_TABLE, {TopicId, '_', '_', '_'})
+            ],
+    
     {ok,Result}.
 
 -spec check_if_subscribed(TopicId::domain:topic_id(),UserId::domain:user_id())->{ok,boolean()}|{error,Error::term()}.
