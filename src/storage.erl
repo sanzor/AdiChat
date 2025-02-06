@@ -152,19 +152,20 @@ check_if_subscribed(TopicId,UserId)->
 
 -spec get_newest_messages(TopicId::domain:topic_id(),Count::number())->{ok,Messages::[domain:message()]}|{error,Reason::term()}.
 get_newest_messages(TopicId,Count)->
-    Messages=case dets:match(?MESSAGE_TABLE,{'_',TopicId,'_','_','_','_'},Count) of
-                '$end_of_table' -> [];
+    Result=case dets:match(?MESSAGE_TABLE,{'_',TopicId,'_','_','_','_'},Count) of
+                '$end_of_table' -> {ok,[]};
                  {error,Reason}->{error,Reason};
                  Results->
                     {ok,[
                      #message{
+                     message_id = Id,
                      user_id= UserId ,
                      topic_id= TopicId,
                      content= Message,
                      created_at= CreatedAt,
                      timezone= Timezone}||{Id,UserId,_,Message,CreatedAt,Timezone}<-Results]}
              end,
-    Messages.
+    Result.
 
 -spec get_oldest_messages(TopicId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::list()}| {error,Error::term()}.
 get_oldest_messages(TopicId,StartIndex,Count)->

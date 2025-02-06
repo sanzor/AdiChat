@@ -126,7 +126,7 @@ handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"start
 handle_command(<<"get_newest_messages">>,Req=#{<<"topicId">> := TopicId, <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_newest_messages(TopicId,Count),
-    {ok,reply,#{<<"topic">>=>TopicId, <<"result">>=>Messages, kind=><<"command_result">>}};
+    {ok,reply,#{topic=>TopicId, result=>Messages, kind=><<"command_result">>, command=><<"get_newest_messages">>}};
     
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"id">>:=UserId})->
     Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},
