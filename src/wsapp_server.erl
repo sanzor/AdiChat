@@ -71,7 +71,7 @@ delete_topic(TopicId)->
 
 
 
-
+-type topic_message_map() :: definition.
 
 -spec get_older_messages(TopidId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::[domain:message()]} | error .
 get_older_messages(TopicId,StartIndex,Count)->
@@ -81,6 +81,8 @@ get_older_messages(TopicId,StartIndex,Count)->
 -spec get_newest_messages(TopidId::domain:topic_id(),Count::integer())->{ok,Messages::[domain:message()]} | error .
 get_newest_messages(TopicId,Count)->
     gen_server:call(?MODULE,{get_newest_messages,{TopicId,Count}}).
+
+-spec get_newest_messages_for_user(UserId::domain:user_id(),Count::integer())->{ok,TopicMessagesMap::#{domain:topic_id()=>[domain:message()]}}.
 
 -spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::[domain:topic()]}  | {error,Reason::any()}.
 get_subscriptions(UserId)->

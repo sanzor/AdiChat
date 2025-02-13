@@ -123,6 +123,11 @@ handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"start
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
     {ok,reply,#{<<"topic">>=>TopicId, <<"result">>=>Messages, kind=><<"command_result">>}};
 
+handle_command(<<"get_newest_messages_for_user">>,_=#{id:=UserId,count:=Count},_=#{<<"id">>:=UserId})->
+    io:format("Fetching newest messages for user ~p",[UserId]),
+    {ok,TopicMessageMap}=wsapp_server:get_newest_messages_for_user(UserId, Count),
+    {ok,reply,#{kind=><<"command_result">>,command=>get_newest_messages_for_user,result=>TopicMessageMap}};
+
 handle_command(<<"get_newest_messages">>,Req=#{<<"topicId">> := TopicId, <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_newest_messages(TopicId,Count),
