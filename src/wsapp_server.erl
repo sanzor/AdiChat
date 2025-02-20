@@ -22,6 +22,7 @@
          unsubscribe/2,
          get_older_messages/3,
          get_newest_messages/2,
+         get_newest_messages_for_user/2,
          get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
@@ -71,8 +72,6 @@ delete_topic(TopicId)->
 
 
 
--type topic_message_map() :: definition.
-
 -spec get_older_messages(TopidId::domain:topic_id(),StartIndex::integer(),Count::integer())->{ok,Messages::[domain:message()]} | error .
 get_older_messages(TopicId,StartIndex,Count)->
     gen_server:call(?MODULE,{get_older_messages,{TopicId,StartIndex,Count}}).
@@ -82,7 +81,10 @@ get_older_messages(TopicId,StartIndex,Count)->
 get_newest_messages(TopicId,Count)->
     gen_server:call(?MODULE,{get_newest_messages,{TopicId,Count}}).
 
--spec get_newest_messages_for_user(UserId::domain:user_id(),Count::integer())->{ok,TopicMessagesMap::#{domain:topic_id()=>[domain:message()]}}.
+-spec get_newest_messages_for_user(UserId::domain:user_id(),Count::integer())->{ok,[domain:topic_with_messages()]} | {error,Reason::term()}.
+
+get_newest_messages_for_user(UserId,Count)->
+    gen_server:call(?MODULE,{get_newest_messages_for_user,{UserId,Count}}).
 
 -spec get_subscriptions(UserId::domain:user_id())->{ok,Channels::[domain:topic()]}  | {error,Reason::any()}.
 get_subscriptions(UserId)->
@@ -186,6 +188,11 @@ handle_call({get_newest_messages,{TopicId,Count}},_,State)->
     {ok,Messages}=storage:get_newest_messages(TopicId, Count),
     {reply,{ok,Messages},State};
 
+handle_call({get_newest_messages_for_user,{UserId,Count}},_,State)->
+    Result=[[#topic_with_messages{messages =Messages ,topic=Topic}|| 
+    {ok,Messages}<-storage:get_newest_messages(TopicId, Count)]|| {ok,Topic=#topic{id = TopicId}}<-storage:get_user_subscriptions(UserId)],
+    {reply,{ok,Result},State};
+    
 handle_call({get_subscriptions,UserId},_,State)->
     {ok,Subscriptions}=storage:get_user_subscriptions(UserId),
     {reply,{ok,Subscriptions},State};

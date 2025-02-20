@@ -3,6 +3,7 @@
     topic_id/0,
     user/0,
     topic/0,
+    topic_with_messages/0,
     create_user_params/0,
     create_topic_params/0,
     subscribe_result/0,
@@ -100,6 +101,15 @@
     created_at::string(),
     timezone::binary()
 }.
+-record(topic_with_messages,{
+    topic::topic(),
+    messages::[message()]
+}).
+-type topic_with_messages()::#topic_with_messages{
+    topic::topic(),
+    messages::[message()]
+}.
+
 
 -type message_content()::string().
 -type message_id()::number().
