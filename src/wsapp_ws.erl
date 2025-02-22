@@ -43,6 +43,7 @@ websocket_handle({text, Message},State)->
     Json=json:decode(Message,[maps]),
     io:format("\nReceived :~p\n",[Json]),
     #{<<"command">>:= Command}=Json,
+    io:format("~p",[Command]),
     case handle_command(Command,Json,State) of
             {ok,noreply} -> {ok,State};
             {ok,reply,Reply} ->
@@ -123,10 +124,13 @@ handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"start
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
     {ok,reply,#{<<"topic">>=>TopicId, <<"result">>=>Messages, kind=><<"command_result">>}};
 
-handle_command(<<"get_newest_messages_for_user">>,_=#{user_id:=UserId,count:=Count},_=#{<<"id">>:=UserId})->
-    io:format("Fetching newest messages for user ~p",[UserId]),
-    {ok,TopicMessageMap}=wsapp_server:get_newest_messages_for_user(UserId, Count),
-    {ok,reply,#{kind=><<"command_result">>,command=>get_newest_messages_for_user,result=>TopicMessageMap}};
+handle_command(<<"get_newest_messages_for_user">>,_=#{<<"user_id">>:=UserId,<<"count">>:=Count},_=#{<<"id">>:=UserId})->
+    Result=[
+        #{topic=>utils:from_topic(Topic),
+         messages=>[utils:from_message(Message)||Message<-Messages]
+        }||
+        {ok,TopicsWithMessages}<-[wsapp_server:get_newest_messages_for_user(UserId, Count)],#topic_with_messages{topic =Topic ,messages=Messages}<-TopicsWithMessages],
+    {ok,reply,#{kind=><<"command_result">>,command=>get_newest_messages_for_user,result=>Result}};
 
 handle_command(<<"get_newest_messages">>,Req=#{<<"topicId">> := TopicId, <<"count">> := Count},_State)->
     io:format("~p",[Req]),

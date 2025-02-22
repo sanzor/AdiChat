@@ -189,8 +189,12 @@ handle_call({get_newest_messages,{TopicId,Count}},_,State)->
     {reply,{ok,Messages},State};
 
 handle_call({get_newest_messages_for_user,{UserId,Count}},_,State)->
-    Result=[[#topic_with_messages{messages =Messages ,topic=Topic}|| 
-    {ok,Messages}<-storage:get_newest_messages(TopicId, Count)]|| {ok,Topic=#topic{id = TopicId}}<-storage:get_user_subscriptions(UserId)],
+     Result=[
+    #topic_with_messages{
+        messages = Messages ,
+        topic=Topic
+    }
+    || {ok,Topics}<-[storage:get_user_subscriptions(UserId)],Topic=#topic{id = TopicId}<-Topics,{ok,Messages}<-[storage:get_newest_messages(TopicId, Count)]],
     {reply,{ok,Result},State};
     
 handle_call({get_subscriptions,UserId},_,State)->
