@@ -122,7 +122,7 @@ subscribe(TopicId,UserId)->
 -spec unsubscribe(TopicId::domain:topic_id(),UserId::domain:user_id())-> ok | not_joined | {error,Reason::term()}.
 unsubscribe(TopicId,UserId)->
     case dets:match_object(?USER_TOPIC_TABLE, {'_',UserId,TopicId,'_'}) of
-        [UserTopic] -> dets:delete(?USER_TOPIC_TABLE,UserTopic),
+        [{Id,_,_,_}] -> dets:delete(?USER_TOPIC_TABLE,Id),
                        ok;
         [] -> not_joined
 end.
