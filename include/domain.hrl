@@ -7,7 +7,8 @@
     create_user_params/0,
     create_topic_params/0,
     subscribe_result/0,
-    message/0]
+    message/0,
+    message_dto/0]
 ).
 -type user_id()::number().
 -type topic_id()::number().
@@ -93,6 +94,17 @@
     timezone::string()
 }).
 
+-type message_dto()::#message_dto{
+    content::message_content(),
+    user_id::user_id(),
+    topic_id::topic()
+}.
+
+-record(message_dto,{
+    user_id::user_id(),
+    topic_id::topic_id(),
+    content::message_content()
+}).
 -type message()::#message{
     message_id::message_id(),
     content::message_content(),

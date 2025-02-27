@@ -188,10 +188,11 @@ get_oldest_messages(TopicId,StartIndex,Count)->
             Results),
             {ok,lists:reverse(FilteredMessages)}.
 
--spec write_chat_message(Message::domain:message())->ok | {error,Error::any()}.
-write_chat_message(Input=#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone})->
+-spec write_chat_message(Message::domain:message_dto())->ok | {error,Error::any()}.
+write_chat_message(Input=#message_dto{user_id = UserId,topic_id = TopicId,content = Content})->
     Id=erlang:unique_integer([monotonic,positive]),
-    Record={Id,UserId,TopicId,Content,CreatedAt,Timezone},
+    CreatedAt=erlang:system_time(),
+    Record={Id,UserId,TopicId,Content,CreatedAt,"utc+2"},
     dets:insert(?MESSAGE_TABLE,Record),
     ok.
 

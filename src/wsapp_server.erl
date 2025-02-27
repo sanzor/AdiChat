@@ -90,7 +90,7 @@ get_newest_messages_for_user(UserId,Count)->
 get_subscriptions(UserId)->
     gen_server:call(?MODULE,{get_subscriptions,UserId}).
 
--spec publish(Message::domain:message())->ok.
+-spec publish(Message::domain:message_dto())->ok.
 publish(Message)->
     gen_server:cast(?MODULE, {publish,Message}).
 
@@ -258,11 +258,11 @@ handle_call({offline,{UserId,Socket}},_,State)->
 %% 
 %% Handling cast messages
 %% @end
-handle_cast({publish,Message=#message{}},State)->
+handle_cast({publish,Message=#message_dto{}},State)->
     ok=storage:write_chat_message(Message),
-    {ok,Subscribers}=storage:get_subscriptions_for_topic(Message#message.topic_id),
+    {ok,Subscribers}=storage:get_subscriptions_for_topic(Message#message_dto.topic_id),
     io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
-    io:format("\nSubscribers to topic ~p : ~p\n", [Message#message.topic_id,Subscribers]),
+    io:format("\nSubscribers to topic ~p : ~p\n", [Message#message_dto.topic_id,Subscribers]),
     UIDS=lists:map(fun(_=#{<<"user_id">>:=UID})->UID end, Subscribers),
     [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
     {noreply,State}.
