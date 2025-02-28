@@ -130,7 +130,7 @@ end.
 -spec get_subscriptions_for_topic(TopicId::domain:topic_id())-> {ok,[domain:user_topic()]} | {error,Reason::term()}.
 get_subscriptions_for_topic(TopicId)->
     Result=[#user_topic{id=Id, user_id=UserId, topic_id=TopicId ,created_at =CreatedAt} || {Id,UserId,_,CreatedAt}<-dets:match_object(?USER_TOPIC_TABLE, {'_','_',TopicId,'_'})],
-    Result.
+    {ok,Result}.
 
 -spec get_user_subscriptions(UserId::domain:user_id()) -> {ok,[domain:topic()]}|{error,Reason::term()}.
 get_user_subscriptions(UserId)->
@@ -188,13 +188,34 @@ get_oldest_messages(TopicId,StartIndex,Count)->
             Results),
             {ok,lists:reverse(FilteredMessages)}.
 
--spec write_chat_message(Message::domain:message_dto())->ok | {error,Error::any()}.
-write_chat_message(Input=#message_dto{user_id = UserId,topic_id = TopicId,content = Content})->
-    Id=erlang:unique_integer([monotonic,positive]),
-    CreatedAt=erlang:system_time(),
-    Record={Id,UserId,TopicId,Content,CreatedAt,"utc+2"},
-    dets:insert(?MESSAGE_TABLE,Record),
-    ok.
+-spec write_chat_message(Message::domain:message_dto())->{ok,domain:message()} | {error,Error::any()}.
+write_chat_message(#message_dto{user_id = UserId, topic_id = TopicId, content = Content}) ->
+    Id = erlang:unique_integer([monotonic, positive]),
+
+    % Get system time in seconds (UNIX timestamp)
+    CreatedAt = erlang:system_time(second), 
+
+    % Store raw timestamp in DETS
+    Record = {Id, UserId, TopicId, Content, CreatedAt, "utc+2"},
+    dets:insert(?MESSAGE_TABLE, Record),
+
+    % Convert UNIX timestamp (seconds) to Erlang datetime
+    DateTime = calendar:gregorian_seconds_to_datetime(CreatedAt + 62167219200),  
+    FormattedDateTime = case DateTime of
+        {{_, _, _}, {_, _, _}} -> datetime_to_string(DateTime);
+        _ -> DateTime  % If it's already a string, return it as is
+end,
+    {ok, #message{
+        message_id = Id,
+        topic_id = TopicId,
+        user_id = UserId,
+        content = Content,
+        created_at = FormattedDateTime
+    }}.
+
+datetime_to_string({{Year, Month, Day}, {Hour, Minute, Second}}) ->
+    lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w", 
+                                [Year, Month, Day, Hour, Minute, Second])).
 
 -spec write_chat_messages(Messages::[domain:message()])->{ok,Inserted::integer()} | {error,Error::any()}.
 write_chat_messages(Messages)->

@@ -258,13 +258,13 @@ handle_call({offline,{UserId,Socket}},_,State)->
 %% 
 %% Handling cast messages
 %% @end
-handle_cast({publish,Message=#message_dto{}},State)->
-    ok=storage:write_chat_message(Message),
-    {ok,Subscribers}=storage:get_subscriptions_for_topic(Message#message_dto.topic_id),
-    io:format("\nWill send message:~p to subscribers:~p\n",[Message,Subscribers]),
-    io:format("\nSubscribers to topic ~p : ~p\n", [Message#message_dto.topic_id,Subscribers]),
-    UIDS=lists:map(fun(_=#{<<"user_id">>:=UID})->UID end, Subscribers),
-    [[send(Socket,Message)|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
+handle_cast({publish,MessageParams=#message_dto{}},State)->
+    {ok,PublishedMessage}=storage:write_chat_message(MessageParams),
+    {ok,Subscribers}=storage:get_subscriptions_for_topic(PublishedMessage#message.topic_id),
+    io:format("\nWill send message:~p to subscribers:~p\n",[PublishedMessage,Subscribers]),
+    io:format("\nSubscribers to topic ~p : ~p\n", [PublishedMessage#message.topic_id,Subscribers]),
+    UIDS=lists:map(fun(_=#user_topic{ user_id =UID})->UID end, Subscribers),
+    [[send(Socket,PublishedMessage)|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
     {noreply,State}.
 
 %% @doc 

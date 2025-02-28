@@ -94,17 +94,18 @@
     timezone::string()
 }).
 
+-record(message_dto,{
+    user_id::user_id(),
+    topic_id::topic_id(),
+    content::message_content()
+}).
+
 -type message_dto()::#message_dto{
     content::message_content(),
     user_id::user_id(),
     topic_id::topic()
 }.
 
--record(message_dto,{
-    user_id::user_id(),
-    topic_id::topic_id(),
-    content::message_content()
-}).
 -type message()::#message{
     message_id::message_id(),
     content::message_content(),

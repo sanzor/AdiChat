@@ -33,8 +33,7 @@ websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
 
 
 websocket_info(_=#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone},State)->
-    FormattedDateTime=utils:datetime_to_string(CreatedAt),
-    Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>FormattedDateTime,timezone=>Timezone, kind=><<"chat">>},
+    Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>CreatedAt,timezone=>Timezone, kind=><<"chat">>},
     io:format("\nWeird: ~p\ntrace",[Reply]),
     {reply,{text,thoas:encode(Reply)},State}.
 
@@ -111,12 +110,10 @@ handle_command(<<"publish">>,Json,_State)->
     #{<<"id">>:= UserId}=_State,
     
     DateTime=calendar:universal_time(),
-    Message=#message{
+    Message=#message_dto{
          user_id =UserId,
          topic_id= TopicId,
-         content = Content,
-         created_at = DateTime,
-         timezone= <<"utc+2">>
+         content = Content
         },
    
     ok=wsapp_server:publish(Message),
