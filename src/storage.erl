@@ -152,18 +152,19 @@ check_if_subscribed(TopicId,UserId)->
 
 -spec get_newest_messages(TopicId::domain:topic_id(),Count::number())->{ok,Messages::[domain:message()]}|{error,Reason::term()}.
 get_newest_messages(TopicId,Count)->
-    Result=case dets:match(?MESSAGE_TABLE,{'_',TopicId,'_','_','_','_'},Count) of
+    Result=case dets:match(?MESSAGE_TABLE,{'_','_',TopicId,'_','_','_','_'},Count) of
                 '$end_of_table' -> {ok,[]};
                  {error,Reason}->{error,Reason};
                  Results->
                     {ok,[
                      #message{
                      message_id = Id,
+                     temp_id = TempId,
                      user_id= UserId ,
                      topic_id= TopicId,
                      content= Message,
                      created_at= CreatedAt,
-                     timezone= Timezone}||{Id,UserId,_,Message,CreatedAt,Timezone}<-Results]}
+                     timezone= Timezone}||{Id,TempId,UserId,_,Message,CreatedAt,Timezone}<-Results]}
              end,
     Result.
 
@@ -172,10 +173,12 @@ get_oldest_messages(TopicId,StartIndex,Count)->
     Pattern={'_',TopicId,'_','_','_','_'},
     Results=dets:match_object(?MESSAGE_TABLE, Pattern),
     FilteredMessages=lists:foldl(
-             fun({Id,UserId,_TopicId,Message,CreatedAt,Timezone},Acc)->
+             fun({Id,TempId,UserId,_TopicId,Message,CreatedAt,Timezone},Acc)->
                 case {Id<StartIndex,length(Acc)<Count} of
                     {true,true}->
-                        [#message{message_id = Id,
+                        [#message{
+                           message_id = Id,
+                           temp_id=TempId,
                            user_id=UserId,
                            topic_id=TopicId,
                            content=Message,
@@ -189,14 +192,14 @@ get_oldest_messages(TopicId,StartIndex,Count)->
             {ok,lists:reverse(FilteredMessages)}.
 
 -spec write_chat_message(Message::domain:message_dto())->{ok,domain:message()} | {error,Error::any()}.
-write_chat_message(#message_dto{user_id = UserId, topic_id = TopicId, content = Content}) ->
+write_chat_message(#message_dto{user_id = UserId, topic_id = TopicId, content = Content,temp_id = TempId}) ->
     Id = erlang:unique_integer([monotonic, positive]),
 
     % Get system time in seconds (UNIX timestamp)
     CreatedAt = erlang:system_time(second), 
 
     % Store raw timestamp in DETS
-    Record = {Id, UserId, TopicId, Content, CreatedAt, "utc+2"},
+    Record = {Id,TempId, UserId, TopicId, Content, CreatedAt, "utc+2"},
     dets:insert(?MESSAGE_TABLE, Record),
 
     % Convert UNIX timestamp (seconds) to Erlang datetime
@@ -207,6 +210,7 @@ write_chat_message(#message_dto{user_id = UserId, topic_id = TopicId, content = 
 end,
     {ok, #message{
         message_id = Id,
+        temp_id = TempId,
         topic_id = TopicId,
         user_id = UserId,
         content = Content,
@@ -222,6 +226,7 @@ write_chat_messages(Messages)->
     try
     Records=[
             {erlang:unique_integer([monotonic, positive]),
+             Msg#message.temp_id,
              Msg#message.user_id,
              Msg#message.topic_id,
              Msg#message.content,

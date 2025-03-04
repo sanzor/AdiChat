@@ -15,7 +15,7 @@
          get_user_by_email/1,
          create_topic/1,
          delete_topic/1,
-         publish/1,
+         publish/2,
          online/2,
          offline/2,
          subscribe/2,
@@ -90,9 +90,9 @@ get_newest_messages_for_user(UserId,Count)->
 get_subscriptions(UserId)->
     gen_server:call(?MODULE,{get_subscriptions,UserId}).
 
--spec publish(Message::domain:message_dto())->ok.
-publish(Message)->
-    gen_server:cast(?MODULE, {publish,Message}).
+-spec publish(From::pid(),Message::domain:message_dto())->ok.
+publish(From,Message)->
+    gen_server:cast(?MODULE, {publish,From,Message}).
 
 
 -spec online(UserId::domain:user_id(),Socket::pid())->ok.
@@ -258,13 +258,15 @@ handle_call({offline,{UserId,Socket}},_,State)->
 %% 
 %% Handling cast messages
 %% @end
-handle_cast({publish,MessageParams=#message_dto{}},State)->
+handle_cast({publish,From,MessageParams=#message_dto{}},State)->
     {ok,PublishedMessage}=storage:write_chat_message(MessageParams),
     {ok,Subscribers}=storage:get_subscriptions_for_topic(PublishedMessage#message.topic_id),
     io:format("\nWill send message:~p to subscribers:~p\n",[PublishedMessage,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [PublishedMessage#message.topic_id,Subscribers]),
     UIDS=lists:map(fun(_=#user_topic{ user_id =UID})->UID end, Subscribers),
-    [[send(Socket,PublishedMessage)|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
+    send(From,{message_published,PublishedMessage}),
+    [[send(Socket,{new_message,PublishedMessage})|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
+   
     {noreply,State}.
 
 %% @doc 

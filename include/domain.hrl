@@ -85,22 +85,27 @@
     created_at::string()
 }.
 -type user_topic_id()::integer().
+-type temp_id()::binary().
 -record(message,{
     message_id::message_id(),
+    temp_id::temp_id(),
     content::message_content(),
     user_id::user_id(),
     topic_id::topic_id(),
     created_at::string(),
-    timezone::string()
+    timezone::string(),
+    status::string()
 }).
 
 -record(message_dto,{
     user_id::user_id(),
+    temp_id::temp_id(),
     topic_id::topic_id(),
     content::message_content()
 }).
 
 -type message_dto()::#message_dto{
+    temp_id::temp_id(),
     content::message_content(),
     user_id::user_id(),
     topic_id::topic()
@@ -108,11 +113,13 @@
 
 -type message()::#message{
     message_id::message_id(),
+    temp_id::temp_id(),
     content::message_content(),
     user_id::user_id(),
     topic_id::topic_id(),
     created_at::string(),
-    timezone::binary()
+    timezone::binary(),
+    status::string()
 }.
 -record(topic_with_messages,{
     topic::topic(),

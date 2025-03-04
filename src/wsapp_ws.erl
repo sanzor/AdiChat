@@ -32,10 +32,15 @@ websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
     {reply,{text,thoas:encode(Reply)},State};
 
 
-websocket_info(_=#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone},State)->
-    Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>CreatedAt,timezone=>Timezone, kind=><<"chat">>},
+websocket_info(_={new_message,#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone,status = Status}},State)->
+    Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>CreatedAt,timezone=>Timezone, kind=><<"chat">> ,type=><<"new_message">>,status=>Status},
     io:format("\nWeird: ~p\ntrace",[Reply]),
-    {reply,{text,thoas:encode(Reply)},State}.
+    {reply,{text,thoas:encode(Reply)},State};
+
+websocket_info(_={message_published,#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone,status=Status}},State)->
+        Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>CreatedAt,timezone=>Timezone, kind=><<"chat">>,type=><<"message_published">>,status=>Status},
+        io:format("\nWeird: ~p\ntrace",[Reply]),
+        {reply,{text,thoas:encode(Reply)},State}.
 
 websocket_handle({text, Message},State)->
     io:format("\nInput :~p\n",[Message]),
