@@ -264,10 +264,20 @@ handle_cast({publish,From,MessageParams=#message_dto{}},State)->
     io:format("\nWill send message:~p to subscribers:~p\n",[PublishedMessage,Subscribers]),
     io:format("\nSubscribers to topic ~p : ~p\n", [PublishedMessage#message.topic_id,Subscribers]),
     UIDS=lists:map(fun(_=#user_topic{ user_id =UID})->UID end, Subscribers),
+    SenderUserId=PublishedMessage#message.user_id,
+    SenderSessions=online_sockets(SenderUserId),
     send(From,{message_published,PublishedMessage}),
-    [[send(Socket,{new_message,PublishedMessage})|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
+    self() ! {dispatch_sender_sessions,SenderUserId,SenderSessions,PublishedMessage},
+    self() ! {dispatch_other_users,SenderUserId,UIDS,PublishedMessage},
+    % [[send(Socket,{new_message,PublishedMessage})|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
    
     {noreply,State}.
+
+handle_info({dispatch_sender_sessions,SenderUserId,SenderSessions,PublishedMessage},State)->
+    {noreply,State};
+
+handle_info({dispatch_other_users,SenderUserId,SenderSessions,PublishedMessage},State)->
+    {noreply,State};
 
 %% @doc 
 %% Handling info messages

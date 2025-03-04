@@ -121,7 +121,7 @@ handle_command(<<"publish">>,Json,_State)->
          content = Content
         },
    
-    ok=wsapp_server:publish(Message),
+    ok=wsapp_server:publish(self(),Message),
     {ok,noreply};
 
 handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
