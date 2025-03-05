@@ -20,13 +20,13 @@
          write_chat_message/1,
          write_chat_messages/1,
          start/0,
-         
          stop/0]).
 
 -define(USER_TABLE,user).
 -define(TOPIC_TABLE,topic).
 -define(USER_TOPIC_TABLE,user_topic).
 -define(MESSAGE_TABLE,message).
+-define(PENDING_MESSAGE_TABLE,pending_message).
 
 -spec start()->ok | {error,term()}.
 start()->
@@ -216,6 +216,7 @@ end,
         content = Content,
         created_at = FormattedDateTime
     }}.
+
 
 datetime_to_string({{Year, Month, Day}, {Hour, Minute, Second}}) ->
     lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w", 

@@ -26,6 +26,7 @@
          get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
+-define(PENDING_MESSAGE_TABLE,pending_message_table).
 -define(CONSTANT,<<"_events">>).
 -define(F(UserId),<<(integer_to_binary(UserId))/binary,?CONSTANT/binary>>).
 -record(state,{
@@ -122,6 +123,7 @@ start_link()->
 %-------------callbacks---------------------------------------%
 
 init(Args)->
+    ets:new(?PENDING_MESSAGE_TABLE, []),
     process_flag(trap_exit,true),
     self() ! start,
     {ok,#state{}}.
@@ -267,16 +269,48 @@ handle_cast({publish,From,MessageParams=#message_dto{}},State)->
     SenderUserId=PublishedMessage#message.user_id,
     SenderSessions=online_sockets(SenderUserId),
     send(From,{message_published,PublishedMessage}),
-    self() ! {dispatch_sender_sessions,SenderUserId,SenderSessions,PublishedMessage},
-    self() ! {dispatch_other_users,SenderUserId,UIDS,PublishedMessage},
-    % [[send(Socket,{new_message,PublishedMessage})|| Socket<-online_sockets(Subscriber)] || Subscriber<-UIDS],
-   
+    self() ! {dispatch_all_users, SenderUserId, From, SenderSessions, UIDS, PublishedMessage},
     {noreply,State}.
 
-handle_info({dispatch_sender_sessions,SenderUserId,SenderSessions,PublishedMessage},State)->
-    {noreply,State};
+handle_info({dispatch_all_users,SenderUserId,From,SenderSessions,UIDS,PublishedMessage},State)->
+    OtherUsers=lists:delete(SenderUserId,UIDS),
+    OtherSessions=lists:delete(From, SenderSessions),
+    TempId=PublishedMessage#message.temp_id,
+    RealID=PublishedMessage#message.message_id,
+    ets:insert(?PENDING_MESSAGE_TABLE, {TempId,SenderUserId,RealID,PublishedMessage,OtherSessions,OtherUsers, erlang:monotonic_time(millisecond)}),
+    {noreply,State,5000};
 
-handle_info({dispatch_other_users,SenderUserId,SenderSessions,PublishedMessage},State)->
+handle_info({acknowledge, SenderUserId, TempId}, State) ->
+        case ets:lookup(?PENDING_MESSAGE_TABLE, TempId) of
+                [{TempId, SenderUserId, RealId, PublishedMessage, OtherSenderSessions,OtherUsers, _StartTime}] ->
+                        io:format("\nAcknowledgment received from sender. Updating tempId -> real id: ~p -> ~p\n", [TempId, RealId]),
+                        % Replace tempId with real id and send to other sender sessions
+                        UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id  = RealId},
+                        [send(Socket,{new_message,UpdatedMessage})|| Socket<-OtherSenderSessions],
+                        [send(Socket,{new_message,UpdatedMessage})|| User<-OtherUsers,Sockets<-[online_sockets(User)],Socket<-Sockets],
+                        % Remove from ETS
+                        ets:delete(?PENDING_MESSAGE_TABLE, TempId);
+            
+                    _ -> io:format("\nReceived ACK for unknown tempId (probably already processed).\n")
+        end,
+        {noreply, State};
+
+handle_info(timeout, State) ->
+        Now = erlang:monotonic_time(millisecond),   
+        Pending = ets:tab2list(?PENDING_MESSAGE_TABLE),
+        [broadcast_message(Now,Message)||Message<-Pending],
+         % ✅ Reschedule another timeout to keep checking every 5s
+        {noreply, State, 5000};
+          
+handle_info({dispatch_other_users,SenderUserId,UIDS,PublishedMessage},State)->
+    OtherUsers=lists:delete(SenderUserId, UIDS),
+    lists:foreach(
+        fun(SubscriberId)-> 
+             SubscriberSockets=online_sockets(SubscriberId),
+             lists:foreach(fun(Socket)->send(Socket, {new_message,PublishedMessage})end,
+             SubscriberSockets)
+        end, 
+    OtherUsers),
     {noreply,State};
 
 %% @doc 
@@ -299,4 +333,21 @@ online_sockets(User)->
     Sockets.
 
 
-
+broadcast_message(Now, {TempId, SenderUserId, RealId, PublishedMessage, OtherSenderSessions, OtherUsers, StartTime}) ->
+        ElapsedTime = Now - StartTime,
+        if ElapsedTime >= 5000 ->
+            io:format("\nTimeout reached for message ~p. Using real id: ~p\n", [TempId, RealId]),
+    
+            UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id = RealId},
+            % ✅ Send to sender's other sessions
+            [send(Session, {new_message, UpdatedMessage}) || Session <- OtherSenderSessions],
+            % ✅ Send to other users
+            [send(Socket, {new_message, UpdatedMessage}) || User <- OtherUsers, Sockets <- [online_sockets(User)], Socket <- Sockets],
+    
+            % ✅ Remove from ETS
+            ets:delete(?PENDING_MESSAGE_TABLE, TempId);
+    
+        true -> ok
+        end.
+    
+              
