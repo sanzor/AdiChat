@@ -301,17 +301,6 @@ handle_info(timeout, State) ->
         [broadcast_message(Now,Message)||Message<-Pending],
          % ✅ Reschedule another timeout to keep checking every 5s
         {noreply, State, 5000};
-          
-handle_info({dispatch_other_users,SenderUserId,UIDS,PublishedMessage},State)->
-    OtherUsers=lists:delete(SenderUserId, UIDS),
-    lists:foreach(
-        fun(SubscriberId)-> 
-             SubscriberSockets=online_sockets(SubscriberId),
-             lists:foreach(fun(Socket)->send(Socket, {new_message,PublishedMessage})end,
-             SubscriberSockets)
-        end, 
-    OtherUsers),
-    {noreply,State};
 
 %% @doc 
 %% Handling info messages
@@ -324,23 +313,19 @@ handle_info(Message,State)->
     {reply,Message,State}.
 
 terminate(_Reason,_State)->ok.
-send(Socket,Message)->
-    io:format("Sending to session ~p",[Socket]),
-    Socket ! Message.
-online_sockets(User)->
-    Sockets=pg:get_members(User),
-    io:format("Sockets : ~p",[Sockets]),
-    Sockets.
 
 
-broadcast_message(Now, {TempId, SenderUserId, RealId, PublishedMessage, OtherSenderSessions, OtherUsers, StartTime}) ->
+broadcast_message(Now, {TempId, _SenderUserId, RealId, PublishedMessage, OtherSenderSessions, OtherUsers, StartTime}) ->
         ElapsedTime = Now - StartTime,
+    
         if ElapsedTime >= 5000 ->
             io:format("\nTimeout reached for message ~p. Using real id: ~p\n", [TempId, RealId]),
     
             UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id = RealId},
+    
             % ✅ Send to sender's other sessions
             [send(Session, {new_message, UpdatedMessage}) || Session <- OtherSenderSessions],
+    
             % ✅ Send to other users
             [send(Socket, {new_message, UpdatedMessage}) || User <- OtherUsers, Sockets <- [online_sockets(User)], Socket <- Sockets],
     
@@ -349,5 +334,11 @@ broadcast_message(Now, {TempId, SenderUserId, RealId, PublishedMessage, OtherSen
     
         true -> ok
         end.
-    
+send(Socket,Message)->
+            io:format("Sending to session ~p",[Socket]),
+            Socket ! Message.
+online_sockets(User)->
+            Sockets=pg:get_members(User),
+            io:format("Sockets : ~p",[Sockets]),
+            Sockets.
               
