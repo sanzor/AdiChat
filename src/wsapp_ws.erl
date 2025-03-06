@@ -124,6 +124,13 @@ handle_command(<<"publish">>,Json,_State)->
     ok=wsapp_server:publish(self(),Message),
     {ok,noreply};
 
+handle_command(<<"acknowledge">>,Json,_State)->
+        io:format("Command publish: ~p",[Json]),
+        #{<<"messageTempId">> := TempId}=Json,
+        #{<<"userId">>:= UserId}=_State,
+        ok=wsapp_server:acknowledge(self(),TempId,UserId),
+        {ok,noreply};
+
 handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
