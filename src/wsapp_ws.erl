@@ -47,7 +47,7 @@ websocket_info(_={message_published,#message{message_id = MessageId,temp_id = Te
             created_at=>CreatedAt,
             timezone=>Timezone,
             kind=><<"chat">>,
-            type=><<"new_message_published">>,
+            type=><<"message_published">>,
             status=>Status},
         io:format("\nWeird: ~p\ntrace",[Reply]),
         {reply,{text,thoas:encode(Reply)},State}.

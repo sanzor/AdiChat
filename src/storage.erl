@@ -197,9 +197,9 @@ write_chat_message(#message_dto{user_id = UserId, topic_id = TopicId, content = 
 
     % Get system time in seconds (UNIX timestamp)
     CreatedAt = erlang:system_time(second), 
-
+    Status= <<"sent">>,
     % Store raw timestamp in DETS
-    Record = {Id,TempId, UserId, TopicId, Content, CreatedAt, "utc+2"},
+    Record = {Id,TempId, UserId, TopicId, Content, CreatedAt, "utc+2",Status},
     dets:insert(?MESSAGE_TABLE, Record),
 
     % Convert UNIX timestamp (seconds) to Erlang datetime
@@ -214,7 +214,8 @@ end,
         topic_id = TopicId,
         user_id = UserId,
         content = Content,
-        created_at = FormattedDateTime
+        created_at = FormattedDateTime,
+        status = Status
     }}.
 
 
