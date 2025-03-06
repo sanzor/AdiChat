@@ -126,7 +126,7 @@ start_link()->
 %-------------callbacks---------------------------------------%
 
 init(Args)->
-    ets:new(?PENDING_MESSAGE_TABLE, []),
+    ets:new(?PENDING_MESSAGE_TABLE, [set, named_table, {keypos, 1}]),
     process_flag(trap_exit,true),
     self() ! start,
     {ok,#state{}}.
@@ -263,6 +263,17 @@ handle_call({offline,{UserId,Socket}},_,State)->
 %% 
 %% Handling cast messages
 %% @end
+handle_cast({publish,From,MessageParams=#message_dto{}},State)->
+    {ok,PublishedMessage}=storage:write_chat_message(MessageParams),
+    {ok,Subscribers}=storage:get_subscriptions_for_topic(PublishedMessage#message.topic_id),
+    io:format("\nSubscribers to topic ~p : ~p\n", [PublishedMessage#message.topic_id,Subscribers]),
+    UIDS=lists:map(fun(_=#user_topic{ user_id =UID})->UID end, Subscribers),
+    SenderUserId=PublishedMessage#message.user_id,
+    SenderSessions=online_sockets(SenderUserId),
+    io:format("\nPublishing message: ~p\n",[PublishedMessage]),
+    send(From,{message_published,PublishedMessage}),
+    self() ! {dispatch_all_users, SenderUserId, From, SenderSessions, UIDS, PublishedMessage},
+    {noreply,State};
 
 handle_cast({acknowledge, SenderUserId, TempId}, State) ->
         case ets:lookup(?PENDING_MESSAGE_TABLE, TempId) of
@@ -277,24 +288,13 @@ handle_cast({acknowledge, SenderUserId, TempId}, State) ->
             
                     _ -> io:format("\nReceived ACK for unknown tempId (probably already processed).\n")
         end,
-        {noreply, State};
-        
-handle_cast({publish,From,MessageParams=#message_dto{}},State)->
-    {ok,PublishedMessage}=storage:write_chat_message(MessageParams),
-    {ok,Subscribers}=storage:get_subscriptions_for_topic(PublishedMessage#message.topic_id),
-    io:format("\nWill send message:~p to subscribers:~p\n",[PublishedMessage,Subscribers]),
-    io:format("\nSubscribers to topic ~p : ~p\n", [PublishedMessage#message.topic_id,Subscribers]),
-    UIDS=lists:map(fun(_=#user_topic{ user_id =UID})->UID end, Subscribers),
-    SenderUserId=PublishedMessage#message.user_id,
-    SenderSessions=online_sockets(SenderUserId),
-    send(From,{message_published,PublishedMessage}),
-    self() ! {dispatch_all_users, SenderUserId, From, SenderSessions, UIDS, PublishedMessage},
-    {noreply,State}.
+        {noreply, State}.
 
 handle_info({dispatch_all_users,SenderUserId,From,SenderSessions,UIDS,PublishedMessage},State)->
     OtherUsers=lists:delete(SenderUserId,UIDS),
     OtherSessions=lists:delete(From, SenderSessions),
     TempId=PublishedMessage#message.temp_id,
+    io:format("TempId: ~p~n", [TempId]),
     RealID=PublishedMessage#message.message_id,
     ets:insert(?PENDING_MESSAGE_TABLE, {TempId,SenderUserId,RealID,PublishedMessage,OtherSessions,OtherUsers, erlang:monotonic_time(millisecond)}),
     {noreply,State,5000};
@@ -334,10 +334,10 @@ broadcast_message({TempId, _SenderUserId, RealId, PublishedMessage, OtherSenderS
         % ✅ Remove from ETS
 
 send(Socket,Message)->
-            io:format("Sending to session ~p",[Socket]),
+            io:format("\nSending to session ~p\n",[Socket]),
             Socket ! Message.
 online_sockets(User)->
             Sockets=pg:get_members(User),
-            io:format("Sockets : ~p",[Sockets]),
+            io:format("\nSockets : ~p\n",[Sockets]),
             Sockets.
               

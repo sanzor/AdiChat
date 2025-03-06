@@ -37,8 +37,18 @@ websocket_info(_={new_message,#message{user_id = UserId,topic_id = TopicId,conte
     io:format("\nWeird: ~p\ntrace",[Reply]),
     {reply,{text,thoas:encode(Reply)},State};
 
-websocket_info(_={message_published,#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone,status=Status}},State)->
-        Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>CreatedAt,timezone=>Timezone, kind=><<"chat">>,type=><<"message_published">>,status=>Status},
+websocket_info(_={message_published,#message{message_id = MessageId,temp_id = TempId,user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone,status=Status}},State)->
+        Reply=#{
+            id=>MessageId,
+            user_id=>UserId,
+            temp_id=>TempId,
+            topic_id=>TopicId,
+            content=>Content,
+            created_at=>CreatedAt,
+            timezone=>Timezone,
+            kind=><<"chat">>,
+            type=><<"new_message_published">>,
+            status=>Status},
         io:format("\nWeird: ~p\ntrace",[Reply]),
         {reply,{text,thoas:encode(Reply)},State}.
 
@@ -111,14 +121,15 @@ handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:
   
 handle_command(<<"publish">>,Json,_State)->
     io:format("Command publish: ~p",[Json]),
-    #{<<"topicId">> := TopicId, <<"content">> := Content}=Json,
+    #{<<"topicId">> := TopicId, <<"tempId">>:=TempId, <<"content">> := Content}=Json,
     #{<<"id">>:= UserId}=_State,
     
     DateTime=calendar:universal_time(),
     Message=#message_dto{
          user_id =UserId,
          topic_id= TopicId,
-         content = Content
+         content = Content,
+         temp_id = TempId
         },
    
     ok=wsapp_server:publish(self(),Message),
