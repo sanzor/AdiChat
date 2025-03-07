@@ -139,6 +139,7 @@ handle_command(<<"acknowledge">>,Json,_State)->
         io:format("\nCommand acknowledge: ~p\n",[Json]),
         #{<<"message_temp_id">> := TempId}=Json,
         #{<<"user_id">>:= UserId}=_State,
+        io:format("Received AKNOWLEDGE with TempId: ~p ",[TempId]),
         ok=wsapp_server:acknowledge(TempId,UserId),
         {ok,noreply};
 

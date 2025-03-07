@@ -97,7 +97,7 @@ publish(From,Message)->
     gen_server:cast(?MODULE, {publish,From,Message}).
 
 -spec acknowledge(MessageTempId::domain:temp_message_id(),SenderId::domain:user_id())->ok.
-acknowledge(SenderId,MessageTempId)->
+acknowledge(MessageTempId,SenderId)->
     gen_server:cast(?MODULE,{acknowledge,SenderId,MessageTempId}).
 -spec online(UserId::domain:user_id(),Socket::pid())->ok.
 online(UserId,Socket)->
@@ -276,7 +276,8 @@ handle_cast({publish,From,MessageParams=#message_dto{}},State)->
     {noreply,State};
 
 handle_cast({acknowledge, SenderUserId, TempId}, State) ->
-    io:format("\nInside ack cast\n"),
+         io:format("\nInside ack with TempId: ~p and SenderId:~p\n",[TempId,SenderUserId]),
+    
         case ets:lookup(?PENDING_MESSAGE_TABLE, TempId) of
                 [{TempId, SenderUserId, RealId, PublishedMessage, OtherSenderSessions,OtherUsers, _StartTime}] ->
                         io:format("\nAcknowledgment received from sender. Updating tempId -> real id: ~p -> ~p\n", [TempId, RealId]),
@@ -289,9 +290,10 @@ handle_cast({acknowledge, SenderUserId, TempId}, State) ->
                        
                         [send(Socket,{new_message,UpdatedMessage})|| User<-OtherUsers,Sockets<-[online_sockets(User)],Socket<-Sockets],
                         % Remove from ETS
-                        ets:delete(?PENDING_MESSAGE_TABLE, TempId);
+                        ets:delete(?PENDING_MESSAGE_TABLE, TempId),
+                        io:format("\nRemoved temp message ~p\n",[UpdatedMessage]);
                         
-                    _ -> io:format("\nReceived ACK for unknown tempId (probably already processed).\n")
+                    Value -> io:format("\nReceived ACK for unknown tempId (probably already processed).\n~p",[Value])
         end,
         {noreply, State}.
 
@@ -299,13 +301,14 @@ handle_info({dispatch_all_users,SenderUserId,From,SenderSessions,UIDS,PublishedM
     OtherUsers=lists:delete(SenderUserId,UIDS),
     OtherSessions=lists:delete(From, SenderSessions),
     TempId=PublishedMessage#message.temp_id,
-    io:format("TempId: ~p~n", [TempId]),
+    io:format("\nTempId: ~p~n\n", [TempId]),
     RealID=PublishedMessage#message.message_id,
     ets:insert(?PENDING_MESSAGE_TABLE, {TempId,SenderUserId,RealID,PublishedMessage,OtherSessions,OtherUsers, erlang:monotonic_time(millisecond)}),
     {noreply,State,5000};
 
 
 handle_info(timeout, State) ->
+        io:format("\nInside timeout\n"),
         Now = erlang:monotonic_time(millisecond),   
         Pending = ets:tab2list(?PENDING_MESSAGE_TABLE),
 
@@ -329,8 +332,8 @@ handle_info(Message,State)->
 terminate(_Reason,_State)->ok.
 
 
-broadcast_message({TempId, _SenderUserId, RealId, PublishedMessage, OtherSenderSessions, OtherUsers, _}) ->
-        io:format("\nTimeout reached for message ~p. Using real id: ~p\n", [TempId, RealId]),
+broadcast_message({_, _SenderUserId, RealId, PublishedMessage, OtherSenderSessions, OtherUsers, _}=Input) ->
+        io:format("Broadcasting ~p",[Input]),
         UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id = RealId},
         % ✅ Send to sender's other sessions
         [send(Session, {new_message, UpdatedMessage}) || Session <- OtherSenderSessions],
