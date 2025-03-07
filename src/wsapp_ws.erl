@@ -8,11 +8,11 @@
 
 -define(HEARTBEAT,1500).
 init(#{req :=Req})->
-    #{bindings := #{<<"id">> := Id}}=Req,
+    #{bindings := #{<<"user_id">> := Id}}=Req,
     io:format("\nSetting up session with UserId:~p\n",[binary_to_integer(Id)]),
-    {ok,#{<<"id">> => binary_to_integer(Id)}}.
+    {ok,#{<<"user_id">> => binary_to_integer(Id)}}.
 
-websocket_init(State=#{<<"id">> :=Id})->
+websocket_init(State=#{<<"user_id">> :=Id})->
     {ok,User}= wsapp_server:get_user(Id),                         
       
     #user{id=UserId}=User,
@@ -34,7 +34,7 @@ websocket_info({user_event,User,UserEventMessage}, State=#{<<"user">> :=User})->
 
 websocket_info(_={new_message,#message{user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone,status = Status}},State)->
     Reply=#{user_id=>UserId,topic_id=>TopicId,content=>Content,created_at=>CreatedAt,timezone=>Timezone, kind=><<"chat">> ,type=><<"new_message">>,status=>Status},
-    io:format("\nWeird: ~p\ntrace",[Reply]),
+    io:format("\n Sending new_message : ~p\ntrace\n",[Reply]),
     {reply,{text,thoas:encode(Reply)},State};
 
 websocket_info(_={message_published,#message{message_id = MessageId,temp_id = TempId,user_id = UserId,topic_id = TopicId,content = Content,created_at = CreatedAt,timezone = Timezone,status=Status}},State)->
@@ -49,7 +49,7 @@ websocket_info(_={message_published,#message{message_id = MessageId,temp_id = Te
             kind=><<"chat">>,
             type=><<"message_published">>,
             status=>Status},
-        io:format("\nWeird: ~p\ntrace",[Reply]),
+        io:format("\nSending message_published response ~p\n",[Reply]),
         {reply,{text,thoas:encode(Reply)},State}.
 
 websocket_handle({text, Message},State)->
@@ -98,31 +98,31 @@ handle_command(<<"create-user">>,UserData,_State)->
     end,
     {ok,reply,Reply};
 
-handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"id">> := UserId})->
+handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"user_id">> := UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"subscribe">>},
     Reply=case wsapp_server:subscribe(UserId, TopicName) of
             already_subscribed-> BaseReply#{result=><<"already_subscribed">>};
             {ok,#subscribe_result{result = Result,subscriber_id = SubscriberId}} -> 
                 Subs=[utils:from_topic(U)||{ok,Subscriptions}<-[wsapp_server:get_subscriptions(UserId)],U<-Subscriptions],
-                BaseReply#{result=><<"ok">>, <<"userId">> => SubscriberId,<<"topic">>=>utils:from_topic(Result),subscriptions=>Subs}
+                BaseReply#{result=><<"ok">>, <<"user_id">> => SubscriberId,<<"topic">>=>utils:from_topic(Result),subscriptions=>Subs}
           end, 
     {ok,reply,Reply};
 
-handle_command(<<"unsubscribe">>,_=#{<<"topicId">> :=TopicId},_State=#{<<"id">>:=UserId})->
+handle_command(<<"unsubscribe">>,_=#{<<"topic_id">> :=TopicId},_State=#{<<"user_id">>:=UserId})->
     BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>},
     Reply=case wsapp_server:unsubscribe(UserId,TopicId) of
         not_joined -> BaseReply#{result=><<"not_joined">>};
         {ok,{unsubscribed,TopicId}} ->
              Subs=[utils:from_topic(U)||{ok,Subscriptions}<-[wsapp_server:get_subscriptions(UserId)],U<-Subscriptions],
-             BaseReply#{result=><<"ok">>,<<"topicId">>=>TopicId,subscriptions=>Subs}
+             BaseReply#{result=><<"ok">>,<<"topic_id">>=>TopicId,subscriptions=>Subs}
     end,
    
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Json,_State)->
     io:format("Command publish: ~p",[Json]),
-    #{<<"topicId">> := TopicId, <<"tempId">>:=TempId, <<"content">> := Content}=Json,
-    #{<<"id">>:= UserId}=_State,
+    #{<<"topic_id">> := TopicId, <<"temp_id">>:=TempId, <<"content">> := Content}=Json,
+    #{<<"user_id">>:= UserId}=_State,
     
     DateTime=calendar:universal_time(),
     Message=#message_dto{
@@ -136,18 +136,18 @@ handle_command(<<"publish">>,Json,_State)->
     {ok,noreply};
 
 handle_command(<<"acknowledge">>,Json,_State)->
-        io:format("Command publish: ~p",[Json]),
-        #{<<"messageTempId">> := TempId}=Json,
-        #{<<"userId">>:= UserId}=_State,
-        ok=wsapp_server:acknowledge(self(),TempId,UserId),
+        io:format("\nCommand acknowledge: ~p\n",[Json]),
+        #{<<"message_temp_id">> := TempId}=Json,
+        #{<<"user_id">>:= UserId}=_State,
+        ok=wsapp_server:acknowledge(TempId,UserId),
         {ok,noreply};
 
-handle_command(<<"get_older_messages">>,Req=#{<<"topicId">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
+handle_command(<<"get_older_messages">>,Req=#{<<"topic_id">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),
     {ok,reply,#{<<"topic">>=>TopicId, <<"result">>=>Messages, kind=><<"command_result">>}};
 
-handle_command(<<"get_newest_messages_for_user">>,_=#{<<"user_id">>:=UserId,<<"count">>:=Count},_=#{<<"id">>:=UserId})->
+handle_command(<<"get_newest_messages_for_user">>,_=#{<<"user_id">>:=UserId,<<"count">>:=Count},_=#{<<"user_id">>:=UserId})->
     Result=[
         #{topic=>utils:from_topic(Topic),
          messages=>[utils:from_message(Message)||Message<-Messages]
@@ -155,12 +155,12 @@ handle_command(<<"get_newest_messages_for_user">>,_=#{<<"user_id">>:=UserId,<<"c
         {ok,TopicsWithMessages}<-[wsapp_server:get_newest_messages_for_user(UserId, Count)],#topic_with_messages{topic =Topic ,messages=Messages}<-TopicsWithMessages],
     {ok,reply,#{kind=><<"command_result">>,command=>get_newest_messages_for_user,result=>Result}};
 
-handle_command(<<"get_newest_messages">>,Req=#{<<"topicId">> := TopicId, <<"count">> := Count},_State)->
+handle_command(<<"get_newest_messages">>,Req=#{<<"topic_id">> := TopicId, <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_newest_messages(TopicId,Count),
     {ok,reply,#{topic=>TopicId, result=>Messages, kind=><<"command_result">>, command=><<"get_newest_messages">>}};
     
-handle_command(<<"get_subscriptions">>,_,_State=#{<<"id">>:=UserId})->
+handle_command(<<"get_subscriptions">>,_,_State=#{<<"user_id">>:=UserId})->
     Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},
     case wsapp_server:get_subscriptions(UserId) of
         {ok,no_subscriptions}->{ok,reply,Reply#{result=> atom_to_binary(no_subscriptions)}};

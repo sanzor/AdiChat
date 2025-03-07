@@ -16,7 +16,7 @@
          create_topic/1,
          delete_topic/1,
          publish/2,
-         acknowledge/3,
+         acknowledge/2,
          online/2,
          offline/2,
          subscribe/2,
@@ -96,9 +96,9 @@ get_subscriptions(UserId)->
 publish(From,Message)->
     gen_server:cast(?MODULE, {publish,From,Message}).
 
--spec acknowledge(From::pid(),MessageTempId::domain:temp_message_id(),SenderId::domain:user_id())->ok.
-acknowledge(From,SenderId,MessageTempId)->
-    gen_server:cast(From,{acknowledge,MessageTempId,SenderId}).
+-spec acknowledge(MessageTempId::domain:temp_message_id(),SenderId::domain:user_id())->ok.
+acknowledge(SenderId,MessageTempId)->
+    gen_server:cast(?MODULE,{acknowledge,SenderId,MessageTempId}).
 -spec online(UserId::domain:user_id(),Socket::pid())->ok.
 online(UserId,Socket)->
     gen_server:call(?MODULE, {online,{UserId,Socket}}).
@@ -276,16 +276,21 @@ handle_cast({publish,From,MessageParams=#message_dto{}},State)->
     {noreply,State};
 
 handle_cast({acknowledge, SenderUserId, TempId}, State) ->
+    io:format("\nInside ack cast\n"),
         case ets:lookup(?PENDING_MESSAGE_TABLE, TempId) of
                 [{TempId, SenderUserId, RealId, PublishedMessage, OtherSenderSessions,OtherUsers, _StartTime}] ->
                         io:format("\nAcknowledgment received from sender. Updating tempId -> real id: ~p -> ~p\n", [TempId, RealId]),
                         % Replace tempId with real id and send to other sender sessions
                         UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id  = RealId},
+                        io:format("\nSender Sessions: ~p\n", [OtherSenderSessions]),
+                        io:format("\nOther Users: ~p\n", [OtherUsers]),
+                        io:format("\nUpdated Message: ~p\n", [UpdatedMessage]),
                         [send(Socket,{new_message,UpdatedMessage})|| Socket<-OtherSenderSessions],
+                       
                         [send(Socket,{new_message,UpdatedMessage})|| User<-OtherUsers,Sockets<-[online_sockets(User)],Socket<-Sockets],
                         % Remove from ETS
                         ets:delete(?PENDING_MESSAGE_TABLE, TempId);
-            
+                        
                     _ -> io:format("\nReceived ACK for unknown tempId (probably already processed).\n")
         end,
         {noreply, State}.
