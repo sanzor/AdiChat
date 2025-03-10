@@ -14,11 +14,13 @@
          unsubscribe/2,
          check_if_subscribed/2,
          get_subscriptions_for_topic/1,
+         get_recipients/1,
          get_user_subscriptions/1,
          get_oldest_messages/3,
          get_newest_messages/2,
          write_chat_message/1,
          write_chat_messages/1,
+         update_message_status/2,
          start/0,
          stop/0]).
 
@@ -26,7 +28,6 @@
 -define(TOPIC_TABLE,topic).
 -define(USER_TOPIC_TABLE,user_topic).
 -define(MESSAGE_TABLE,message).
--define(PENDING_MESSAGE_TABLE,pending_message).
 
 -spec start()->ok | {error,term()}.
 start()->
@@ -132,6 +133,12 @@ get_subscriptions_for_topic(TopicId)->
     Result=[#user_topic{id=Id, user_id=UserId, topic_id=TopicId ,created_at =CreatedAt} || {Id,UserId,_,CreatedAt}<-dets:match_object(?USER_TOPIC_TABLE, {'_','_',TopicId,'_'})],
     {ok,Result}.
 
+-spec get_recipients(TopicId::domain:topic_id())->{ok,[domain:user()]}| {error,Reason::any()}.
+get_recipients(TopicId)->
+    {ok,UserTopics}=get_subscriptions_for_topic(TopicId),
+    Recipients=[get_user(UserId)||#user_topic{user_id = UserId}<-UserTopics],
+    {ok,Recipients}.
+
 -spec get_user_subscriptions(UserId::domain:user_id()) -> {ok,[domain:topic()]}|{error,Reason::term()}.
 get_user_subscriptions(UserId)->
     Result = [
@@ -152,7 +159,7 @@ check_if_subscribed(TopicId,UserId)->
 
 -spec get_newest_messages(TopicId::domain:topic_id(),Count::number())->{ok,Messages::[domain:message()]}|{error,Reason::term()}.
 get_newest_messages(TopicId,Count)->
-    Result=case dets:match(?MESSAGE_TABLE,{'_','_',TopicId,'_','_','_','_'},Count) of
+    Result=case dets:match(?MESSAGE_TABLE,{'_','_',TopicId,'_','_','_','_','_'},Count) of
                 '$end_of_table' -> {ok,[]};
                  {error,Reason}->{error,Reason};
                  Results->
@@ -164,7 +171,8 @@ get_newest_messages(TopicId,Count)->
                      topic_id= TopicId,
                      content= Message,
                      created_at= CreatedAt,
-                     timezone= Timezone}||{Id,TempId,UserId,_,Message,CreatedAt,Timezone}<-Results]}
+                     timezone= Timezone,
+                     status = Status}||{Id,TempId,UserId,_,Message,CreatedAt,Timezone,Status}<-Results]}
              end,
     Result.
 
@@ -173,7 +181,7 @@ get_oldest_messages(TopicId,StartIndex,Count)->
     Pattern={'_',TopicId,'_','_','_','_'},
     Results=dets:match_object(?MESSAGE_TABLE, Pattern),
     FilteredMessages=lists:foldl(
-             fun({Id,TempId,UserId,_TopicId,Message,CreatedAt,Timezone},Acc)->
+             fun({Id,TempId,UserId,_TopicId,Message,CreatedAt,Timezone,Status},Acc)->
                 case {Id<StartIndex,length(Acc)<Count} of
                     {true,true}->
                         [#message{
@@ -183,7 +191,8 @@ get_oldest_messages(TopicId,StartIndex,Count)->
                            topic_id=TopicId,
                            content=Message,
                            created_at = CreatedAt,
-                           timezone =Timezone}];
+                           timezone =Timezone,
+                           status = Status}];
                     _ ->Acc
                 end
             end,
@@ -218,6 +227,23 @@ end,
         status = Status
     }}.
 
+-spec update_message_status(MessageId::domain:message_id(), Status::binary()) -> 
+        {ok, domain:message()} | {error, any()}.
+    
+update_message_status(MessageId, NewStatus) ->
+        case dets:lookup(?MESSAGE_TABLE, MessageId) of
+            [{MessageId, TempId, UserId, TopicId, Message, CreatedAt, Timezone, _OldStatus}] ->
+                % ✅ Create updated record with new status
+                UpdatedMessage = {MessageId, TempId, UserId, TopicId, Message, CreatedAt, Timezone, NewStatus},
+    
+                % ✅ Insert the updated message back into dets
+                dets:insert(?MESSAGE_TABLE, UpdatedMessage),
+    
+                {ok, UpdatedMessage};
+            
+            [] -> {error, not_found};
+            Error -> {error, Error}
+        end.
 
 datetime_to_string({{Year, Month, Day}, {Hour, Minute, Second}}) ->
     lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w", 

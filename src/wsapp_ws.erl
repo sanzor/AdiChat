@@ -143,6 +143,14 @@ handle_command(<<"acknowledge">>,Json,_State)->
         ok=wsapp_server:acknowledge(TempId,UserId),
         {ok,noreply};
 
+handle_command(<<"message_viewed">>,Json,_State)->
+        io:format("\nCommand acknowledge: ~p\n",[Json]),
+        #{<<"message_id">> := MessageId}=Json,
+        #{<<"user_id">>:= UserId}=_State,
+        io:format("Received Message VIEWED with MessageId: ~p ",[MessageId]),
+        ok=wsapp_server:message_viewed(MessageId,UserId),
+        {ok,noreply};
+
 handle_command(<<"get_older_messages">>,Req=#{<<"topic_id">> := TopicId, <<"startIndex">> :=StartIndex , <<"count">> := Count},_State)->
     io:format("~p",[Req]),
     {ok,Messages}=wsapp_server:get_oldest_messages(TopicId,StartIndex,Count),

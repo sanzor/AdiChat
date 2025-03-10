@@ -17,6 +17,7 @@
          delete_topic/1,
          publish/2,
          acknowledge/2,
+         message_viewed/2,
          online/2,
          offline/2,
          subscribe/2,
@@ -27,6 +28,7 @@
          get_subscriptions/1]).
 
 -define(SERVER,?MODULE).
+-define(STATUS_VIEWED,<<"read">>).
 -define(PENDING_MESSAGE_TABLE,pending_message_table).
 -define(CONSTANT,<<"_events">>).
 -define(F(UserId),<<(integer_to_binary(UserId))/binary,?CONSTANT/binary>>).
@@ -99,6 +101,11 @@ publish(From,Message)->
 -spec acknowledge(MessageTempId::domain:temp_message_id(),SenderId::domain:user_id())->ok.
 acknowledge(MessageTempId,SenderId)->
     gen_server:cast(?MODULE,{acknowledge,SenderId,MessageTempId}).
+
+-spec message_viewed(UserId::domain:user_id(),domain:message_id())->ok.
+message_viewed(UserId,MessageId)->
+    gen_server:cast(?MODULE,{message_read,UserId,MessageId}).
+
 -spec online(UserId::domain:user_id(),Socket::pid())->ok.
 online(UserId,Socket)->
     gen_server:call(?MODULE, {online,{UserId,Socket}}).
@@ -254,17 +261,15 @@ handle_call({offline,{UserId,Socket}},_,State)->
     ok=pg:leave(UserEventGroup,Socket),
     {reply,ok,State}.
 
-
-
-
-
-
 %% @doc 
 %% 
 %% Handling cast messages
 %% @end
 handle_cast({publish,From,MessageParams=#message_dto{}},State)->
     {ok,PublishedMessage}=storage:write_chat_message(MessageParams),
+    io:format("\n📝 Stored message in DB: ~p\n", [PublishedMessage]),
+    io:format("\n📌 Received tempId: ~p, Sent tempId: ~p\n", [MessageParams#message_dto.temp_id, PublishedMessage#message.temp_id]),
+
     {ok,Subscribers}=storage:get_subscriptions_for_topic(PublishedMessage#message.topic_id),
     io:format("\nSubscribers to topic ~p : ~p\n", [PublishedMessage#message.topic_id,Subscribers]),
     UIDS=lists:map(fun(_=#user_topic{ user_id =UID})->UID end, Subscribers),
@@ -282,20 +287,46 @@ handle_cast({acknowledge, SenderUserId, TempId}, State) ->
                 [{TempId, SenderUserId, RealId, PublishedMessage, OtherSenderSessions,OtherUsers, _StartTime}] ->
                         io:format("\nAcknowledgment received from sender. Updating tempId -> real id: ~p -> ~p\n", [TempId, RealId]),
                         % Replace tempId with real id and send to other sender sessions
-                        UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id  = RealId},
-                        io:format("\nSender Sessions: ~p\n", [OtherSenderSessions]),
-                        io:format("\nOther Users: ~p\n", [OtherUsers]),
-                        io:format("\nUpdated Message: ~p\n", [UpdatedMessage]),
-                        [send(Socket,{new_message,UpdatedMessage})|| Socket<-OtherSenderSessions],
-                       
-                        [send(Socket,{new_message,UpdatedMessage})|| User<-OtherUsers,Sockets<-[online_sockets(User)],Socket<-Sockets],
-                        % Remove from ETS
-                        ets:delete(?PENDING_MESSAGE_TABLE, TempId),
-                        io:format("\nRemoved temp message ~p\n",[UpdatedMessage]);
+                        case storage:update_message_status(RealId, <<"delivered">>) of
+                            {ok,_}->  UpdatedMessage = PublishedMessage#message{temp_id = undefined, message_id  = RealId,status = <<"delivered">>},
+                                                   io:format("\nSender Sessions: ~p\n", [OtherSenderSessions]),
+                                                   io:format("\nOther Users: ~p\n", [OtherUsers]),
+                                                   io:format("\nUpdated Message: ~p\n", [UpdatedMessage]),
+                                                   [send(Socket,{new_message,UpdatedMessage})|| Socket<-OtherSenderSessions],
+                                                   [send(Socket,{new_message,UpdatedMessage})|| User<-OtherUsers,Sockets<-[online_sockets(User)],Socket<-Sockets],
+                                                   ets:delete(?PENDING_MESSAGE_TABLE, TempId),
+                                                   io:format("\nRemoved temp message ~p\n",[UpdatedMessage]);
+                         
+                             {error,Reason} ->   io:format("\n❌ Failed to update message status: ~p\n", [Reason])
+                        end;
                         
-                    Value -> io:format("\nReceived ACK for unknown tempId (probably already processed).\n~p",[Value])
+                    Value ->  io:format("\n⚠️ Received ACK for unknown TempId (probably already processed). Value: ~p\n", [Value])
         end,
-        {noreply, State}.
+        {noreply, State};
+
+handle_cast({message_read,ViewerUserId,MessageId},State)->
+    io:format("\nInside message_read with MessageId: ~p and ViewerUserId:~p\n",[MessageId,ViewerUserId]),
+    case storage:update_message_status(MessageId,?STATUS_VIEWED) of
+        {ok,UpdatedMessage=#message{
+            user_id = SenderUserId,
+            topic_id = TopicId}} -> io:format("\n✅ Message marked as VIEWED: ~p\n", [UpdatedMessage]),
+                                    % ✅ Notify sender’s active sessions (so all their devices get blue ticks)
+                                    SenderSessions=online_sockets(SenderUserId),
+                                    io:format("\n📡 Broadcasting VIEWED update to sender's sessions: ~p\n", [SenderSessions]),
+                                    [send(Socket, {message_viewed, UpdatedMessage}) || Socket <- SenderSessions],
+                                    % ✅ Notify recipient’s other active sessions
+                                    ViewerSessions=online_sockets(ViewerUserId),
+                                    [send(Socket,{message_viewed,UpdatedMessage})|| Socket<-ViewerSessions],
+                                    % ✅ Notify other users in the group (excluding sender & viewer)
+                                    OtherUsers = storage:get_recipients(TopicId) -- [SenderUserId, ViewerUserId], % Exclude sender & viewer
+                                    lists:foreach(fun(_=#user{id=RecipientId})->
+                                                    RecipientSessions=online_sockets(RecipientId),
+                                                    [send(Session,UpdatedMessage)||Session<-RecipientSessions],
+                                                    ok end, OtherUsers
+                                    );
+        {error,Reason}-> io:format("\nCould not update message with Id ~p to READ status due to  Reason :~p\n",[MessageId,Reason])
+    end,
+    {noreply,State}.
 
 handle_info({dispatch_all_users,SenderUserId,From,SenderSessions,UIDS,PublishedMessage},State)->
     OtherUsers=lists:delete(SenderUserId,UIDS),
@@ -312,9 +343,10 @@ handle_info(timeout, State) ->
         Now = erlang:monotonic_time(millisecond),   
         Pending = ets:tab2list(?PENDING_MESSAGE_TABLE),
 
-        lists:foreach(fun(Msg)->
+        lists:foreach(fun(Msg={TempId, _, RealId, _, _,_, _StartTime})->
+            storage:update_message_status(RealId, <<"delivered">>),
             broadcast_message(Msg),
-            ets:delete(?PENDING_MESSAGE_TABLE,Msg#message.temp_id)
+            ets:delete(?PENDING_MESSAGE_TABLE,TempId)
             end,
         [Message||Message<-Pending,Now-Message#message.created_at>=5000]),
         {noreply, State, 5000};
