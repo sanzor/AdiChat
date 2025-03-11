@@ -109,6 +109,7 @@ handle_command(<<"subscribe">>,_=#{<<"topic">> :=TopicName},_State=#{<<"user_id"
     {ok,reply,Reply};
 
 handle_command(<<"unsubscribe">>,_=#{<<"topic_id">> :=TopicId},_State=#{<<"user_id">>:=UserId})->
+    io:format("\nInside unsubscribe\n"),
     BaseReply=#{kind=><<"command_result">>, command=> <<"unsubscribe">>},
     Reply=case wsapp_server:unsubscribe(UserId,TopicId) of
         not_joined -> BaseReply#{result=><<"not_joined">>};
@@ -120,7 +121,7 @@ handle_command(<<"unsubscribe">>,_=#{<<"topic_id">> :=TopicId},_State=#{<<"user_
     {ok,reply,Reply};
   
 handle_command(<<"publish">>,Json,_State)->
-    io:format("Command publish: ~p",[Json]),
+    io:format("\nCommand publish: ~p\n",[Json]),
     #{<<"topic_id">> := TopicId, <<"temp_id">>:=TempId, <<"content">> := Content}=Json,
     #{<<"user_id">>:= UserId}=_State,
     
@@ -165,9 +166,11 @@ handle_command(<<"get_newest_messages_for_user">>,_=#{<<"user_id">>:=UserId,<<"c
     {ok,reply,#{kind=><<"command_result">>,command=>get_newest_messages_for_user,result=>Result}};
 
 handle_command(<<"get_newest_messages">>,Req=#{<<"topic_id">> := TopicId, <<"count">> := Count},_State)->
-    io:format("~p",[Req]),
+    io:format("\nInside get newest messages: ~p\n",[Req]),
     {ok,Messages}=wsapp_server:get_newest_messages(TopicId,Count),
-    {ok,reply,#{topic=>TopicId, result=>Messages, kind=><<"command_result">>, command=><<"get_newest_messages">>}};
+    io:format("\nRetrieved messages: ~p\n",[Messages]),
+    ResultMessages=[utils:from_message(Message)||Message<-Messages],
+    {ok,reply,#{topic=>TopicId, result=>ResultMessages, kind=><<"command_result">>, command=><<"get_newest_messages">>}};
     
 handle_command(<<"get_subscriptions">>,_,_State=#{<<"user_id">>:=UserId})->
     Reply=#{command=> <<"get_subscriptions">>,kind=><<"command_result">>},

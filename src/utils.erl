@@ -12,8 +12,8 @@ from_topic(_=#topic{id = Id,name=Name,created_by = CreatedBy})->
 
 -spec from_message(Message::domain:message())->map().
 
-from_message(#message{message_id=MessageId,temp_id = TempId,user_id = UserId,content = Content,topic_id=TopicId,created_at = CreatedAt})->
-    #{message_id=>MessageId,temp_id=>TempId,topic_id=>TopicId,user_id=>UserId,content=>Content,created_at=>CreatedAt}.
+from_message(#message{message_id=MessageId,temp_id = TempId,user_id = UserId,content = Content,topic_id=TopicId,created_at = CreatedAt,status = Status})->
+    #{message_id=>MessageId,temp_id=>TempId,topic_id=>TopicId,user_id=>UserId,content=>Content,created_at=>CreatedAt,status=>Status}.
 -spec from_user_topic(UserTopic::domain:user_topic())->map().
 from_user_topic(_=#user_topic{id = Id,topic_id = TopicId,user_id = UserId})->
     #{id=>Id,topic_id=>TopicId,user_id=>UserId}.

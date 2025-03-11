@@ -103,8 +103,8 @@ acknowledge(MessageTempId,SenderId)->
     gen_server:cast(?MODULE,{acknowledge,SenderId,MessageTempId}).
 
 -spec message_viewed(UserId::domain:user_id(),domain:message_id())->ok.
-message_viewed(UserId,MessageId)->
-    gen_server:cast(?MODULE,{message_read,UserId,MessageId}).
+message_viewed(ViewerUserId,MessageId)->
+    gen_server:cast(?MODULE,{message_read,ViewerUserId,MessageId}).
 
 -spec online(UserId::domain:user_id(),Socket::pid())->ok.
 online(UserId,Socket)->
