@@ -1,0 +1,39 @@
+%% -*- mode: erlang;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+
+[
+ {kernel, [
+           {logger_level, debug},
+           #{formatter => {flatlog, #{
+                                      map_depth => 3,
+                                      term_depth => 50,
+                                      colored => true,
+                                      template => [colored_start, "[\033[1m", level, "\033[0m", colored_start,"] [", time, "]",
+                                                   colored_end, " ", msg, " (", mfa, ")\n"]
+                                     }}}
+          ]},
+ {nova, [
+         {environment, dev},
+         {cowboy_configuration, #{
+                                  port => 8080
+                                 }},
+         {dev_mode, true},
+         {bootstrap_application, wsapp}, %% Bootstraps the application
+         %% Plugins is written on form {RequestType, Module, Options, Priority}
+         %% Priority is that the lowest number is executed first
+         {plugins, [
+          {pre_request, nova_request_plugin, #{ decode_json_body=>true,read_urlencoded_body=>true,parse_qs=>true}},
+          {pre_request, nova_cors_plugin, #{allow_origins=><<"*">>}}
+         ]}]},
+  {wsapp,[
+    {hosts,[]},
+    {smtp,[
+      {relay, "smtp.gmail.com"},
+      {port, 587},
+      {username, "your-email@gmail.com"},
+      {password, "your-app-password"},
+      {from_email, "your-email@gmail.com"},
+      {base_url, "http://localhost:5173"}
+    ]}
+  ]}
+  %% Please change your app.src-file instead if you intend to add app-specific configurations
+].

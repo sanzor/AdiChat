@@ -1,31 +1,19 @@
-.eunit
-*.o
-*.beam
-*.plt
-erl_crash.dump
-.concrete/DEV_MODE
+# Erlang / rebar3
+backend/_build/
+backend/deps/
+backend/.rebar3/
+backend/.rebar/
+backend/erl_crash.dump
+backend/rebar3.crashdump
+backend/*.dets
 
-# rebar 2.x
-.rebar
-rel/example_project
-ebin/*.beam
-deps
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.pnpm-store/
 
-# rebar 3
-.rebar3
-_build/
-_checkouts/
-ws1/
-ws2/
-private/
-/resources/rebar.lock
-rebar3.crashdump
-*/dist/*
-*/ui/js/*
+# Env / misc
+.env
+.env.*
+.DS_Store
 
-node_modules/*
-node_modules/
-package.json
-package-lock.json
-*.dets
-.gitignore

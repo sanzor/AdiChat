@@ -1,35 +1,21 @@
-# Adi Chat
+# AdiChat
 
-This is a full fledged chat web application including the web UI, server and database integration.
+This workspace is split into two folders:
 
-The server side is built using Erlang/OTP with  [NovaFramework](http://novaframework.org/) (Check out my previous 
-[article](https://github.com/sanzor/NovaWebApiTutorial) on how to build web apps with Nova)!
+- `backend/`: Erlang/OTP server (rebar3 / NovaFramework)
+- `frontend/`: React UI
 
-Persistence is done using PostgreSQL
+## Dev (Docker Compose)
 
-The web UI is built using plain javascrirpt,
+- `make up` / `make down`
+- `make up-backend` / `make down-backend`
+- `make up-frontend` / `make down-frontend`
 
-**Chat application supports**:
-- user subscriptions to multiple channels
-- multiple sessions for the same user
-- fault tolerance (application is distributed across multiple nodes)
-- load balancing
+Default ports: backend `8080`, frontend `5173`, postgres `5432`.
 
-**Start project (testing)**
+## Dev (Local, no Docker)
 
+Prereqs: Erlang/OTP + `rebar3`, Node.js + `pnpm`, and a PostgreSQL instance (or run only Postgres via `make up-postgres`).
 
-Prerequisites:
-- [vscode live server extensions](https://github.com/ritwickdey/vscode-live-server-plus-plus) to run the frontend server
-- PostgreSQL  up and running , running the sql scripts located at `./resources/tables.pgsql` on the target database
-- change the `./src/wsapp.app.src`  section for key `pg2` as to your local configuration: 
- `{pg2,[
-    {hostname,"localhost"},
-    {port,30762},
-    {username,"admin"},
-    {password,"test123"},
-    {database,"postgresdb"}
-   ]}`
-
-Run 
-- run the script in the root of the folder `script.sh` 
-- go to `ui/html/chat.html` and right click -> `Open with live server`
+- Backend: `make dev-backend` (serves on `http://localhost:8080`)
+- Frontend: `make dev-frontend` (serves on `http://localhost:5173`)

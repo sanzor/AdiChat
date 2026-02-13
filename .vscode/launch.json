@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Up: Full Stack (Local)",
+      "configurations": ["Up: Backend (Nova)", "Up: Frontend (Vite)"]
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Up: Backend (Nova)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bash -lc 'cd backend && rebar3 nova serve'",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Up: Frontend (Vite)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bash -lc 'cd frontend && pnpm dev'",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

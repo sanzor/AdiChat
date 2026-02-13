@@ -1,0 +1,41 @@
+
+name: adichat
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PG_USER:-admin}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-test123}
+      POSTGRES_DB: ${PG_DATABASE:-postgresdb}
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - adichat_postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-admin} -d ${PG_DATABASE:-postgresdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${PG_USER:-admin}
+      PG_PASSWORD: ${PG_PASSWORD:-test123}
+      PG_DATABASE: ${PG_DATABASE:-postgresdb}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+volumes:
+  adichat_postgres_data:

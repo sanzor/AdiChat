@@ -1,0 +1,12 @@
+name: adichat
+
+services:
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      VITE_PROXY_TARGET: ${VITE_PROXY_TARGET:-http://backend:8080}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"

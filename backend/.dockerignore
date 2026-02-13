@@ -1,0 +1,9 @@
+_build
+deps
+.rebar3
+.rebar
+erl_crash.dump
+rebar3.crashdump
+*.dets
+.git
+
